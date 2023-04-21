@@ -2,10 +2,27 @@
 
 version: '3.7'
 
-
 services:
   app:
     build:
       context: app
     ports:
-      - 5000:5000
+      - 5000
+    networks:
+      - backnet
+      - frontnet
+
+  nginx:
+    image: nginx:latest
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    ports:
+      - 80:80
+    networks:
+      - frontnet
+    depends_on:
+      - app
+
+networks:
+  backnet:
+  frontnet:
