@@ -1,21 +1,30 @@
-# Docker compose file for the docker-compose command
-
 version: '3.7'
 
 services:
   app:
     build:
       context: app
-    ports:
-      - 5000
+    depends_on:
+      - db
     networks:
       - backnet
       - frontnet
 
+  db:
+    image: postgres:latest
+    volumes:
+      - ./db_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: app
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: app
+    networks:
+      - backnet
+
   nginx:
     image: nginx:latest
     volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
     ports:
       - 80:80
     networks:
