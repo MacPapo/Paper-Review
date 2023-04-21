@@ -1,0 +1,11 @@
+# Docker compose file for the docker-compose command
+
+version: '3.7'
+
+
+services:
+  app:
+    build:
+      context: app
+    ports:
+      - 5000:5000
