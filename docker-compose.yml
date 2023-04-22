@@ -1,4 +1,4 @@
-version: '3.7'
+version: "3.7"
 
 services:
   db:
@@ -6,10 +6,12 @@ services:
     restart: always
     volumes:
       - ./db_data:/var/lib/postgresql/data
+    ports:
+      - 5433:5432
     environment:
-      POSTGRES_DB: app
-      POSTGRES_USER: app
-      POSTGRES_PASSWORD: app
+      POSTGRES_DB: paper_review
+      POSTGRES_USER: moonphase
+      POSTGRES_PASSWORD: eclipse
     networks:
       - backnet
 
