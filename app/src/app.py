@@ -1,14 +1,19 @@
-from flask import Flask
+from flask import Flask, render_template, request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 import sqlalchemy as sa
+
+
+app = Flask(__name__)
+app.config[
+    "SQLALCHEMY_DATABASE_URI"
+] = "postgresql://moonphase:eclipse@db:5432/paper_review"
+
 
 # Initialize the database
 db = SQLAlchemy()
 
-app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://moonphase:eclipse@db:5432/paper_review'
-
 db.init_app(app)
+
 
 class User(db.Model):
     id = sa.Column(sa.Integer, primary_key=True)
@@ -18,20 +23,16 @@ class User(db.Model):
 with app.app_context():
     db.create_all()
 
+
 @app.route("/")
+@app.route("/home")
 def home_page():
-    return "<p>Hello from Home page!</p>"
-
-
-@app.route("/hello")
-def hello_world():
-    return "<p>Hello from hello page!</p>"
+    return render_template("index.html")
 
 
 @app.route("/about")
 def about_page():
-    return "<p>Hello from about page!</p>"
-
+    return render_template("about.html")
 
 if __name__ == "__main__":
     app.run()
