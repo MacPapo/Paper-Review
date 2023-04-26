@@ -1,7 +1,9 @@
 Flask
 Flask-SQLAlchemy
 Flask-Migrate
+flask-login
 flask-debugtoolbar
 flask-wtf
 psycopg2-binary
 Werkzeug
+email-validator

@@ -4,6 +4,14 @@
 <div class="row">
     <div class="col-md-12">
         <h1>Home page</h1>
+        {% if current_user.is_authenticated %}
+        <p>Welcome {{ current_user.username }}!</p>
+        {% if posts %}
+            {% for post in posts %}
+            <div><p>{{ post.author.username }} says: <b>{{ post.body }}</b></p></div>
+            {% endfor %}
+        {% endif %}
+        {% else %}
         <p>
             Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Gravida neque convallis a cras semper auctor. At erat pellentesque adipiscing commodo elit. Massa sed elementum tempus egestas sed sed risus pretium quam. Ullamcorper malesuada proin libero nunc. In eu mi bibendum neque egestas congue quisque. Mauris nunc congue nisi vitae suscipit. At volutpat diam ut venenatis tellus in metus vulputate. Adipiscing elit ut aliquam purus sit amet luctus venenatis. Ligula ullamcorper malesuada proin libero. Neque sodales ut etiam sit amet nisl purus in mollis. Morbi leo urna molestie at elementum eu facilisis sed odio. Phasellus egestas tellus rutrum tellus pellentesque eu tincidunt.
             Velit dignissim sodales ut eu sem integer vitae. Eu augue ut lectus arcu. Nisl nisi scelerisque eu ultrices vitae auctor eu augue. Pharetra convallis posuere morbi leo urna molestie. Aliquam sem fringilla ut morbi tincidunt augue interdum velit euismod. Mattis nunc sed blandit libero. Commodo sed egestas egestas fringilla phasellus faucibus scelerisque eleifend. Sit amet venenatis urna cursus eget nunc scelerisque viverra. Ultrices mi tempus imperdiet nulla malesuada pellentesque. Sit amet aliquam id diam maecenas. Amet facilisis magna etiam tempor orci eu lobortis. Sed velit dignissim sodales ut eu sem integer vitae. Leo a diam sollicitudin tempor id eu nisl. Augue neque gravida in fermentum et sollicitudin ac. Volutpat commodo sed egestas egestas fringilla phasellus faucibus.
@@ -26,6 +34,7 @@
             A lacus vestibulum sed arcu non. Ultrices neque ornare aenean euismod elementum nisi quis eleifend quam. Etiam non quam lacus suspendisse faucibus. Nec sagittis aliquam malesuada bibendum arcu vitae. Sed viverra tellus in hac. Enim nunc faucibus a pellentesque sit amet porttitor eget dolor. Purus faucibus ornare suspendisse sed nisi lacus sed. Et egestas quis ipsum suspendisse ultrices. Enim nunc faucibus a pellentesque sit amet. Egestas purus viverra accumsan in nisl nisi scelerisque. At lectus urna duis convallis. In eu mi bibendum neque. Dictum sit amet justo donec enim diam vulputate. Malesuada fames ac turpis egestas sed tempus urna et pharetra. Id diam vel quam elementum pulvinar etiam non quam lacus.
             Pellentesque habitant morbi tristique senectus et. Vel turpis nunc eget lorem dolor sed viverra ipsum. Hac habitasse platea dictumst quisque. Non sodales neque sodales ut etiam sit. Massa placerat duis ultricies lacus sed turpis tincidunt id. Dui accumsan sit amet nulla facilisi. Ullamcorper eget nulla facilisi etiam dignissim diam quis enim. Ut eu sem integer vitae justo eget magna fermentum. Velit laoreet id donec ultrices tincidunt arcu non sodales neque. Tellus rutrum tellus pellentesque eu tincidunt tortor. Id aliquet risus feugiat in ante metus dictum at. Lectus nulla at volutpat diam ut venenatis tellus. Facilisis leo vel fringilla est ullamcorper eget. Elit scelerisque mauris pellentesque pulvinar. Sit amet mattis vulputate enim nulla aliquet porttitor lacus luctus. Auctor augue mauris augue neque gravida in fermentum et sollicitudin. Turpis egestas pretium aenean pharetra magna ac placerat vestibulum. Venenatis tellus in metus vulputate.
         </p>
+        {% endif %}
     </div>
 </div>
 {% endblock %}
