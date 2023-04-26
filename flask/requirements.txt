@@ -1,4 +1,5 @@
 Flask
 Flask-SQLAlchemy
 flask-debugtoolbar
+flask-wtf
 psycopg2-binary
