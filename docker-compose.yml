@@ -17,10 +17,10 @@ services:
 
   app:
     build:
-      context: app
+      context: flask
       dockerfile: Dockerfile
     volumes:
-      - ./app:/app
+      - ./flask:/app
     depends_on:
       - db
     restart: always
