@@ -1,5 +1,6 @@
 Flask
 Flask-SQLAlchemy
+Flask-Migrate
 flask-debugtoolbar
 flask-wtf
 psycopg2-binary
