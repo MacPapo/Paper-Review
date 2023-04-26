@@ -9,6 +9,19 @@ Docker now compose and compile all the needed packages.
 
 Now go to [localhost](http://localhost/)
 
+
+# Obiettivi bonus progetto #
+- vincoli, 
+- trigger,
+- transazioni,
+- stione ruolo e politiche di autorizzazione,
+- sicurezza applicazione(da XSS e SqL injection),
+- uso di indici e viste,
+- o di Expression language o Orm per dialetto SQL(usare oggetti per fare
+query e non scrivere la query sotto forma di stringa, questa parte
+aiuta anche per la parte di sicurezza);
+
+
 # Idee progetto #
 
 * home page
