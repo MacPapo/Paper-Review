@@ -4,3 +4,4 @@ Flask-Migrate
 flask-debugtoolbar
 flask-wtf
 psycopg2-binary
+Werkzeug
