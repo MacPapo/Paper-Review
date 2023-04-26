@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
+from flask_debugtoolbar import DebugToolbarExtension
 import sqlalchemy as sa
 
 
@@ -8,6 +9,13 @@ app.config[
     "SQLALCHEMY_DATABASE_URI"
 ] = "postgresql://moonphase:eclipse@db:5432/paper_review"
 
+# the toolbar is only enabled in debug mode:
+app.debug = True
+
+# set a 'SECRET_KEY' to enable the Flask session cookies
+app.config['SECRET_KEY'] = 'bucami'
+
+toolbar = DebugToolbarExtension(app)
 
 # Initialize the database
 db = SQLAlchemy()
