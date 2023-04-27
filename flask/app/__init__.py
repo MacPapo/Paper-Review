@@ -6,12 +6,14 @@ from flask_login import LoginManager
 
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'bucami'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://moonphase:eclipse@db:5432/paper_review'
+app.config["SECRET_KEY"] = "bucami"
+app.config[
+    "SQLALCHEMY_DATABASE_URI"
+] = "postgresql://moonphase:eclipse@db:5432/paper_review"
 app.debug = True
 
 login = LoginManager(app)
-login.login_view = 'login'
+login.login_view = "login"
 
 toolbar = DebugToolbarExtension(app)
 
@@ -19,3 +21,6 @@ db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
 from app import routes, models
+
+# with app.app_context():
+#     db.create_all()

@@ -9,9 +9,14 @@ services:
     ports:
       - 5433:5432
     environment:
-      POSTGRES_DB: paper_review
-      POSTGRES_USER: moonphase
-      POSTGRES_PASSWORD: eclipse
+      - POSTGRES_DB=paper_review
+      - POSTGRES_USER=moonphase
+      - POSTGRES_PASSWORD=eclipse
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     networks:
       - backnet
 
@@ -21,9 +26,11 @@ services:
       dockerfile: Dockerfile
     volumes:
       - ./flask:/app
-    depends_on:
-      - db
     restart: always
+    depends_on:
+      db:
+        condition: service_healthy
+    entrypoint: /app/entrypoint.sh
     networks:
       - backnet
       - frontnet

@@ -2,7 +2,10 @@ FROM python:slim
 
 WORKDIR /app
 
-COPY . .
+COPY ./app .
+COPY ./migrations .
+COPY ./entrypoint.sh .
+COPY ./project0.py .
 COPY ./requirements.txt .
 
 RUN pip install -r requirements.txt
@@ -14,4 +17,5 @@ ENV FLASK_RUN_HOST 0.0.0.0
 
 EXPOSE 5000
 
-CMD [ "flask", "run" ]
+RUN chmod u+x entrypoint.sh
+ENTRYPOINT ["./entrypoint.sh"]

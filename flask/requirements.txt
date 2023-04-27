@@ -2,6 +2,7 @@ Flask
 Flask-SQLAlchemy
 Flask-Migrate
 flask-login
+flask-script
 flask-debugtoolbar
 flask-wtf
 psycopg2-binary
