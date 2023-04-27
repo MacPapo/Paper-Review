@@ -5,7 +5,7 @@ from werkzeug.urls import url_parse  # this is used to parse the url
 from werkzeug.utils import secure_filename
 from app import app, db, firebase
 from app.modules.forms import UploadForm
-
+from app.models import PDF
 
 # firebase = Firebase()
 # # select a file and firebase upload it
@@ -35,9 +35,13 @@ def upload():
         filename = secure_filename(f.filename)
         upload_file_location = os.path.join("uploads", filename)
         f.save(upload_file_location)
-        x = firebase.upload(upload_file_location)
+        pdf_data = firebase.upload(upload_file_location)
+        pdf = PDF(id=pdf_data[1], key=pdf_data[0])
+        db.session.add(pdf)
+        db.session.commit()
+        flash("Congratulations, you have submitted a PDF!")
         os.remove(upload_file_location)
-        return redirect(url_for("upload"))
+        return redirect(url_for("index"))
     return render_template("upload.html", title="Upload", form=form)
 
 
