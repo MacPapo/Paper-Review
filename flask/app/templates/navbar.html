@@ -53,7 +53,7 @@
       </ul>
       {% if current_user.is_anonymous %}
        <a class="btn btn-primary shadow" role="button" href="{{ url_for('login') }}">Login</a>
-       <a class="btn btn-danger shadow" role="button" href="{{ url_for('logout') }}">Register</a>
+       <a class="btn btn-danger shadow" role="button" href="{{ url_for('register') }}">Register</a>
       {% else %}
         <a class="btn btn-danger shadow" role="button" href="{{ url_for('logout') }}">Logout</a>
       {% endif %}
