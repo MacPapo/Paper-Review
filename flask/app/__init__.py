@@ -20,13 +20,7 @@ toolbar = DebugToolbarExtension(app)
 
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
+firebase = Firebase()
 
 from app import routes, models
 
-firebase = Firebase()
-
-# select a file and firebase upload it
-x = firebase.upload('Dockerfile')
-app.logger.info(x[0])
-app.logger.info(x[1])
-app.logger.info(firebase.decrypt(x[0], x[1]))
