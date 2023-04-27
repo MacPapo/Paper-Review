@@ -8,3 +8,4 @@ flask-wtf
 psycopg2-binary
 Werkzeug
 email-validator
+firebase-admin

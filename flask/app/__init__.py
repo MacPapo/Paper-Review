@@ -3,6 +3,7 @@ from flask_debugtoolbar import DebugToolbarExtension
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager
+from app.modules.firebase import Firebase
 
 
 app = Flask(__name__)
@@ -21,3 +22,5 @@ db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
 from app import routes, models
+
+firebase = Firebase()
