@@ -13,7 +13,6 @@ def index():
     return render_template("index.html", title="Home")
 
 
-@login_required  # this decorator will make sure that the user is logged in
 @app.route("/about")
 def about():
     return render_template("about.html", title="About")

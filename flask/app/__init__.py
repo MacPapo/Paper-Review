@@ -2,7 +2,7 @@ from flask import Flask
 from flask_debugtoolbar import DebugToolbarExtension
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
-from flask_login import LoginManager
+#from flask_login import LoginManager
 from app.modules.firebase import Firebase
 
 
@@ -13,8 +13,8 @@ app.config[
 ] = "postgresql://moonphase:eclipse@db:5432/paper_review"
 app.debug = True
 
-login = LoginManager(app)
-login.login_view = "login"
+#login = LoginManager(app)
+#login.login_view = "login"
 
 toolbar = DebugToolbarExtension(app)
 
@@ -24,3 +24,9 @@ migrate = Migrate(app, db)
 from app import routes, models
 
 firebase = Firebase()
+
+# select a file and firebase upload it
+x = firebase.upload('Dockerfile')
+app.logger.info(x[0])
+app.logger.info(x[1])
+app.logger.info(firebase.decrypt(x[0], x[1]))
