@@ -7,13 +7,6 @@ from app import app, db, firebase
 from app.modules.forms import UploadForm
 from app.models import PDF
 
-# firebase = Firebase()
-# # select a file and firebase upload it
-# x = firebase.upload('Dockerfile')
-# app.logger.info(x[0])
-# app.logger.info(x[1])
-# app.logger.info(firebase.decrypt(x[0], x[1]))
-
 
 @app.route("/")
 @app.route("/index")
@@ -44,6 +37,18 @@ def upload():
         return redirect(url_for("index"))
     return render_template("upload.html", title="Upload", form=form)
 
+# TODO: Add a route for the PDFs
+
+# Add route to show all PDFs
+@app.route("/pdfs")
+def pdfs():
+    # get one pdf
+    pdf = PDF.query.all()[0]
+    app.logger.info(pdf.key)
+    app.logger.info(pdf.id)
+    app.logger.info(firebase.decrypt(pdf.key, pdf.id))
+    app.logger.info(firebase.retrive(pdf.key, pdf.id))
+    return render_template("pdfs.html", title="PDFs", pdfs=pdfs)
 
 # @app.route("/login", methods=["GET", "POST"])
 # def login():
