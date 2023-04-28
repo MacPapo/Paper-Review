@@ -10,3 +10,4 @@ Werkzeug
 email-validator
 firebase-admin
 cryptography
+google-cloud-storage

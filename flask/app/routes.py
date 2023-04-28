@@ -46,8 +46,12 @@ def pdfs():
     pdf = PDF.query.all()[0]
     app.logger.info(pdf.key)
     app.logger.info(pdf.id)
-    app.logger.info(firebase.decrypt(pdf.key, pdf.id))
-    app.logger.info(firebase.retrive(pdf.key, pdf.id))
+    # app.logger.info(firebase.decrypt(pdf.key, pdf.id))
+    # app.logger.info(firebase.retrive(pdf.key, pdf.id))
+
+    app.logger.info(firebase.upload_blob("uploads/keepme.txt", "images/keepme.txt"))
+    for x in firebase.retrive(pdf.key, pdf.id):
+        app.logger.info(x.public_url)
     return render_template("pdfs.html", title="PDFs", pdfs=pdfs)
 
 # @app.route("/login", methods=["GET", "POST"])
