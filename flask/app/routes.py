@@ -1,4 +1,5 @@
 import os, tempfile
+from datetime import datetime
 from flask import render_template, flash, redirect, url_for, request
 from flask_login import current_user, login_user, logout_user, login_required
 from werkzeug.urls import url_parse  # this is used to parse the url
@@ -25,7 +26,8 @@ def upload():
     form = UploadForm()
     if form.validate_on_submit():
         f = form.file.data
-        filename = secure_filename(f.filename)
+        now = datetime.now()
+        filename = secure_filename(f.filename + now.strftime("-%d_%m_%Y") + now.strftime("-%H_%M_%S"))
         upload_file_location = os.path.join("uploads", filename)
         f.save(upload_file_location)
         pdf_data = firebase.upload(upload_file_location)
