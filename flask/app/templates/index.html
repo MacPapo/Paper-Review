@@ -8,11 +8,23 @@
             <div class="col-md-8 text-center text-md-start mx-auto">
                 <div class="text-center">
                     {% if current_user.is_authenticated %}
-                    <h1 class="display-4 fw-bold mb-5">Welcome &nbsp;<span class="underline">{{ current_user.username }}</span>.</h1>
+                    <h1 class="display-4 fw-bold mb-5">Welcome &nbsp;<span class="underline">{{ user.first_name + " "  }}</span><span class="underline">{{ user.last_name }}</span>.</h1>
                     <p class="fs-5 text-muted mb-5">Nice to see you!</p>
+                    <ul>
+                        <li>{{ user.uid }}</li>
+                        <li>{{ user.first_name }}</li>
+                        <li>{{ user.last_name }}</li>
+                        <li>{{ user.email }}</li>
+                        <li>{{ user.sex }}</li>
+                        <li>{{ user.nationality }}</li>
+                        <li>{{ user.phone }}</li>
+                        <li>{{ user.created_at }}</li>
+                        <li>{{ user.updated_at }}</li>
+                        <img src="{{ user.gravatar() }}">
+                    </ul>
                     {% else %}
                     <h1 class="display-4 fw-bold mb-5">Welcome to Project0</span>.</h1>
-                    <p class="fs-5 text-muted mb-5">Take a tour of our site</p>
+                    <p class="fs-5 text-muted mb-5">Welcome!Take a tour of our site</p>
                     {% endif %}
                 </div>
             </div>

@@ -8,12 +8,43 @@
                     <img class="img-fluid w-100" src="static/assets/img/illustrations/register.svg">
                 </div>
                 <div class="col-md-5 col-xl-4 text-center text-md-start">
-                    <h2 class="display-6 fw-bold mb-5"><span class="underline pb-1"><strong>Sign up</strong></span></h2>
+                    <h2 class="display-6 fw-bold mb-5"><span class="underline pb-1"><strong>Register</strong></span></h2>
                     <form action="" method="post">
                         {{ form.hidden_tag() }}
                         <div class="mb-3">
-                            {{ form.username(class_="shadow-sm form-control", size=32, placeholder="Username") }}
-                            {% for error in form.username.errors %}
+                            {{ form.uid(class_="shadow-sm form-control", size=16, placeholder="User ID") }}
+                            {% for error in form.uid.errors %}
+                            <span style="color: red;">[{{ error }}]</span>
+                            {% endfor %}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.firstname(class_="shadow-sm form-control", size=32, placeholder="First Name") }}
+                            {% for error in form.firstname.errors %}
+                            <span style="color: red;">[{{ error }}]</span>
+                            {% endfor %}
+                        </div>
+                        <div class="mb-3">
+                            {{ form.lastname(class_="shadow-sm form-control", size=64, placeholder="Last Name") }}
+                            {% for error in form.lastname.errors %}
+                            <span style="color: red;">[{{ error }}]</span>
+                            {% endfor %}
+                        </div>
+                         <div class="mb-3">
+                            {{ form.birthdate(class_="shadow-sm form-control", placeholder="Last Name") }}
+                            {% for error in form.birthdate.errors %}
+                            <span style="color: red;">[{{ error }}]</span>
+                            {% endfor %}
+                        </div>
+                        <div class="mb-3">
+                            {{ form.nationality(class_="shadow-sm form-control") }}
+                            {% for error in form.nationality.errors %}
+                            <span style="color: red;">[{{ error }}]</span>
+                            {% endfor %}
+                        </div>
+                        <div class="mb-3">
+                            {{ form.phone(class_="shadow-sm form-control", size=10, placeholder="+39") }}
+                            {% for error in form.phone.errors %}
                             <span style="color: red;">[{{ error }}]</span>
                             {% endfor %}
                         </div>
@@ -21,6 +52,12 @@
                             {{ form.email(class_="shadow-sm form-control", size=64, placeholder="Email") }}
                             {% for error in form.email.errors %}
                             <span style="color: red;">[{{ error }}]</span>
+                            {% endfor %}
+                        </div>
+                        <div class="mb-3">
+                           {{ form.sex(class_='shadow-sm form-control') }}
+                            {% for error in form.sex.errors %}
+                                <span style="color: red;">[{{ error }}]</span>
                             {% endfor %}
                         </div>
                         <div class="mb-3">

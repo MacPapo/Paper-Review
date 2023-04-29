@@ -3,10 +3,11 @@ from flask_debugtoolbar import DebugToolbarExtension
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager
-
+from app.modules.firebase import Firebase
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "bucami"
+app.config["ALLOWED_EXTENSIONS"] = ["pdf"]
 app.config[
     "SQLALCHEMY_DATABASE_URI"
 ] = "postgresql://moonphase:eclipse@db:5432/paper_review"
@@ -19,5 +20,6 @@ toolbar = DebugToolbarExtension(app)
 
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
+firebase = Firebase()
 
 from app import routes, models

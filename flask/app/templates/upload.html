@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="py-4 py-md-5 my-5">
+    <div class="container py-md-5">
+        <div class="row">
+            <div class="mb-3">
+                <form method="POST" enctype="multipart/form-data">
+                    {{ form.hidden_tag() }}
+                    <div class="form-group">
+                        <label for="{{ form.pdfs.id }}">PDF Files</label>
+                        <input type="file" class="form-control" id="{{ form.pdfs.id }}" name="{{ form.pdfs.name }}" accept=".pdf" multiple>
+                    </div>
+                    <button type="submit" class="btn btn-primary shadow">Submit</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

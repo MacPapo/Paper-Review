@@ -8,3 +8,6 @@ flask-wtf
 psycopg2-binary
 Werkzeug
 email-validator
+wtform_address
+cryptography
+pyrebase4

@@ -1,3 +1,5 @@
 /db_data
 *.pyc
 /.DS_Store
+/flask/.DS_Store
+/flask/app/.DS_Store
