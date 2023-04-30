@@ -53,7 +53,7 @@ class Researcher(UserMixin, db.Model):
     def is_authenticated(self):
         return self.authenticated
     
-    def resercher_fullname(self):
+    def researcher_fullname(self):
         return User.query.join(Researcher, User.uid == Researcher.rsid).filter_by(rsid=self.rsid).first().fullname()
 
     def __repr__(self):
