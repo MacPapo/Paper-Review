@@ -11,3 +11,6 @@ email-validator
 wtform_address
 cryptography
 pyrebase4
+Flask-Bootstrap
+wtforms-components
+datetime

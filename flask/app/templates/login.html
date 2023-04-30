@@ -10,7 +10,7 @@
                     <form action="" method="post" novalidate>
                         {{ form.hidden_tag() }}
                         <div class="mb-3">
-                            {{ form.rsid(class_="shadow form-control", size=16, placeholder="Researcher ID") }}
+                            {{ form.rsid(class_="shadow form-control", size=16, placeholder="User ID") }}
                             {% for error in form.rsid.errors %}
                             <span style="color: red;">[{{ error }}]</span>
                             {% endfor %}

@@ -1,89 +1,92 @@
-{% extends "base.html" %}
+{%  extends "base.html" %}
 
 {% block content %}
-    <section class="py-4 py-md-5 my-5">
-        <div class="container py-md-5">
-            <div class="row">
-                <div class="col-md-6 text-center">
-                    <img class="img-fluid w-100" src="static/assets/img/illustrations/register.svg">
-                </div>
-                <div class="col-md-5 col-xl-4 text-center text-md-start">
-                    <h2 class="display-6 fw-bold mb-5"><span class="underline pb-1"><strong>Register</strong></span></h2>
-                    <form action="" method="post">
-                        {{ form.hidden_tag() }}
-                        <div class="mb-3">
-                            {{ form.uid(class_="shadow-sm form-control", size=16, placeholder="User ID") }}
-                            {% for error in form.uid.errors %}
-                            <span style="color: red;">[{{ error }}]</span>
-                            {% endfor %}
-                        </div>
+<section class="py-4 py-md-5 my-5">
+    <div class="container py-md-5">
+        <div class="row">
+            <div class="col-md-6 text-center">
+                <img class="img-fluid w-100" src="static/assets/img/illustrations/register.svg">
+            </div>
+            <div class="col-md-5 col-xl-4 text-center text-md-start">
+                <h2 class="display-6 fw-bold mb-5"><span class="underline pb-1"><strong>Register</strong></span></h2>
+                <form action="" method="post">
+                    {{ form.hidden_tag() }}
+                    <div class="mb-3">
+                        {{ form.uid(class_="shadow-sm form-control", size=16, placeholder="User ID") }}
+                        {% for error in form.uid.errors %}
+                        <span style="color: red;">[{{ error }}]</span>
+                        {% endfor %}
+                    </div>
 
-                        <div class="mb-3">
-                            {{ form.firstname(class_="shadow-sm form-control", size=32, placeholder="First Name") }}
-                            {% for error in form.firstname.errors %}
-                            <span style="color: red;">[{{ error }}]</span>
-                            {% endfor %}
-                        </div>
-                        <div class="mb-3">
-                            {{ form.lastname(class_="shadow-sm form-control", size=64, placeholder="Last Name") }}
-                            {% for error in form.lastname.errors %}
-                            <span style="color: red;">[{{ error }}]</span>
-                            {% endfor %}
-                        </div>
-                         <div class="mb-3">
-                            {{ form.birthdate(class_="shadow-sm form-control", placeholder="Last Name") }}
-                            {% for error in form.birthdate.errors %}
-                            <span style="color: red;">[{{ error }}]</span>
-                            {% endfor %}
-                        </div>
-                        <div class="mb-3">
-                            {{ form.nationality(class_="shadow-sm form-control") }}
-                            {% for error in form.nationality.errors %}
-                            <span style="color: red;">[{{ error }}]</span>
-                            {% endfor %}
-                        </div>
-                        <div class="mb-3">
-                            {{ form.phone(class_="shadow-sm form-control", size=10, placeholder="+39") }}
-                            {% for error in form.phone.errors %}
-                            <span style="color: red;">[{{ error }}]</span>
-                            {% endfor %}
-                        </div>
-                        <div class="mb-3">
-                            {{ form.email(class_="shadow-sm form-control", size=64, placeholder="Email") }}
-                            {% for error in form.email.errors %}
-                            <span style="color: red;">[{{ error }}]</span>
-                            {% endfor %}
-                        </div>
-                        <div class="mb-3">
-                           {{ form.sex(class_='shadow-sm form-control') }}
-                            {% for error in form.sex.errors %}
-                                <span style="color: red;">[{{ error }}]</span>
-                            {% endfor %}
-                        </div>
-                        <div class="mb-3">
-                            {{ form.password(class_="shadow-sm form-control", size=32, placeholder="Password") }}
-                            {% for error in form.password.errors %}
-                            <span style="color: red;">[{{ error }}]</span>
-                            {% endfor %}
-                        </div>
-                        <div class="mb-3">
-                            {{ form.password2(class_="shadow-sm form-control", size=32, placeholder="Password") }}
-                            {% for error in form.password2.errors %}
-                            <span style="color: red;">[{{ error }}]</span>
-                            {% endfor %}
-                        </div>
-                        <div class="mb-5">
-                            {{ form.submit(class_="btn btn-primary shadow") }}
-                        </div>
-                        <p class="text-muted">Have an account? <a href="{{ url_for('login') }}">Log in&nbsp;<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icon-tabler-arrow-narrow-right">
-                                    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                                    <line x1="5" y1="12" x2="19" y2="12"></line>
-                                    <line x1="15" y1="16" x2="19" y2="12"></line>
-                                    <line x1="15" y1="8" x2="19" y2="12"></line>
-                                </svg></a>&nbsp;</p>
-                    </form>
-                </div>
+                    <div class="mb-3">
+                        {{ form.firstname(size=64) }}
+                        {% for error in form.firstname.errors %}
+                        <span style="color: red;">[{{ error }}]</span>
+                        {% endfor %}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.lastname(class_="shadow-sm form-control", size=64,placeholder="last name") }}
+                        {% for error in form.lastname.errors %}
+                        <span style="color: red;">[{{ error }}]</span>
+                        {% endfor %}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.birthdate(class_="shadow-sm form-control", placeholder="Last Name") }}
+                        {% for error in form.birthdate.errors %}
+                        <span style="color: red;">[{{ error }}]</span>
+                        {% endfor %}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.nationality(class_="shadow-sm form-control") }}
+                        {% for error in form.nationality.errors %}
+                        <span style="color: red;">[{{ error }}]</span>
+                        {% endfor %}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.phone(class_="shadow-sm form-control", size=10, placeholder="+39") }}
+                        {% for error in form.phone.errors %}
+                        <span style="color: red;">[{{ error }}]</span>
+                        {% endfor %}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.email(class_="shadow-sm form-control", size=64, placeholder="Email") }}
+                        {% for error in form.email.errors %}
+                        <span style="color: red;">[{{ error }}]</span>
+                        {% endfor %}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.sex(class_='shadow-sm form-control') }}
+                        {% for error in form.sex.errors %}
+                        <span style="color: red;">[{{ error }}]</span>
+                        {% endfor %}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.password(class_="shadow-sm form-control", size=32, placeholder="Password") }}
+                        {% for error in form.password.errors %}
+                        <span style="color: red;">[{{ error }}]</span>
+                        {% endfor %}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.password2(class_="shadow-sm form-control", size=32, placeholder="Password") }}
+                        {% for error in form.password2.errors %}
+                        <span style="color: red;">[{{ error }}]</span>
+                        {% endfor %}
+                    </div>
+                    <div class="mb-5">
+                        {{ form.submit(class_="btn btn-primary shadow") }}
+                    </div>
+                    <p class="text-muted">Have an account? <a href="{{ url_for('login') }}">Log in&nbsp;<svg
+                                xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24"
+                                stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round"
+                                stroke-linejoin="round" class="icon icon-tabler icon-tabler-arrow-narrow-right">
+                                <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                                <line x1="15" y1="16" x2="19" y2="12"></line>
+                                <line x1="15" y1="8" x2="19" y2="12"></line>
+                            </svg></a>&nbsp;</p>
+                </form>
             </div>
         </div>
+    </div>
 </section>
 {% endblock %}
