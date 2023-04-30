@@ -21,8 +21,8 @@ def index():
     return render_template("index.html", title="Home")
 
 
-@login_required  # this decorator will make sure that the user is logged in
 @app.route("/about")
+@login_required  # this decorator will make sure that the user is logged in
 def about():
     return render_template("about.html", title="About")
 
@@ -34,7 +34,7 @@ def login():
     form = LoginForm()
     if form.validate_on_submit():
         researcher = Researcher.query.filter_by(rsid=form.rsid.data).first()
-        user = User.query.join(Researcher,User.uid == Researcher.rsid).first()
+        user = User.query.join(Researcher,User.uid == Researcher.rsid).filter_by(rsid=form.rsid.data).first()
         if user is None or not user.check_password(form.password.data):
             flash("Invalid username or password")
             return redirect(url_for("login"))
@@ -80,8 +80,9 @@ def register():
     return render_template("register.html", title="Register", form=form)
 
 
-@login_required
+
 @app.route("/upload", methods=["GET", "POST"])
+@login_required  # this decorator will make sure that the user is logged in
 def upload():
     form = UploadForm()
     if form.validate_on_submit():
@@ -142,9 +143,8 @@ def upload():
 
     return render_template("upload.html", title="Upload", form=form)
 
-
-@login_required
 @app.route("/pdfs")
+@login_required  # this decorator will make sure that the user is logged in
 def pdfs():
     pdfs_enc = PDF.query.all()
     if pdfs_enc:
