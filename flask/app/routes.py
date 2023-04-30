@@ -31,7 +31,11 @@ def login():
     form = LoginForm()
     if form.validate_on_submit():
         researcher = Researcher.query.filter_by(rsid=form.rsid.data).first()
-        user = User.query.join(Researcher,User.uid == Researcher.rsid).filter_by(rsid=form.rsid.data).first()
+        user = (
+            User.query.join(Researcher, User.uid == Researcher.rsid)
+            .filter_by(rsid=form.rsid.data)
+            .first()
+        )
         if user is None or not user.check_password(form.password.data):
             flash("Invalid username or password")
             return redirect(url_for("login"))
@@ -57,6 +61,7 @@ def register():
     if form.validate_on_submit():
         user = User(
             uid=form.uid.data,
+            username=form.username.data,
             first_name=form.firstname.data,
             last_name=form.lastname.data,
             birthdate=form.birthdate.data,
@@ -64,8 +69,8 @@ def register():
             sex=form.sex.data,
             nationality=form.nationality.data,
             phone=form.phone.data,
-            created_at = datetime.now(),
-            updated_at = datetime.now()
+            created_at=datetime.now(),
+            updated_at=datetime.now()
         )
         user.set_password(form.password.data)
         db.session.add(user)
@@ -75,7 +80,6 @@ def register():
         flash("Congratulations, you are now a registered user!")
         return redirect(url_for("login"))
     return render_template("register.html", title="Register", form=form)
-
 
 
 @app.route("/upload", methods=["GET", "POST"])
@@ -140,6 +144,7 @@ def upload():
 
     return render_template("upload.html", title="Upload", form=form)
 
+
 @app.route("/pdfs")
 @login_required  # this decorator will make sure that the user is logged in
 def pdfs():
@@ -152,14 +157,21 @@ def pdfs():
         return render_template("pdfs.html", title="PDFs", pdfs=pdfs)
     return render_template("index.html", title="PDFs")
 
-@app.route("/profile")
+
+@app.route("/user/<username>")
 @login_required
-def profile():
-    if current_user.is_authenticated:
-        if isinstance(current_user, Researcher):
-            user = User.query.join(Researcher,User.uid == Researcher.rsid).filter_by(rsid=current_user.rsid).first()
-            user_type = "Researcher"
-        return render_template("profile.html", title="profile", user = user, user_type = user_type)
+def profile(username):
+    # TODO: add a check to see if the user is a researcher or a reviewer
+    user = (
+        User.query.join(Researcher, User.uid == Researcher.rsid)
+        .filter(User.username == username)
+        .first_or_404()
+    )
+    user_type = "Researcher"
+    return render_template(
+        "profile.html", title="profile", user=user, user_type=user_type
+    )
+
 
 @app.before_request
 def before_request():

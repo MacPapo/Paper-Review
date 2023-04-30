@@ -24,8 +24,9 @@ class LoginForm(FlaskForm):
 
 class RegistrationForm(FlaskForm):
     uid = StringField("Username", validators=[DataRequired(), Length(min=16, max=16)])
-    firstname = StringField("First Name", validators=[DataRequired()])
-    lastname = StringField("Last Name", validators=[DataRequired()])
+    username = StringField("User Name", validators=[DataRequired(), Length(min=6, max=32)])
+    firstname = StringField("First Name", validators=[DataRequired(), Length(min=1, max=32)])
+    lastname = StringField("Last Name", validators=[DataRequired(), Length(min=1, max=32)])
     birthdate = DateField("Birth Date", validators=[DataRequired()])
     email = StringField("Email", validators=[DataRequired(), Email()])
     sex = RadioField("Sex",choices=[('M','M'),('F','F'),('Other','Other')],validators=[DataRequired()])
@@ -41,6 +42,11 @@ class RegistrationForm(FlaskForm):
         user = User.query.filter_by(uid=uid.data).first()
         if user is not None:
             raise ValidationError("Please use a different username.")
+
+    def validate_username(self, username):
+        user = User.query.filter_by(username=username.data).first()
+        if user is not None:
+            raise ValidationError("Please use a different user name.")
 
     def validate_email(self, email):
         user = User.query.filter_by(email=email.data).first()

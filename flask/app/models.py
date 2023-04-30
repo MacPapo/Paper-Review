@@ -8,6 +8,7 @@ from app import db, login
 
 class User(db.Model):
     uid = db.Column(db.String(16), index=True, primary_key=True)
+    username = db.Column(db.String(32), index=True, unique=True, nullable=False)
     first_name = db.Column(db.String(32))
     last_name = db.Column(db.String(64))
     birthdate = db.Column(db.DateTime)
@@ -63,6 +64,9 @@ class Researcher(UserMixin, db.Model):
 
     def researcher_fullname(self):
         return self.get_this_user().fullname()
+
+    def researcher_username(self):
+        return self.get_this_user().username
 
     def __repr__(self):
         return "<User {}>".format(self.rsid)
