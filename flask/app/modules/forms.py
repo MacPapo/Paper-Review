@@ -29,7 +29,6 @@ class RegistrationForm(FlaskForm):
     firstname = StringField("First Name", validators=[DataRequired()],render_kw={"placeholder": "Porc o name","class":"shadow-sm form-control"})
     lastname = StringField("Last Name", validators=[DataRequired()])
     birthdate = DateField("Birth Date", validators=[DataRequired(),DateRange(min=min_date)])
-
     email = StringField("Email", validators=[DataRequired(), Email()])
     sex = RadioField("Sex",choices=[('M','M'),('F','F'),('Other','Other')],validators=[DataRequired()])
     nationality = CountrySelectField(default='IT')
