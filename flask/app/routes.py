@@ -16,7 +16,7 @@ from app.modules.forms import LoginForm, RegistrationForm, UploadForm
 @app.route("/home")
 def index():
     if current_user.is_authenticated:
-        user = User.query.join(Researcher,User.uid == Researcher.rsid).first()
+        user = User.query.join(Researcher,User.uid == Researcher.rsid).filter_by(rsid=current_user.rsid).first()
         return render_template("index.html", title="Home", user=user)
     return render_template("index.html", title="Home")
 
@@ -154,3 +154,12 @@ def pdfs():
             pdfs.append(crypt.decrypt(pdf.key, pdf.id))
         return render_template("pdfs.html", title="PDFs", pdfs=pdfs)
     return render_template("index.html", title="PDFs")
+
+@app.route("/profile")
+@login_required
+def profile():
+    if current_user.is_authenticated:
+        if isinstance(current_user, Researcher):
+            user = User.query.join(Researcher,User.uid == Researcher.rsid).filter_by(rsid=current_user.rsid).first()
+            user_type = "Researcher"
+        return render_template("profile.html", title="profile", user = user, user_type = user_type)

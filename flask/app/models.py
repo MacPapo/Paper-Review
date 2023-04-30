@@ -36,6 +36,12 @@ class User(db.Model):
 
     def __repr__(self):
         return "<User {}>".format(self.uid)
+    
+    def fullname(self):
+        return self.first_name + " " + self.last_name
+    
+    def format_birth_date(self):
+        return self.birthdate.strftime('%Y-%m-%d')
 
 
 class Researcher(UserMixin, db.Model):
@@ -46,6 +52,9 @@ class Researcher(UserMixin, db.Model):
     
     def is_authenticated(self):
         return self.authenticated
+    
+    def resercher_fullname(self):
+        return User.query.join(Researcher, User.uid == Researcher.rsid).filter_by(rsid=self.rsid).first().fullname()
 
     def __repr__(self):
         return "<User {}>".format(self.rsid)
