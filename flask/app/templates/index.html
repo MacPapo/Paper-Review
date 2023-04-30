@@ -8,7 +8,7 @@
             <div class="col-md-8 text-center text-md-start mx-auto">
                 <div class="text-center">
                     {% if current_user.is_authenticated %}
-                    <h1 class="display-4 fw-bold mb-5">Welcome &nbsp;<span class="underline">{{ current_user.researcher_fullname() + " "  }}</span>.</h1>
+                    <h1 class="display-4 fw-bold mb-5">Welcome &nbsp;<span class="underline">{{ current_user.researcher_fullname() }}</span>.</h1>
                     <p class="fs-5 text-muted mb-5">Nice to see you!</p>
                     {% else %}
                     <h1 class="display-4 fw-bold mb-5">Welcome to Project0</span>.</h1>
