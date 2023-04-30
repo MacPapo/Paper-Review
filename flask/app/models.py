@@ -19,6 +19,7 @@ class User(db.Model):
 
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow)
+    last_seen = db.Column(db.DateTime, default=datetime.utcnow)
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -36,12 +37,12 @@ class User(db.Model):
 
     def __repr__(self):
         return "<User {}>".format(self.uid)
-    
+
     def fullname(self):
         return self.first_name + " " + self.last_name
-    
+
     def format_birth_date(self):
-        return self.birthdate.strftime('%Y-%m-%d')
+        return self.birthdate.strftime("%Y-%m-%d")
 
 
 class Researcher(UserMixin, db.Model):
@@ -49,12 +50,19 @@ class Researcher(UserMixin, db.Model):
 
     def get_id(self):
         return self.rsid
-    
+
     def is_authenticated(self):
         return self.authenticated
-    
+
+    def get_this_user(self):
+        return (
+            User.query.join(Researcher, User.uid == Researcher.rsid)
+            .filter_by(rsid=self.rsid)
+            .first()
+        )
+
     def researcher_fullname(self):
-        return User.query.join(Researcher, User.uid == Researcher.rsid).filter_by(rsid=self.rsid).first().fullname()
+        return self.get_this_user().fullname()
 
     def __repr__(self):
         return "<User {}>".format(self.rsid)

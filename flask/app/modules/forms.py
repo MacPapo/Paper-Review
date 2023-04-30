@@ -1,5 +1,6 @@
+import phonenumbers
 from flask_wtf import FlaskForm
-from wtforms.validators import ValidationError, DataRequired, Email, EqualTo
+from wtforms.validators import ValidationError, DataRequired, Email, EqualTo, Length
 from wtform_address import CountrySelectField
 from werkzeug.utils import secure_filename
 from app.models import User
@@ -22,22 +23,22 @@ class LoginForm(FlaskForm):
 
 
 class RegistrationForm(FlaskForm):
-    uid = StringField("Username", validators=[DataRequired()])
+    uid = StringField("Username", validators=[DataRequired(), Length(min=16, max=16)])
     firstname = StringField("First Name", validators=[DataRequired()])
     lastname = StringField("Last Name", validators=[DataRequired()])
     birthdate = DateField("Birth Date", validators=[DataRequired()])
     email = StringField("Email", validators=[DataRequired(), Email()])
     sex = RadioField("Sex",choices=[('M','M'),('F','F'),('Other','Other')],validators=[DataRequired()])
     nationality = CountrySelectField(default='IT')
-    phone = TelField("Phone", validators=[DataRequired()]  )
+    phone = StringField("Phone", validators=[DataRequired()])
     password = PasswordField("Password", validators=[DataRequired()])
     password2 = PasswordField(
         "Repeat Password", validators=[DataRequired(), EqualTo("password")]
     )
     submit = SubmitField("Register")
 
-    def validate_username(self, username):
-        user = User.query.filter_by(username=username.data).first()
+    def validate_uid(self, uid):
+        user = User.query.filter_by(uid=uid.data).first()
         if user is not None:
             raise ValidationError("Please use a different username.")
 
@@ -45,6 +46,15 @@ class RegistrationForm(FlaskForm):
         user = User.query.filter_by(email=email.data).first()
         if user is not None:
             raise ValidationError("Please use a different email address.")
+
+    def validate_phone(self, phone):
+        try:
+            p = phonenumbers.parse(phone.data)
+            if not phonenumbers.is_valid_number(p):
+                raise ValueError()
+        except (phonenumbers.phonenumberutil.NumberParseException, ValueError):
+            raise ValidationError('Invalid phone number')
+
 
 
 class UploadForm(FlaskForm):

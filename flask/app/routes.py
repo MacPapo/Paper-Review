@@ -160,3 +160,10 @@ def profile():
             user = User.query.join(Researcher,User.uid == Researcher.rsid).filter_by(rsid=current_user.rsid).first()
             user_type = "Researcher"
         return render_template("profile.html", title="profile", user = user, user_type = user_type)
+
+@app.before_request
+def before_request():
+    if current_user.is_authenticated:
+        this_user = current_user.get_this_user()
+        this_user.last_seen = datetime.utcnow()
+        db.session.commit()

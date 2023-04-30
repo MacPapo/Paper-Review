@@ -11,3 +11,4 @@ email-validator
 wtform_address
 cryptography
 pyrebase4
+phonenumbers
