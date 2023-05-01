@@ -25,12 +25,12 @@ services:
       context: flask
       dockerfile: Dockerfile
     volumes:
-      - ./flask:/app
+      - ./flask:/home/moonphase/paper_review
     restart: always
     depends_on:
       db:
         condition: service_healthy
-    entrypoint: /app/boot.sh
+    entrypoint: /home/moonphase/paper_review/boot.sh
     networks:
       - backnet
       - frontnet

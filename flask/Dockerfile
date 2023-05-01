@@ -1,16 +1,13 @@
 FROM python:3.10-slim
 
-ENV VIRTUAL_ENV=/opt/venv
-RUN python3 -m venv $VIRTUAL_ENV
 RUN useradd moonphase
-ENV PATH="$VIRTUAL_ENV/bin:$PATH"
-
-WORKDIR /home/moonphase
+WORKDIR /home/moonphase/paper_review
 
 COPY requirements.txt .
+
+RUN python3 -m venv venv
 RUN pip install -r requirements.txt
 # RUN pip install gunicorn
-#RUN pip uninstall -y requests_toolbelt && pip install requests_toolbelt==0.9.1
 
 COPY app app
 COPY migrations migrations

@@ -22,4 +22,4 @@ db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 firebase = Firebase()
 
-from app import routes, models
+from app import routes, models, errors
