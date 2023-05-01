@@ -30,20 +30,28 @@ def login():
         return redirect(url_for("index"))
     form = LoginForm()
     if form.validate_on_submit():
-        researcher = Researcher.query.filter_by(rsid=form.rsid.data).first()
-        user = (
-            User.query.join(Researcher, User.uid == Researcher.rsid)
-            .filter_by(rsid=form.rsid.data)
-            .first()
-        )
+        user = User.query.filter_by(username=form.username.data).first()
+        #Non esiste utente con questo  username
         if user is None or not user.check_password(form.password.data):
+            app.logger.info("Invalid username or password for user %s", form.username.data)
             flash("Invalid username or password")
             return redirect(url_for("login"))
-        login_user(researcher, remember=form.remember_me.data)
-        next_page = request.args.get("next")
-        if not next_page or url_parse(next_page).netloc != "":
-            next_page = url_for("index")
-        return redirect(next_page)
+        #Controllo se è un ricercatore o reviewer
+        researcher = (
+            User.query.join(Researcher, User.uid == Researcher.rsid)
+            .filter_by(rsid=user.get_id())
+            .first()
+        )
+        if researcher is None:
+            app.logger.info("User %s is not a researcher", form.username.data)
+            return redirect(url_for("login"))
+        else:
+            app.logger.info("User %s is a researcher", form.username.data)
+            login_user(researcher, remember=form.remember_me.data)
+            next_page = request.args.get("next")
+            if not next_page or url_parse(next_page).netloc != "":
+                next_page = url_for("index")
+                return redirect(next_page)
     return render_template("login.html", title="Sign In", form=form)
 
 

@@ -6,7 +6,7 @@ from sqlalchemy.dialects.postgresql import BYTEA, ENUM  # Import BYTEA for postg
 from app import db, login
 
 
-class User(db.Model):
+class User(UserMixin,db.Model):
     uid = db.Column(db.String(16), index=True, primary_key=True)
     username = db.Column(db.String(32), index=True, unique=True, nullable=False)
     first_name = db.Column(db.String(32))
@@ -44,7 +44,8 @@ class User(db.Model):
 
     def format_birth_date(self):
         return self.birthdate.strftime("%Y-%m-%d")
-
+    def get_id(self):
+        return self.uid
 
 class Researcher(UserMixin, db.Model):
     rsid = db.Column(db.String(16), db.ForeignKey("user.uid"), primary_key=True)
