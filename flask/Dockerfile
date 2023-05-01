@@ -1,21 +1,30 @@
-FROM python:slim
+FROM python:3.10-slim
 
-WORKDIR /app
+ENV VIRTUAL_ENV=/opt/venv
+RUN python3 -m venv $VIRTUAL_ENV
+RUN useradd moonphase
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
-COPY ./app .
-COPY ./migrations .
-COPY ./entrypoint.sh .
-COPY ./project0.py .
-COPY ./requirements.txt .
+WORKDIR /home/moonphase
 
+COPY requirements.txt .
 RUN pip install -r requirements.txt
+# RUN pip install gunicorn
+#RUN pip uninstall -y requests_toolbelt && pip install requests_toolbelt==0.9.1
+
+COPY app app
+COPY migrations migrations
+COPY uploads uploads
+COPY project0.py boot.sh ./
+RUN chmod +x boot.sh
 
 ENV FLASK_APP project0.py
+ENV FLASK_ENV development
 ENV FLASK_DEBUG 1
-ENV FLASK_RUN_PORT 5000
 ENV FLASK_RUN_HOST 0.0.0.0
 
-EXPOSE 5000
+RUN chown -R moonphase:moonphase ./
+USER moonphase
 
-RUN chmod u+x entrypoint.sh
-ENTRYPOINT ["./entrypoint.sh"]
+EXPOSE 5000
+ENTRYPOINT ["./boot.sh"]

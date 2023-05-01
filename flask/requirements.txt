@@ -10,5 +10,6 @@ Werkzeug
 email-validator
 wtform_address
 cryptography
+requests_toolbelt==0.9.1
 pyrebase4
 phonenumbers
