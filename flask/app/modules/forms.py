@@ -32,7 +32,7 @@ class RegistrationForm(FlaskForm):
     username = StringField("User Name", validators=[DataRequired(), Length(min=6, max=32)])
     firstname = StringField("First Name", validators=[DataRequired(), Length(min=1, max=32)],render_kw={"placeholder": "First Name","class":"shadow-sm form-control"})
     lastname = StringField("Last Name", validators=[DataRequired(), Length(min=1, max=32)])
-    birthdate = DateField("Birth Date", validators=[DataRequired(),DateRange(max=min_date)],render_kw={"format": "%d/%m/%Y","class":"shadow-sm form-control"}})
+    birthdate = DateField("Birth Date", validators=[DataRequired(),DateRange(max=min_date)],render_kw={"format": "%d/%m/%Y","class":"shadow-sm form-control"})
     email = StringField("Email", validators=[DataRequired(), Email()])
     sex = RadioField("Sex",choices=[('M','M'),('F','F'),('Other','Other')],validators=[DataRequired()])
     nationality = CountrySelectField(default='IT')

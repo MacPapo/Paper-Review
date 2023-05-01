@@ -1,38 +1,41 @@
 <!doctype html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="description" content="App" />
-        <meta name="keywords" content="App" />
-        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-        {% if title %}
-        <title>{{ title }} - project0</title>
-        {% else %}
-        <title>project0</title>
-        {% endif %}
-        <link rel="stylesheet" href="static/assets/bootstrap/css/bootstrap.min.css">
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800&amp;display=swap">
-    </head>
-    <body>
-        {% include '_navbar.html' %}
 
-        {% with messages = get_flashed_messages() %}
-        {% if messages %}
-        <ul>
-            {% for message in messages %}
-            <li>{{ message }}</li>
-            {% endfor %}
-        </ul>
-        {% endif %}
-        {% endwith %}
+<head>
+    <meta charset="UTF-8" />
+    <meta name="description" content="App" />
+    <meta name="keywords" content="App" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    {% if title %}
+    <title>{{ title }} - project0</title>
+    {% else %}
+    <title>project0</title>
+    {% endif %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='assets/bootstrap/css/bootstrap.min.css') }}">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css?family=Raleway:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800&amp;display=swap">
+</head>
 
-        {% block content %}{% endblock %}
+<body>
+    {% include '_navbar.html' %}
 
-        {% include '_footer.html' %}
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <ul>
+        {% for message in messages %}
+        <li>{{ message }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+    {% endwith %}
 
-        <script src="static/assets/bootstrap/js/bootstrap.min.js"></script>
-        <script src="static/assets/js/startup-modern.js"></script>
+    {% block content %}{% endblock %}
 
-        {% block scripts %}{% endblock %}
-    </body>
+    {% include '_footer.html' %}
+
+    <script src="{{ url_for('static', filename='assets/bootstrap/js/bootstrap.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='assets/js/startup-modern.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+
 </html>
