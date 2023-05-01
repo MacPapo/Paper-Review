@@ -1,4 +1,4 @@
-{%  extends "base.html" %}
+{% extends "base.html" %}
 
 {% block content %}
 <section class="py-4 py-md-5 my-5">
@@ -17,7 +17,12 @@
                         <span style="color: red;">[{{ error }}]</span>
                         {% endfor %}
                     </div>
-
+                    <div class="mb-3">
+                        {{ form.username(class_="shadow-sm form-control", size=32, placeholder="User Name") }}
+                        {% for error in form.username.errors %}
+                        <span style="color: red;">[{{ error }}]</span>
+                        {% endfor %}
+                    </div>
                     <div class="mb-3">
                         {{ form.firstname(size=64) }}
                         {% for error in form.firstname.errors %}
@@ -25,7 +30,7 @@
                         {% endfor %}
                     </div>
                     <div class="mb-3">
-                        {{ form.lastname(class_="shadow-sm form-control", size=64,placeholder="last name") }}
+                        {{ form.lastname(class_="shadow-sm form-control", size=64, placeholder="Last Name") }}
                         {% for error in form.lastname.errors %}
                         <span style="color: red;">[{{ error }}]</span>
                         {% endfor %}
@@ -43,7 +48,7 @@
                         {% endfor %}
                     </div>
                     <div class="mb-3">
-                        {{ form.phone(class_="shadow-sm form-control", size=10, placeholder="+39") }}
+                        {{ form.phone(class_="shadow-sm form-control") }}
                         {% for error in form.phone.errors %}
                         <span style="color: red;">[{{ error }}]</span>
                         {% endfor %}
@@ -88,5 +93,9 @@
             </div>
         </div>
     </div>
+    </div>
 </section>
+{% endblock %}
+
+{% block scripts %}
 {% endblock %}

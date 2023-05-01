@@ -14,7 +14,7 @@
             </ul>
             {% if current_user.is_anonymous %}
             <a class="btn btn-primary shadow" role="button" href="{{ url_for('login') }}">Login</a>
-            <a class="btn btn-danger shadow" role="button" href="{{ url_for('register') }}">Register</a>
+            <a class="ms-2 btn btn-danger shadow" role="button" href="{{ url_for('register') }}">Register</a>
             {% else %}
             <div class="dropdown">
                 <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1"
@@ -22,8 +22,8 @@
                     {{ current_user.researcher_fullname() }}
                 </button>
                 <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-                    <li><a class="dropdown-item" href="{{ url_for('profile') }}">Profile</a></li>
-                    <li><a class="dropdown-item" href="{{ url_for('logout') }}">Logout</a></li>
+                    <li><a class="dropdown-item" href="{{ url_for('profile', username=current_user.researcher_username() ) }}">Profile</a></li>
+                    <li><a class="dropdown-item text-danger" href="{{ url_for('logout') }}">Logout</a></li>
                 </ul>
             </div>
             {% endif %}

@@ -51,4 +51,17 @@ Almeno due pagine:
 	   review, /grafico andamento e percentuali/ => da pensarci,
 	   notifiche,sezione repository progetti di ricerca che puoi aggiungere
     2- sezione aggiungi pdf e commento
-	
+
+# To do#
+
+
+- visualizzare lista progetti del researchers
+- Form richiesta progetto
+- Form registrazione reviewers
+- Table project,comments(sottoclassi),versions,reports,pdf,reviewers con relative  classi per le relazioni M:N
+- Modificare mappa concettuale e logica
+- Interfaccia reviewers,researchers
+- Form report
+- Interfaccia chat per la comunicazione tra gli utenti
+- finire la Home
+
