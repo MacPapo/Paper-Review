@@ -45,7 +45,7 @@ class RegistrationForm(FlaskForm):
     nationality = CountrySelectField(default='IT',
                       render_kw={"class":"shadow-sm form-control"})
     phone = StringField("Phone", validators=[DataRequired()],
-                      render_kw={"class":"shadow-sm form-control","placeholder":"Phone","size":16})
+                      render_kw={"class":"shadow-sm form-control"})
     password = PasswordField("Password", validators=[DataRequired()],
                       render_kw={"class":"shadow-sm form-control","placeholder":"Password","size":32})
     password2 = PasswordField(
