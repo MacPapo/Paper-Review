@@ -12,4 +12,7 @@ wtform_address
 cryptography
 requests_toolbelt==0.9.1
 pyrebase4
+Flask-Bootstrap
+wtforms-components
+datetime
 phonenumbers
