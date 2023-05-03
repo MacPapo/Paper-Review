@@ -1,0 +1,15 @@
+{
+    "Servers": {
+        "1": {
+            "Name": "Flask PostgreSQL server",
+            "Group": "Servers",
+            "Host": "paper_review_db",
+            "Port": 5432,
+            "SSLMode": "prefer",
+            "MaintenanceDB": "paper_review",
+            "Username": "moonphase",
+            "SavePassword": true,
+            "Comment": "This is my PostgreSQL server"
+        }
+    }
+}

@@ -11,6 +11,7 @@ email-validator
 wtform_address
 cryptography
 requests_toolbelt==0.9.1
+urllib3==1.26.15
 pyrebase4
 Flask-Bootstrap
 wtforms-components
