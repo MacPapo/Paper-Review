@@ -1,5 +1,5 @@
 #!/bin/bash
-source venv/bin/activate
+source /home/moonphase/paper_review/venv/bin/activate
 flask db upgrade
 flask run
 # flask translate compile

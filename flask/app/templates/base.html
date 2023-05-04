@@ -6,17 +6,19 @@
     <meta name="description" content="App" />
     <meta name="keywords" content="App" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/16.0.4/css/intlTelInput.css"
     {% if title %}
     <title>{{ title }} - project0</title>
     {% else %}
     <title>project0</title>
     {% endif %}
-    {% block styles %}
+
     <link rel="stylesheet" href="{{ url_for('static', filename='assets/bootstrap/css/bootstrap.min.css') }}">
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css?family=Raleway:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800&amp;display=swap">
+
+    {% block styles %}
     {% endblock %}
+
 </head>
 
 <body>
@@ -38,8 +40,8 @@
 
     <script src="{{ url_for('static', filename='assets/bootstrap/js/bootstrap.min.js') }}"></script>
     <script src="{{ url_for('static', filename='assets/js/startup-modern.js') }}"></script>
+
     {% block scripts %}
-         <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/16.0.4/js/intlTelInput.min.js"></script>
     {% endblock %}
 </body>
 
