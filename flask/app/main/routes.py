@@ -1,12 +1,14 @@
+import os
+from werkzeug.utils import secure_filename
 from datetime import datetime
-from flask import render_template, flash, redirect, url_for, request, current_app
+from flask import render_template, flash, redirect, url_for
 from flask_login import current_user, login_required
-from app import db
+from app import db, firebase
 from app.main import bp
 from app.main.forms import UploadForm
-from app.models import User, PDF
-
-
+from app.models import PDF
+from app.auth.crypt import Crypt
+from pathlib import Path
 @bp.before_request
 def before_request():
     if current_user.is_authenticated:
@@ -23,7 +25,6 @@ def index():
 
 
 @bp.route("/about")
-@login_required  # this decorator will make sure that the user is logged in
 def about():
     return render_template("about.html", title="About")
 
