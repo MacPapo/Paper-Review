@@ -7,9 +7,8 @@ from werkzeug.urls import url_parse  # this is used to parse the url
 from werkzeug.utils import secure_filename
 from app import db
 from app.auth import bp
-from app.auth.crypt import Crypt
 from app.models import User, Researcher
-from app.auth.forms import LoginUserForm, RegistrationUserForm
+from app.auth.forms import LoginUserForm, RegistrationUserForm, EditUserForm
 
 
 @bp.route("/login", methods=["GET", "POST"])
@@ -93,3 +92,26 @@ def profile(username):
     return render_template(
         "profile.html", title="profile", user=user, user_type=user_type
     )
+
+@bp.route("/user/<username>/edit", methods=["GET", "POST"])
+@login_required
+def edit_profile(username):
+    this_user = current_user.get_this_user()
+    form = EditUserForm()
+    if form.validate_on_submit():
+        this_user.first_name = form.first_name.data
+        this_user.last_name = form.last_name.data
+        this_user.birthdate = form.birthdate.data
+        this_user.sex = form.sex.data
+        this_user.nationality = form.nationality.data
+        this_user.updated_at = datetime.now()
+        db.session.commit()
+        flash('Your changes have been saved.')
+        return redirect(url_for('auth.profile', username=this_user.username))
+    elif request.method == 'GET':
+        form.first_name.data = this_user.first_name
+        form.last_name.data = this_user.last_name
+        form.birthdate.data = this_user.birthdate
+        form.sex.data = this_user.sex
+        form.nationality.data = this_user.nationality
+    return render_template('edit_profile.html', title='Edit Profile', form=form)

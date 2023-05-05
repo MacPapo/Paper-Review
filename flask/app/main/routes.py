@@ -9,6 +9,7 @@ from app.main.forms import UploadForm
 from app.models import PDF, Project, Version, Researcher
 from app.auth.crypt import Crypt
 from pathlib import Path
+
 @bp.before_request
 def before_request():
     if current_user.is_authenticated:

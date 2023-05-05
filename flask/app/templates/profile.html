@@ -18,7 +18,9 @@
                                             <p class="text-secondary mb-1">{{ user_type }}</p>
                                             <p class="text-muted font-size-sm">{{ user.uid }}</p>
                                             <button class="btn btn-primary">Follow</button>
-                                            <button class="btn btn-outline-primary">Edit</button>
+                                            <button class="btn btn-outline-primary" onclick="location.href='{{ url_for('auth.edit_profile', username=current_user.researcher_username() ) }}'">
+                                                Edit
+                                            </button>
                                         </div>
                                     </div>
                                 </div>

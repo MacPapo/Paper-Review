@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="py-4 py-md-5 my-5">
+    <div class="container py-md-5">
+        <div class="row">
+            <div class="col-md-6 text-center">
+                <img class="img-fluid w-100" src="{{ url_for('static', filename='assets/img/illustrations/register.svg') }}">
+            </div>
+            <div class="col-md-5 col-xl-4 text-center text-md-start">
+                <h2 class="display-6 fw-bold mb-5"><span class="underline pb-1"><strong>Edit Profile</strong></span></h2>
+                <form action="" method="post">
+                    {{ form.hidden_tag() }}
+                    <div class="mb-3">
+                        {{ form.first_name() }}
+                        {% for error in form.first_name.errors %}
+                        <span style="color: red;">[{{ error }}]</span>
+                        {% endfor %}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.last_name() }}
+                        {% for error in form.last_name.errors %}
+                        <span style="color: red;">[{{ error }}]</span>
+                        {% endfor %}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.birthdate() }}
+                        {% for error in form.birthdate.errors %}
+                        <span style="color: red;">[{{ error }}]</span>
+                        {% endfor %}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.nationality() }}
+                        {% for error in form.nationality.errors %}
+                        <span style="color: red;">[{{ error }}]</span>
+                        {% endfor %}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.sex(class="shadow-sm form-control") }}
+                        {% for error in form.sex.errors %}
+                        <span style="color: red;">[{{ error }}]</span>
+                        {% endfor %}
+                    </div>
+                    <div class="mb-5">
+                        {{ form.submit() }}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    </div>
+</section>
+{% endblock %}

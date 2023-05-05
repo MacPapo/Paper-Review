@@ -23,6 +23,7 @@
                 </button>
                 <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
                     <li><a class="dropdown-item" href="{{ url_for('auth.profile', username=current_user.researcher_username() ) }}">Profile</a></li>
+                    <li><a class="dropdown-item" href="{{ url_for('auth.edit_profile', username=current_user.researcher_username() ) }}">Edit Profile</a></li>
                     <li><a class="dropdown-item text-danger" href="{{ url_for('auth.logout') }}">Logout</a></li>
                 </ul>
             </div>
