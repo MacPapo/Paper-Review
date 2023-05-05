@@ -1,7 +1,7 @@
 import os
 from werkzeug.utils import secure_filename
 from datetime import datetime
-from flask import render_template, flash, redirect, url_for, current_app
+from flask import render_template, flash, redirect, url_for
 from flask_login import current_user, login_required
 from app import db, firebase
 from app.main import bp
@@ -78,7 +78,6 @@ def upload():
 
         # 6. The files are deleted from the server.
         for filename in files:
-            current_app.logger.info("Deleting file: " + filename)
             os.remove(filename)
 
         # 7. The database is committed.
