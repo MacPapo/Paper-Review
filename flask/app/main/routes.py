@@ -6,7 +6,7 @@ from flask_login import current_user, login_required
 from app import db, firebase
 from app.main import bp
 from app.main.forms import UploadForm
-from app.models import PDF
+from app.models import PDF, Project, Version, Researcher
 from app.auth.crypt import Crypt
 from pathlib import Path
 @bp.before_request
@@ -21,7 +21,12 @@ def before_request():
 @bp.route("/index")
 @bp.route("/home")
 def index():
-    return render_template("index.html", title="Home")
+    latest_versions = []
+    if current_user.is_authenticated:
+        projects = Project.query.join(Researcher).filter_by(rsid = current_user.rsid).all()
+        for project in projects:
+            latest_versions.append(Version.query.join(Project).filter_by(pid = project.pid).first())
+    return render_template("index.html", title="Home", projects = latest_versions)
 
 
 @bp.route("/about")
@@ -75,6 +80,22 @@ def upload():
         # 5. The encrypted files's url is saved to the database.
         for pdf_url in pdf_urls:
             db.session.add(PDF(id=pdf_url[0], key=pdf_url[1]))
+
+        # 5.1 Create a project object
+        new_project = Project(rsid=current_user.rsid)
+        db.session.add(new_project)
+        db.session.commit()
+
+        new_version = Version(
+            version_number=1,
+            project_name=form.title.data,
+            project_description=form.description.data,
+            project_state="Sumbmitted",
+            pid = new_project.pid
+        )
+
+        db.session.add(new_version)
+        db.session.commit()
 
         # 6. The files are deleted from the server.
         for filename in files:

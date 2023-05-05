@@ -71,6 +71,24 @@ class Researcher(UserMixin, db.Model):
 
     def __repr__(self):
         return "<User {}>".format(self.rsid)
+    
+
+    
+
+class Project(db.Model):
+    pid = db.Column(db.Integer, primary_key=True)
+    rsid = db.Column(db.String(16), db.ForeignKey('researcher.rsid'))
+
+class Version(db.Model):
+    vid = db.Column(db.Integer, primary_key=True)
+    version_number = db.Column(db.Integer, nullable=False)
+    project_name = db.Column(db.String(64), nullable=False)
+    project_description = db.Column(db.Text, nullable=False)
+    project_state = db.Column(ENUM("Approved",
+                            "Sumbmitted",
+                            "Requires changes",
+                            "Not Approved", name="status_enum", create_type=False))
+    pid = db.Column(db.Integer, db.ForeignKey('project.pid'))
 
 
 @login.user_loader

@@ -7,11 +7,17 @@
             <div class="mb-3">
                 <form method="POST" enctype="multipart/form-data">
                     {{ form.hidden_tag() }}
-                    <div class="form-group">
+                    <div class="form-group mb-4">
+                        {{ form.title() }}
+                    </div>
+                    <div class="form-group mb-4">
+                        {{ form.description() }}
+                    </div>
+                    <div class="form-group mb-4">
                         <label for="{{ form.pdfs.id }}">PDF Files</label>
                         <input type="file" class="form-control" id="{{ form.pdfs.id }}" name="{{ form.pdfs.name }}" accept=".pdf" multiple>
                     </div>
-                    <button type="submit" class="btn btn-primary shadow">Submit</button>
+                    {{ form.submit() }}
                 </form>
             </div>
         </div>
