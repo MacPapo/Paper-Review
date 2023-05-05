@@ -2,6 +2,7 @@ version: "3.7"
 
 services:
   db:
+    container_name: paper_review_db
     image: postgres:latest
     restart: always
     volumes:
@@ -20,7 +21,27 @@ services:
     networks:
       - backnet
 
+  pgadmin:
+    container_name: paper_review_pgadmin
+    image: dpage/pgadmin4:latest
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: moonphase@paperreview.com
+      PGADMIN_DEFAULT_USER: moonphase
+      PGADMIN_DEFAULT_PASSWORD: eclipse
+      PGADMIN_SERVER_JSON_FILE: /pgadmin4/servers.json
+    ports:
+      - 5050:80
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+      - ./servers.json:/pgadmin4/servers.json
+    depends_on:
+      - db
+    networks:
+      - backnet
+
   app:
+    container_name: paper_review_app
     build:
       context: flask
       dockerfile: Dockerfile
@@ -36,6 +57,7 @@ services:
       - frontnet
 
   nginx:
+    container_name: paper_review_nginx
     image: nginx:latest
     restart: always
     volumes:
@@ -50,3 +72,6 @@ services:
 networks:
   backnet:
   frontnet:
+
+volumes:
+  pgadmin_data:
