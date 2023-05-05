@@ -5,3 +5,4 @@
 /flask/app/.DS_Store
 /flask/app/static/.DS_Store
 /flask/app/templates/.DS_Store
+/flask/migration/.DS_Store
