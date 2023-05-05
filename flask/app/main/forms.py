@@ -8,7 +8,7 @@ from wtforms import (
     SubmitField,
     DateField,
     RadioField,
-    MultipleFileField,
+    MultipleFileField
 )
 
 class UploadForm(FlaskForm):

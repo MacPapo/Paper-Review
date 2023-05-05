@@ -30,6 +30,7 @@ def create_app():
     migrate.init_app(app, db)
     login.init_app(app)
     bootstrap.init_app(app)
+    toolbar.init_app(app)
 
     from app.errors import bp as errors_bp
     app.register_blueprint(errors_bp)
