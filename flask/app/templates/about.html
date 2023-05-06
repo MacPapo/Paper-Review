@@ -2,8 +2,16 @@
 
 {% block content %}
 
-<h1>About page</h1>
-
-{% include '_dev_card.html' %}
+<section class="py-4 py-md-5 my-5">
+    <div class="container py-md-5">
+        <div class="row">
+            <div class="container">
+                <div class="main-body">
+                  {% include 'about_components/_dev_card.html' %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
 
 {% endblock %}

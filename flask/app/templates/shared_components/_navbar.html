@@ -10,12 +10,15 @@
         <div class="collapse navbar-collapse" id="navcol-1">
             <ul class="navbar-nav mx-auto">
                 <li class="nav-item"><a class="nav-link active" href="{{ url_for('main.index') }}">Home</a></li>
+            {% if current_user.is_anonymous %}
                 <li class="nav-item"><a class="nav-link active" href="{{ url_for('main.about') }}">About</a></li>
             </ul>
-            {% if current_user.is_anonymous %}
             <a class="btn btn-primary shadow" role="button" href="{{ url_for('auth.login') }}">Login</a>
             <a class="ms-2 btn btn-danger shadow" role="button" href="{{ url_for('auth.register') }}">Register</a>
             {% else %}
+                <li class="nav-item"><a class="nav-link active" href="{{ url_for('main.pdfs') }}">Pdfs</a></li>
+                <li class="nav-item"><a class="nav-link active" href="{{ url_for('main.about') }}">About</a></li>
+            </ul>
             <div class="dropdown">
                 <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1"
                     data-bs-toggle="dropdown" aria-expanded="false">

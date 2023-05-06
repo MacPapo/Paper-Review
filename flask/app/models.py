@@ -1,3 +1,4 @@
+import humanize
 from werkzeug.security import generate_password_hash, check_password_hash
 from hashlib import md5  # for gravatar
 from datetime import datetime
@@ -22,6 +23,10 @@ class User(UserMixin,db.Model):
     updated_at = db.Column(db.DateTime, default=datetime.utcnow)
     last_seen = db.Column(db.DateTime, default=datetime.utcnow)
 
+
+    def get_id(self):
+        return self.uid
+
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
 
@@ -36,16 +41,31 @@ class User(UserMixin,db.Model):
             digest, size, default, rating
         )
 
-    def __repr__(self):
-        return "<User {}>".format(self.uid)
-
+    # Utils
     def fullname(self):
         return self.first_name + " " + self.last_name
 
     def format_birth_date(self):
         return self.birthdate.strftime("%Y-%m-%d")
-    def get_id(self):
-        return self.uid
+
+    def humanize_natural(self, date):
+        return humanize.naturaltime(datetime.utcnow() - date)
+
+    def humanize_date(self, date):
+        return humanize.naturaldate(date)
+
+    def time_since_creation(self):
+        return self.humanize_date(self.created_at)
+
+    def time_since_update(self):
+        return self.humanize_natural(self.updated_at)
+
+    def time_since_last_seen(self):
+        return self.humanize_natural(self.last_seen)
+    # End Utils
+
+    def __repr__(self):
+        return "<User {}>".format(self.uid)
 
 class Researcher(UserMixin, db.Model):
     rsid = db.Column(db.String(16), db.ForeignKey("user.uid"), primary_key=True)
@@ -56,6 +76,7 @@ class Researcher(UserMixin, db.Model):
     def is_authenticated(self):
         return self.authenticated
 
+    # Utils
     def get_this_user(self):
         return (
             User.query.join(Researcher, User.uid == Researcher.rsid)
@@ -69,15 +90,23 @@ class Researcher(UserMixin, db.Model):
     def researcher_username(self):
         return self.get_this_user().username
 
+    def time_since_creation(self):
+        return self.get_this_user().time_since_creation()
+
+    def time_since_update(self):
+        return self.get_this_user().time_since_update()
+
+    def time_since_last_seen(self):
+        return self.get_this_user().time_since_last_seen()
+    # End Utils
+
     def __repr__(self):
         return "<User {}>".format(self.rsid)
-    
-
-    
 
 class Project(db.Model):
     pid = db.Column(db.Integer, primary_key=True)
     rsid = db.Column(db.String(16), db.ForeignKey('researcher.rsid'))
+
 
 class Version(db.Model):
     vid = db.Column(db.Integer, primary_key=True)
