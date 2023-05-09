@@ -10,6 +10,7 @@ from app.models import PDF, Project, Version, Researcher, PDFVersions
 from app.auth.crypt import Crypt
 from pathlib import Path
 
+
 @bp.before_request
 def before_request():
     if current_user.is_authenticated:
@@ -24,10 +25,16 @@ def before_request():
 def index():
     latest_versions = []
     if current_user.is_authenticated:
-        projects = Project.query.join(Researcher).filter_by(rsid = current_user.rsid).all()
+        projects = (
+            Project.query.join(Researcher).filter_by(rsid=current_user.rsid).all()
+        )
         for project in projects:
-            latest_versions.append(Version.query.join(Project).filter_by(pid = project.pid).first())
-    return render_template("index.html", title="Home", projects=latest_versions, len=len(latest_versions))
+            latest_versions.append(
+                Version.query.join(Project).filter_by(pid=project.pid).first()
+            )
+    return render_template(
+        "index.html", title="Home", projects=latest_versions, len=len(latest_versions)
+    )
 
 
 @bp.route("/about")
@@ -91,10 +98,10 @@ def upload():
             version_number=1,
             project_name=form.title.data,
             project_description=form.description.data,
-            project_state="Sumbmitted",
+            project_state="Submitted",
             pid=new_project.pid,
             created_at=datetime.now(),
-            updated_at=datetime.now()
+            updated_at=datetime.now(),
         )
 
         db.session.add(new_version)
@@ -103,8 +110,6 @@ def upload():
         # 5.2 cretate new PDFVersions objects
         for pdf_url in pdf_urls:
             db.session.add(PDFVersions(id=pdf_url[0], vid=new_version.vid))
-        
-        db.session.commit()
 
         # 6. The files are deleted from the server.
         for filename in files:

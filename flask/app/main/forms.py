@@ -1,15 +1,7 @@
 from flask_wtf import FlaskForm
-from wtforms.validators import ValidationError, DataRequired, Email, EqualTo, Length
-from wtforms import (
-    StringField,
-    TextAreaField,
-    PasswordField,
-    BooleanField,
-    SubmitField,
-    DateField,
-    RadioField,
-    MultipleFileField
-)
+from wtforms.validators import ValidationError, DataRequired
+from wtforms import StringField, TextAreaField, SubmitField, MultipleFileField
+
 
 class UploadForm(FlaskForm):
     title = StringField("Title", validators=[DataRequired()])

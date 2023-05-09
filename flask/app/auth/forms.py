@@ -12,7 +12,6 @@ from wtforms import (
     SubmitField,
     DateField,
     RadioField,
-    MultipleFileField,
 )
 
 
@@ -154,6 +153,7 @@ class RegistrationUserForm(FlaskForm):
                 raise ValueError()
         except (phonenumbers.phonenumberutil.NumberParseException, ValueError):
             raise ValidationError("Invalid phone number")
+
 
 class EditUserForm(FlaskForm):
     today = date.today()

@@ -1,15 +1,15 @@
-from sqlalchemy import create_engine, MetaData,text
-from sqlalchemy.engine import connection_memoize
 import humanize
 from werkzeug.security import generate_password_hash, check_password_hash
 from hashlib import md5  # for gravatar
 from datetime import datetime
 from flask_login import UserMixin
+from sqlalchemy import MetaData
 from sqlalchemy.dialects.postgresql import BYTEA, ENUM  # Import BYTEA for postgres
 from app import db, login
 
-class User(UserMixin,db.Model):
 
+class User(UserMixin, db.Model):
+    # General Data
     uid = db.Column(db.String(16), index=True, primary_key=True)
     username = db.Column(db.String(32), index=True, unique=True, nullable=False)
     first_name = db.Column(db.String(32))
@@ -21,10 +21,10 @@ class User(UserMixin,db.Model):
     nationality = db.Column(db.String(32))
     phone = db.Column(db.String(16))
 
+    # User Status
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow)
     last_seen = db.Column(db.DateTime, default=datetime.utcnow)
-
 
     def get_id(self):
         return self.uid
@@ -64,6 +64,7 @@ class User(UserMixin,db.Model):
 
     def time_since_last_seen(self):
         return self.humanize_natural(self.last_seen)
+
     # End Utils
 
     def __repr__(self):
@@ -71,6 +72,7 @@ class User(UserMixin,db.Model):
 
 
 class Researcher(UserMixin, db.Model):
+    # General Data
     rsid = db.Column(db.String(16), db.ForeignKey("user.uid"), primary_key=True)
 
     def get_id(self):
@@ -101,62 +103,77 @@ class Researcher(UserMixin, db.Model):
 
     def time_since_last_seen(self):
         return self.get_this_user().time_since_last_seen()
+
     # End Utils
 
     def __repr__(self):
         return "<User {}>".format(self.rsid)
-    
+
 
 class Project(db.Model):
+    # General Data
     pid = db.Column(db.Integer, primary_key=True)
-    rsid = db.Column(db.String(16), db.ForeignKey('researcher.rsid'))
+    rsid = db.Column(db.String(16), db.ForeignKey("researcher.rsid"))
 
 
 class Version(db.Model):
+    # General Data
     vid = db.Column(db.Integer, primary_key=True)
     version_number = db.Column(db.Integer, nullable=False)
     project_name = db.Column(db.String(64), nullable=False)
     project_description = db.Column(db.Text, nullable=False)
-    project_state = db.Column(ENUM("Approved",
-                            "Sumbmitted",
-                            "Requires changes",
-                            "Not Approved", name="status_enum", create_type=False))
-    pid = db.Column(db.Integer, db.ForeignKey('project.pid'))
+    project_state = db.Column(
+        ENUM(
+            "Approved",
+            "Submitted",
+            "Requires changes",
+            "Not Approved",
+            name="status_enum",
+            create_type=False,
+        )
+    )
+    pid = db.Column(db.Integer, db.ForeignKey("project.pid"))
+
+    # Project versione Status
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 
 class PDFVersions(db.Model):
-    id = db.Column(BYTEA, db.ForeignKey('pdf.id'), primary_key=True)
-    vid = db.Column(db.Integer, db.ForeignKey('version.vid'), primary_key=True)
+    # General Data
+    id = db.Column(BYTEA, db.ForeignKey("pdf.id"), primary_key=True)
+    vid = db.Column(db.Integer, db.ForeignKey("version.vid"), primary_key=True)
 
 
 class PDF(db.Model):
+    # General Data
     id = db.Column(BYTEA, primary_key=True)
     key = db.Column(BYTEA, nullable=False)
 
     def __repr__(self):
         return "<PDF {}>".format(self.id)
 
-      
+
 class UserV(UserMixin):
     def __init__(self):
-
         metadata = MetaData()
         metadata.reflect(bind=db.engine, views=True)
-        self.userview = metadata.tables['userv']
+        self.userview = metadata.tables["userv"]
 
-    def search_user(self,username):
-        query = self.userview.select().where(self.userview.c.username == username).fetch(1)
+    def search_user(self, username):
+        query = (
+            self.userview.select().where(self.userview.c.username == username).fetch(1)
+        )
         result = db.engine.connect().execute(query).first()
         self.id = result.uid
         return result
 
-    def check_password(self,result, password):
+    def check_password(self, result, password):
         return check_password_hash(result.password_hash, password)
 
     def get_id(self):
         return self.id
+
 
 @login.user_loader
 def load_researcher(rsid):
