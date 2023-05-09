@@ -6,7 +6,7 @@ from flask_login import current_user, login_required
 from app import db, firebase
 from app.main import bp
 from app.main.forms import UploadForm
-from app.models import PDF, Project, Version, Researcher
+from app.models import PDF, Project, Version, Researcher, PDFVersions
 from app.auth.crypt import Crypt
 from pathlib import Path
 
@@ -27,7 +27,7 @@ def index():
         projects = Project.query.join(Researcher).filter_by(rsid = current_user.rsid).all()
         for project in projects:
             latest_versions.append(Version.query.join(Project).filter_by(pid = project.pid).first())
-    return render_template("index.html", title="Home", projects = latest_versions)
+    return render_template("index.html", title="Home", projects=latest_versions, len=len(latest_versions))
 
 
 @bp.route("/about")
@@ -92,10 +92,18 @@ def upload():
             project_name=form.title.data,
             project_description=form.description.data,
             project_state="Sumbmitted",
-            pid = new_project.pid
+            pid=new_project.pid,
+            created_at=datetime.now(),
+            updated_at=datetime.now()
         )
 
         db.session.add(new_version)
+        db.session.commit()
+
+        # 5.2 cretate new PDFVersions objects
+        for pdf_url in pdf_urls:
+            db.session.add(PDFVersions(id=pdf_url[0], vid=new_version.vid))
+        
         db.session.commit()
 
         # 6. The files are deleted from the server.

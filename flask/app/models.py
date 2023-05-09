@@ -67,6 +67,7 @@ class User(UserMixin,db.Model):
     def __repr__(self):
         return "<User {}>".format(self.uid)
 
+
 class Researcher(UserMixin, db.Model):
     rsid = db.Column(db.String(16), db.ForeignKey("user.uid"), primary_key=True)
 
@@ -102,6 +103,7 @@ class Researcher(UserMixin, db.Model):
 
     def __repr__(self):
         return "<User {}>".format(self.rsid)
+    
 
 class Project(db.Model):
     pid = db.Column(db.Integer, primary_key=True)
@@ -118,11 +120,13 @@ class Version(db.Model):
                             "Requires changes",
                             "Not Approved", name="status_enum", create_type=False))
     pid = db.Column(db.Integer, db.ForeignKey('project.pid'))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 
-@login.user_loader
-def load_researcher(rsid):
-    return Researcher.query.get(rsid)
+class PDFVersions(db.Model):
+    id = db.Column(BYTEA, db.ForeignKey('pdf.id'), primary_key=True)
+    vid = db.Column(db.Integer, db.ForeignKey('version.vid'), primary_key=True)
 
 
 class PDF(db.Model):
@@ -131,3 +135,9 @@ class PDF(db.Model):
 
     def __repr__(self):
         return "<PDF {}>".format(self.id)
+
+
+@login.user_loader
+def load_researcher(rsid):
+    return Researcher.query.get(rsid)
+

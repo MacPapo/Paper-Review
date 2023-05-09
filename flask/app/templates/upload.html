@@ -5,22 +5,31 @@
     <div class="container py-md-5">
         <div class="row">
             <div class="mb-3">
-                <form method="POST" enctype="multipart/form-data">
+                <h2 class="display-8 fw-bold mb-2">Upload a new project</h2>
+                <p class="display-8 mb-5">Please provide a Title a Descriprion and as many PDFs you desire.</p>
+                <form method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
                     {{ form.hidden_tag() }}
                     <div class="form-group mb-4">
-                        {{ form.title() }}
+                        {{ form.title(class="form-control", placeholder="Title", required=True) }}
+                        <div class="invalid-feedback">
+                            Please provide a valid title.
+                        </div>
                     </div>
                     <div class="form-group mb-4">
-                        {{ form.description() }}
+                        {{ form.description(class="form-control", placeholder="Description", rows="7", required=True) }}
+                        <div class="invalid-feedback">
+                            Please provide a valid description.
+                        </div>
                     </div>
                     <div class="form-group mb-4">
                         <label for="{{ form.pdfs.id }}">PDF Files</label>
                         <input type="file" class="form-control" id="{{ form.pdfs.id }}" name="{{ form.pdfs.name }}" accept=".pdf" multiple>
                     </div>
-                    {{ form.submit() }}
+                    {{ form.submit(class="btn btn-primary") }}
                 </form>
             </div>
         </div>
     </div>
 </section>
+
 {% endblock %}
