@@ -47,6 +47,7 @@ class User(UserMixin,db.Model):
     def get_id(self):
         return self.uid
 
+
 class Researcher(UserMixin, db.Model):
     rsid = db.Column(db.String(16), db.ForeignKey("user.uid"), primary_key=True)
 
@@ -73,11 +74,10 @@ class Researcher(UserMixin, db.Model):
         return "<User {}>".format(self.rsid)
     
 
-    
-
 class Project(db.Model):
     pid = db.Column(db.Integer, primary_key=True)
     rsid = db.Column(db.String(16), db.ForeignKey('researcher.rsid'))
+
 
 class Version(db.Model):
     vid = db.Column(db.Integer, primary_key=True)
@@ -91,9 +91,9 @@ class Version(db.Model):
     pid = db.Column(db.Integer, db.ForeignKey('project.pid'))
 
 
-@login.user_loader
-def load_researcher(rsid):
-    return Researcher.query.get(rsid)
+class PDFTable(db.Model):
+    id = db.Column(BYTEA, db.ForeignKey('pdf.id'), primary_key=True)
+    vid = db.Column(db.Integer, db.ForeignKey('version.vid'), primary_key=True)
 
 
 class PDF(db.Model):
@@ -102,3 +102,9 @@ class PDF(db.Model):
 
     def __repr__(self):
         return "<PDF {}>".format(self.id)
+
+
+@login.user_loader
+def load_researcher(rsid):
+    return Researcher.query.get(rsid)
+

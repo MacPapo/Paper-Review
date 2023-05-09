@@ -6,9 +6,10 @@ from flask_login import current_user, login_required
 from app import db, firebase
 from app.main import bp
 from app.main.forms import UploadForm
-from app.models import PDF, Project, Version, Researcher
+from app.models import PDF, Project, Version, Researcher, PDFTable
 from app.auth.crypt import Crypt
 from pathlib import Path
+
 @bp.before_request
 def before_request():
     if current_user.is_authenticated:
@@ -95,6 +96,12 @@ def upload():
         )
 
         db.session.add(new_version)
+        db.session.commit()
+
+        # 5.2 cretate new PDFTable objects
+        for pdf_url in pdf_urls:
+            db.session.add(PDFTable(id=pdf_url[0], vid=new_version.vid))
+        
         db.session.commit()
 
         # 6. The files are deleted from the server.

@@ -13,6 +13,10 @@
                           <div class="col-md-6">
                             <h2>Your projects</h2>
                           </div>
+                        
+                          <div class="col-md-6">
+                            <a href="{{ url_for('main.upload') }}" class="btn btn-primary">New Project +</a>
+                          </div>
                           {% for project in projects %}
                             <div>
                                 <ul>
@@ -22,9 +26,6 @@
                                 </ul>
                             </div>
                             {% endfor %}
-                          <div class="col-md-6">
-                            <a href="{{ url_for('main.upload') }}" class="btn btn-primary">New Project +</a>
-                          </div>
                         </div>
                       </div>
                     {% else %}
