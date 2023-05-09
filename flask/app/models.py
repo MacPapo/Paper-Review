@@ -1,3 +1,5 @@
+from sqlalchemy import create_engine, MetaData,text
+from sqlalchemy.engine import connection_memoize
 import humanize
 from werkzeug.security import generate_password_hash, check_password_hash
 from hashlib import md5  # for gravatar
@@ -6,8 +8,8 @@ from flask_login import UserMixin
 from sqlalchemy.dialects.postgresql import BYTEA, ENUM  # Import BYTEA for postgres
 from app import db, login
 
-
 class User(UserMixin,db.Model):
+
     uid = db.Column(db.String(16), index=True, primary_key=True)
     username = db.Column(db.String(32), index=True, unique=True, nullable=False)
     first_name = db.Column(db.String(32))
@@ -131,3 +133,26 @@ class PDF(db.Model):
 
     def __repr__(self):
         return "<PDF {}>".format(self.id)
+class UserV(UserMixin):
+    def __init__(self):
+
+        metadata = MetaData()
+        metadata.reflect(bind=db.engine, views=True)
+        self.engine = db.engine
+        self.userview_table = metadata.tables['userv']
+        self.username = self.userview_table.columns['username']
+        self.rsid = self.userview_table.columns['rsid']
+        self.uid = self.userview_table.columns['uid']
+        self.password_hash = self.userview_table.columns['password_hash']
+        self.result = None
+
+    def search_user(self,username):
+        query = self.userview_table.select().where(self.username == username).fetch(1)
+        self.result = self.engine.connect().execute(query).fetchone()
+        return self.result
+
+    def check_password(self,result, password):
+        return check_password_hash(result.password_hash, password)
+
+    def get_id(self):
+        return self.result.uid

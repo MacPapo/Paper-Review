@@ -7,9 +7,9 @@ from werkzeug.urls import url_parse  # this is used to parse the url
 from werkzeug.utils import secure_filename
 from app import db
 from app.auth import bp
-from app.models import User, Researcher
+from app.models import User, Researcher, UserV
 from app.auth.forms import LoginUserForm, RegistrationUserForm, EditUserForm
-
+from sqlalchemy import text
 
 @bp.route("/login", methods=["GET", "POST"])
 def login():
@@ -17,26 +17,23 @@ def login():
         return redirect(url_for("main.index"))
     form = LoginUserForm()
     if form.validate_on_submit():
-        user = User.query.filter_by(username=form.username.data).first()
+        user = UserV()
+        user_data = user.search_user(form.username.data)
         # Non esiste utente con questo  username
-        if user is None or not user.check_password(form.password.data):
+        if user_data is None or not user.check_password(user_data,form.password.data):
             current_app.logger.info(
                 "Invalid username or password for user %s", form.username.data
             )
             flash("Invalid username or password")
             return redirect(url_for("auth.login"))
-        # Controllo se è un ricercatore o reviewer
-        researcher = (
-            User.query.join(Researcher, User.uid == Researcher.rsid)
-            .filter_by(rsid=user.get_id())
-            .first()
-        )
-        if researcher is None:
+         # Controllo se è un ricercatore o reviewer
+
+        if user_data.rsid is None:
             current_app.logger.info("User %s is not a researcher", form.username.data)
             return redirect(url_for("auth.login"))
         else:
             current_app.logger.info("User %s is a researcher", form.username.data)
-            login_user(researcher, remember=form.remember_me.data)
+            login_user(user, remember=form.remember_me.data)
             next_page = request.args.get("next")
             if not next_page or url_parse(next_page).netloc != "":
                 next_page = url_for("main.index")
@@ -74,6 +71,7 @@ def register():
         db.session.commit()
         db.session.add(Researcher(rsid=user.uid))
         db.session.commit()
+        create_userv()
         flash("Congratulations, you are now a registered user!")
         return redirect(url_for("auth.login"))
     return render_template("register.html", title="Register", form=form)
@@ -115,3 +113,12 @@ def edit_profile(username):
         form.sex.data = this_user.sex
         form.nationality.data = this_user.nationality
     return render_template('edit_profile.html', title='Edit Profile', form=form)
+
+def create_userv():
+    query = text("""
+    CREATE  MATERIALIZED VIEW IF NOT EXISTS userv AS
+    SELECT *
+    FROM public.user u left join public.researcher r on u.uid = r.rsid
+    """)
+    db.session.execute(query)
+    db.session.commit()
