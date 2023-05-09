@@ -3,13 +3,14 @@ from datetime import datetime
 from pathlib import Path
 from flask import render_template, flash, redirect, url_for, request, current_app
 from flask_login import current_user, login_user, logout_user, login_required
+from sqlalchemy.dialects import postgresql
 from werkzeug.urls import url_parse  # this is used to parse the url
 from werkzeug.utils import secure_filename
 from app import db
 from app.auth import bp
-from app.models import User, Researcher
+from app.models import User, Researcher, UserV
 from app.auth.forms import LoginUserForm, RegistrationUserForm, EditUserForm
-
+from sqlalchemy import text,Table
 
 @bp.route("/login", methods=["GET", "POST"])
 def login():
@@ -17,26 +18,23 @@ def login():
         return redirect(url_for("main.index"))
     form = LoginUserForm()
     if form.validate_on_submit():
-        user = User.query.filter_by(username=form.username.data).first()
-        # Non esiste utente con questo  username
-        if user is None or not user.check_password(form.password.data):
+        user = UserV()
+        user_data = user.search_user(form.username.data)
+        # Non esiste utentecon questo  username
+        if user_data is None or not user.check_password(user_data,form.password.data):
             current_app.logger.info(
                 "Invalid username or password for user %s", form.username.data
             )
             flash("Invalid username or password")
             return redirect(url_for("auth.login"))
-        # Controllo se è un ricercatore o reviewer
-        researcher = (
-            User.query.join(Researcher, User.uid == Researcher.rsid)
-            .filter_by(rsid=user.get_id())
-            .first()
-        )
-        if researcher is None:
+         # Controllo se è un ricercatore o reviewer
+
+        if user_data.rsid is None:
             current_app.logger.info("User %s is not a researcher", form.username.data)
             return redirect(url_for("auth.login"))
         else:
             current_app.logger.info("User %s is a researcher", form.username.data)
-            login_user(researcher, remember=form.remember_me.data)
+            login_user(user, remember=form.remember_me.data)
             next_page = request.args.get("next")
             if not next_page or url_parse(next_page).netloc != "":
                 next_page = url_for("main.index")
@@ -74,6 +72,8 @@ def register():
         db.session.commit()
         db.session.add(Researcher(rsid=user.uid))
         db.session.commit()
+        create_userv()
+        refresh_userv()
         flash("Congratulations, you are now a registered user!")
         return redirect(url_for("auth.login"))
     return render_template("register.html", title="Register", form=form)
@@ -107,6 +107,7 @@ def edit_profile(username):
         this_user.updated_at = datetime.now()
         db.session.commit()
         flash('Your changes have been saved.')
+        refresh_userv()
         return redirect(url_for('auth.profile', username=this_user.username))
     elif request.method == 'GET':
         form.first_name.data = this_user.first_name
@@ -115,3 +116,29 @@ def edit_profile(username):
         form.sex.data = this_user.sex
         form.nationality.data = this_user.nationality
     return render_template('edit_profile.html', title='Edit Profile', form=form)
+
+def create_userv():
+    #param query to be more safe against sql injection
+
+    table1 = Table('user', db.metadata, autoload_with=db.engine, schema = "public")
+    table2 = Table('researcher', db.metadata, autoload_with=db.engine,schema = "public")
+    query ="""
+    CREATE  MATERIALIZED VIEW IF NOT EXISTS userv AS
+    SELECT *
+    FROM public.{t1} u left join public.{t2} r on u.uid = r.rsid
+    """.format(t1=table1.name, t2=table2.name)
+
+    db.session.execute(text(query))
+    db.session.commit()
+
+def refresh_userv():
+    #param query to be more safe against sql injection
+
+    table1 = Table('user', db.metadata, autoload_with=db.engine, schema = "public")
+    table2 = Table('researcher', db.metadata, autoload_with=db.engine,schema = "public")
+    query ="""
+    REFRESH MATERIALIZED VIEW  userv
+    """.format(t1=table1.name, t2=table2.name)
+
+    db.session.execute(text(query))
+    db.session.commit()

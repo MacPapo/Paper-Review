@@ -5,7 +5,7 @@ from flask_migrate import Migrate
 from flask_login import LoginManager
 from app.modules.firebase import Firebase
 from flask_bootstrap import Bootstrap
-
+from sqlalchemy import text
 
 login = LoginManager()
 login.login_view = 'auth.login'
@@ -40,6 +40,7 @@ def create_app():
 
     from app.auth import bp as auth_bp
     app.register_blueprint(auth_bp, url_prefix='/auth')
+
     return app
 
 
