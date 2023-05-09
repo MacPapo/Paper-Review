@@ -27,7 +27,7 @@ def index():
         projects = Project.query.join(Researcher).filter_by(rsid = current_user.rsid).all()
         for project in projects:
             latest_versions.append(Version.query.join(Project).filter_by(pid = project.pid).first())
-    return render_template("index.html", title="Home", projects = latest_versions)
+    return render_template("index.html", title="Home", projects=latest_versions, len=len(latest_versions))
 
 
 @bp.route("/about")
@@ -92,7 +92,9 @@ def upload():
             project_name=form.title.data,
             project_description=form.description.data,
             project_state="Sumbmitted",
-            pid = new_project.pid
+            pid=new_project.pid,
+            created_at=datetime.now(),
+            updated_at=datetime.now()
         )
 
         db.session.add(new_version)

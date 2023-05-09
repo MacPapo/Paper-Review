@@ -89,6 +89,8 @@ class Version(db.Model):
                             "Requires changes",
                             "Not Approved", name="status_enum", create_type=False))
     pid = db.Column(db.Integer, db.ForeignKey('project.pid'))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 
 class PDFVersions(db.Model):

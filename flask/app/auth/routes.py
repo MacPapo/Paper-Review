@@ -68,7 +68,7 @@ def register():
             nationality=form.nationality.data,
             phone=form.phone.data,
             created_at=datetime.now(),
-            updated_at=datetime.now(),
+            updated_at=datetime.now()
         )
         user.set_password(form.password.data)
         db.session.add(user)
