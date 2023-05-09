@@ -6,7 +6,7 @@ from flask_login import current_user, login_required
 from app import db, firebase
 from app.main import bp
 from app.main.forms import UploadForm
-from app.models import PDF, Project, Version, Researcher, PDFTable
+from app.models import PDF, Project, Version, Researcher, PDFVersions
 from app.auth.crypt import Crypt
 from pathlib import Path
 
@@ -98,9 +98,9 @@ def upload():
         db.session.add(new_version)
         db.session.commit()
 
-        # 5.2 cretate new PDFTable objects
+        # 5.2 cretate new PDFVersions objects
         for pdf_url in pdf_urls:
-            db.session.add(PDFTable(id=pdf_url[0], vid=new_version.vid))
+            db.session.add(PDFVersions(id=pdf_url[0], vid=new_version.vid))
         
         db.session.commit()
 

@@ -91,7 +91,7 @@ class Version(db.Model):
     pid = db.Column(db.Integer, db.ForeignKey('project.pid'))
 
 
-class PDFTable(db.Model):
+class PDFVersions(db.Model):
     id = db.Column(BYTEA, db.ForeignKey('pdf.id'), primary_key=True)
     vid = db.Column(db.Integer, db.ForeignKey('version.vid'), primary_key=True)
 
