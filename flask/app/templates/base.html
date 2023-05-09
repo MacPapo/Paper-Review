@@ -1,48 +1,48 @@
 <!doctype html>
 <html lang="en">
 
-<head>
-    <meta charset="UTF-8" />
-    <meta name="description" content="App" />
-    <meta name="keywords" content="App" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    {% if title %}
-    <title>{{ title }} - project0</title>
-    {% else %}
-    <title>project0</title>
-    {% endif %}
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="description" content="App" />
+        <meta name="keywords" content="App" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-    <link rel="stylesheet" href="{{ url_for('static', filename='assets/bootstrap/css/bootstrap.min.css') }}">
-    <link rel="stylesheet"
-        href="https://fonts.googleapis.com/css?family=Raleway:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800&amp;display=swap">
+        {% if title %}
+        <title>{{ title }} - project0</title>
+        {% else %}
+        <title>project0</title>
+        {% endif %}
 
-    {% block styles %}
-    {% endblock %}
+        <link rel="stylesheet" href="{{ url_for('static', filename='assets/bootstrap/css/bootstrap.min.css') }}">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800&amp;display=swap">
 
-</head>
+        {% block styles %}
+        {% endblock %}
 
-<body>
-    {% include '_navbar.html' %}
+    </head>
 
-    {% with messages = get_flashed_messages() %}
-    {% if messages %}
-    <ul>
-        {% for message in messages %}
-        <li>{{ message }}</li>
-        {% endfor %}
-    </ul>
-    {% endif %}
-    {% endwith %}
+    <body>
+        {% include 'shared_components/_navbar.html' %}
 
-    {% block content %}{% endblock %}
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        <ul>
+            {% for message in messages %}
+            <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+        {% endwith %}
 
-    {% include '_footer.html' %}
+        {% block content %}{% endblock %}
 
-    <script src="{{ url_for('static', filename='assets/bootstrap/js/bootstrap.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='assets/js/startup-modern.js') }}"></script>
+        {% include 'shared_components/_footer.html' %}
 
-    {% block scripts %}
-    {% endblock %}
-</body>
+        <script src="{{ url_for('static', filename='assets/bootstrap/js/bootstrap.min.js') }}"></script>
+        <script src="{{ url_for('static', filename='assets/js/startup-modern.js') }}"></script>
+
+        {% block scripts %}
+        {% endblock %}
+    </body>
 
 </html>
