@@ -138,21 +138,16 @@ class UserV(UserMixin):
 
         metadata = MetaData()
         metadata.reflect(bind=db.engine, views=True)
-        self.engine = db.engine
-        self.userview_table = metadata.tables['userv']
-        self.username = self.userview_table.columns['username']
-        self.rsid = self.userview_table.columns['rsid']
-        self.uid = self.userview_table.columns['uid']
-        self.password_hash = self.userview_table.columns['password_hash']
-        self.result = None
+        self.userview = metadata.tables['userv']
 
     def search_user(self,username):
-        query = self.userview_table.select().where(self.username == username).fetch(1)
-        self.result = self.engine.connect().execute(query).fetchone()
-        return self.result
+        query = self.userview.select().where(self.userview.c.username == username).fetch(1)
+        result = db.engine.connect().execute(query).first()
+        self.id = result.uid
+        return result
 
     def check_password(self,result, password):
         return check_password_hash(result.password_hash, password)
 
     def get_id(self):
-        return self.result.uid
+        return self.id

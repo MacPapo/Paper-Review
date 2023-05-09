@@ -54,7 +54,11 @@ Almeno due pagine:
 
 # To do#
 
-
+- Usare gli ORM per gestire la consistenza dei dati durante le operazioni
+  (problemi legati alla sincronizzazione : es. with db.session.begin() as transaction:, LOCK TABLE per le view    )
+  o usare le transazioni
+- trigger,check constraints
+- gestire meglio le view e i refresh
 - visualizzare lista progetti del researchers
 - Form richiesta progetto
 - Form registrazione reviewers
