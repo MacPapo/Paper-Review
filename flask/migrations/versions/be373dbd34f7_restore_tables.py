@@ -1,8 +1,8 @@
-"""DB restore
+"""restore tables
 
-Revision ID: 12597d163a0b
+Revision ID: be373dbd34f7
 Revises: 
-Create Date: 2023-05-09 21:59:03.466016
+Create Date: 2023-05-10 11:04:02.069482
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision = '12597d163a0b'
+revision = 'be373dbd34f7'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -49,6 +49,13 @@ def upgrade():
     sa.ForeignKeyConstraint(['rsid'], ['user.uid'], ),
     sa.PrimaryKeyConstraint('rsid')
     )
+    op.create_table('reviewer',
+    sa.Column('rvid', sa.String(length=16), nullable=False),
+    sa.Column('pdf_id', postgresql.BYTEA(), nullable=False),
+    sa.ForeignKeyConstraint(['pdf_id'], ['pdf.id'], ),
+    sa.ForeignKeyConstraint(['rvid'], ['user.uid'], ),
+    sa.PrimaryKeyConstraint('rvid')
+    )
     op.create_table('project',
     sa.Column('pid', sa.Integer(), nullable=False),
     sa.Column('rsid', sa.String(length=16), nullable=True),
@@ -82,6 +89,7 @@ def downgrade():
     op.drop_table('pdf_versions')
     op.drop_table('version')
     op.drop_table('project')
+    op.drop_table('reviewer')
     op.drop_table('researcher')
     with op.batch_alter_table('user', schema=None) as batch_op:
         batch_op.drop_index(batch_op.f('ix_user_username'))

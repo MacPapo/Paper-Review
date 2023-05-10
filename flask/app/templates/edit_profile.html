@@ -1,6 +1,5 @@
 {% extends "base.html" %}
-{% from "form_components/_render_field.html" import render_field %}
-{% from "form_components/_render_sex_radio_buttons.html" import render_sex %}
+{% from "form_components/_render_field.html" import render_field, render_submit_button, render_radio_field %}
 
 {% block content %}
 <section class="py-4 py-md-5 my-5">
@@ -18,11 +17,9 @@
                     {{ render_field(form.last_name) }}
                     {{ render_field(form.birthdate) }}
                     {{ render_field(form.nationality) }}
-                    {{ render_sex(form.sex) }}
+                    {{ render_radio_field(form.sex) }}
 
-                    <div class="mb-5">
-                        {{ form.submit() }}
-                    </div>
+                    {{ render_submit_button(form.submit) }}
                 </form>
             </div>
         </div>

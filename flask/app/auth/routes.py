@@ -1,11 +1,19 @@
+import os
+from pathlib import Path
+from werkzeug.utils import secure_filename
 from datetime import datetime
 from flask import render_template, flash, redirect, url_for, request, current_app
 from flask_login import current_user, login_user, logout_user, login_required
 from werkzeug.urls import url_parse  # this is used to parse the url
-from app import db
-from app.auth import bp
-from app.models import User, Researcher, UserV
-from app.auth.forms import LoginUserForm, RegistrationUserForm, EditUserForm
+from app import db, firebase
+from app.auth import bp, crypt, logger
+from app.models import User, Researcher, Reviewer, UserV, PDF
+from app.auth.forms import (
+    LoginUserForm,
+    RegistrationResearcherForm,
+    RegistrationReviewerForm,
+    EditUserForm,
+)
 from sqlalchemy import text, Table
 
 
@@ -15,6 +23,10 @@ def login():
         return redirect(url_for("main.index"))
     form = LoginUserForm()
     if form.validate_on_submit():
+
+        create_userv()
+        refresh_userv()
+
         user = UserV()
         user_data = user.search_user(form.username.data)
         # Non esiste utentecon questo  username
@@ -45,14 +57,14 @@ def logout():
     return redirect(url_for("main.index"))
 
 
-@bp.route("/register", methods=["GET", "POST"])
-def register():
+@bp.route("/register/researcher", methods=["GET", "POST"])
+def register_researcher():
     if current_user.is_authenticated:
         return redirect(url_for("main.index"))
-    form = RegistrationUserForm()
+    form = RegistrationResearcherForm()
     if form.validate_on_submit():
         user = User(
-            uid=form.uid.data,
+            uid=form.uid.data.upper(),
             username=form.username.data,
             first_name=form.firstname.data,
             last_name=form.lastname.data,
@@ -65,15 +77,82 @@ def register():
             updated_at=datetime.now(),
         )
         user.set_password(form.password.data)
+
         db.session.add(user)
         db.session.commit()
+
         db.session.add(Researcher(rsid=user.uid))
         db.session.commit()
+
         create_userv()
         refresh_userv()
+
         flash("Congratulations, you are now a registered user!")
         return redirect(url_for("auth.login"))
-    return render_template("register.html", title="Register", form=form)
+    return render_template(
+        "registration/register_researcher.html", title="Register", form=form
+    )
+
+
+@bp.route("/register/reviewer", methods=["GET", "POST"])
+def register_reviewer():
+    if current_user.is_authenticated:
+        return redirect(url_for("main.index"))
+    form = RegistrationReviewerForm()
+    if form.validate_on_submit():
+        user = User(
+            uid=form.uid.data.upper(),
+            username=form.username.data,
+            first_name=form.firstname.data,
+            last_name=form.lastname.data,
+            birthdate=form.birthdate.data,
+            email=form.email.data,
+            sex=form.sex.data,
+            nationality=form.nationality.data,
+            phone=form.phone.data,
+            created_at=datetime.now(),
+            updated_at=datetime.now(),
+        )
+        user.set_password(form.password.data)
+
+        db.session.add(user)
+        db.session.commit()
+
+        logger.info("User %s created", user.username)
+
+
+        correct_file_name = lambda n: os.path.join(
+            "uploads",
+            Path(secure_filename(n)).stem
+            + datetime.now().strftime("-%Y-%m-%d-%H:%M:%S")
+            + ".pdf",
+        )
+
+        filename = correct_file_name(form.pdf.data.filename)
+        form.pdf.data.save(filename)
+
+        cr = crypt.Crypt()
+        pdf_cr = cr.encrypt_url(firebase.upload(filename))
+        db.session.add(PDF(id=pdf_cr[0], key=pdf_cr[1]))
+        db.session.commit()
+
+        logger.info("PDF %s created", filename)
+
+        os.remove(filename)
+
+        reviewer = Reviewer(rvid=user.uid, pdf_id=pdf_cr[0])
+        db.session.add(reviewer)
+        db.session.commit()
+        logger.info("Reviewer %s created", reviewer.rvid)
+
+        create_userv()
+        refresh_userv()
+
+        flash("Congratulations, you are now a registered user!")
+        return redirect(url_for("auth.login"))
+    return render_template(
+        "registration/register_reviewer.html", title="Register", form=form
+    )
 
 
 @bp.route("/user/<username>")

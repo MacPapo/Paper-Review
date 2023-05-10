@@ -9,7 +9,7 @@ class UploadForm(FlaskForm):
     pdfs = MultipleFileField("PDF Files")
     submit = SubmitField("Submit")
 
-    def validate_pdf_files(form, field):
+    def validate_pdf_files(self, field):
         for data in field.data:
             if not data.filename.endswith(".pdf"):
                 raise ValidationError("Only PDFs are allowed.")

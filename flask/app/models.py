@@ -8,6 +8,15 @@ from sqlalchemy.dialects.postgresql import BYTEA, ENUM  # Import BYTEA for postg
 from app import db, login
 
 
+class PDF(db.Model):
+    # General Data
+    id = db.Column(BYTEA, primary_key=True)
+    key = db.Column(BYTEA, nullable=False)
+
+    def __repr__(self):
+        return "<PDF {}>".format(self.id)
+
+
 class User(UserMixin, db.Model):
     # General Data
     uid = db.Column(db.String(16), index=True, primary_key=True)
@@ -110,6 +119,15 @@ class Researcher(UserMixin, db.Model):
         return "<User {}>".format(self.rsid)
 
 
+class Reviewer(UserMixin, db.Model):
+    # General Data
+    rvid = db.Column(db.String(16), db.ForeignKey("user.uid"), primary_key=True)
+    pdf_id = db.Column(BYTEA, db.ForeignKey("pdf.id"), nullable=False)
+
+    def get_id(self):
+        return self.rvid
+
+
 class Project(db.Model):
     # General Data
     pid = db.Column(db.Integer, primary_key=True)
@@ -145,15 +163,6 @@ class PDFVersions(db.Model):
     vid = db.Column(db.Integer, db.ForeignKey("version.vid"), primary_key=True)
 
 
-class PDF(db.Model):
-    # General Data
-    id = db.Column(BYTEA, primary_key=True)
-    key = db.Column(BYTEA, nullable=False)
-
-    def __repr__(self):
-        return "<PDF {}>".format(self.id)
-
-
 class UserV(UserMixin):
     def __init__(self):
         metadata = MetaData()
@@ -165,6 +174,8 @@ class UserV(UserMixin):
             self.userview.select().where(self.userview.c.username == username).fetch(1)
         )
         result = db.engine.connect().execute(query).first()
+        if result is None:
+            return None
         self.id = result.uid
         return result
 

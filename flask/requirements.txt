@@ -61,3 +61,4 @@ wtform-address==0.1.1
 WTForms==3.0.1
 WTForms-Components==0.10.5
 zope.interface==6.0
+codicefiscale==0.9

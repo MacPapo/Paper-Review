@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-
+{% from "form_components/_render_field.html" import render_multiple_file_field %}
 {% block content %}
 <section class="py-4 py-md-5 my-5">
     <div class="container py-md-5">
@@ -21,10 +21,8 @@
                             Please provide a valid description.
                         </div>
                     </div>
-                    <div class="form-group mb-4">
-                        <label for="{{ form.pdfs.id }}">PDF Files</label>
-                        <input type="file" class="form-control" id="{{ form.pdfs.id }}" name="{{ form.pdfs.name }}" accept=".pdf" multiple>
-                    </div>
+                    {{ render_multiple_file_field(form.pdfs) }}
+
                     {{ form.submit(class="btn btn-primary") }}
                 </form>
             </div>

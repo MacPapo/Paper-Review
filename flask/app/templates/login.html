@@ -1,6 +1,5 @@
 {% extends "base.html" %}
-{% from "form_components/_render_field.html" import render_field %}
-{% from "form_components/_redirect_auth.html" import render_redirect_auth %}
+{% from "form_components/_render_field.html" import render_field, render_submit_button %}
 
 {% block content %}
     <section class="py-4 py-md-5 my-5">
@@ -20,11 +19,8 @@
                             {{ form.remember_me() }}
                         </div>
 
-                        <div class="mb-5">
-                            {{ form.submit() }}
-                        </div>
+                        {{ render_submit_button(form.submit) }}
                     </form>
-                    {{ render_redirect_auth(desc=["Don't have an account?", "Sign up"], route='auth.register') }}
                 </div>
             </div>
         </div>

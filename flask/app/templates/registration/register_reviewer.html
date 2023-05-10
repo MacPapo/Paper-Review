@@ -1,7 +1,5 @@
 {% extends "base.html" %}
-{% from "form_components/_render_field.html" import render_field %}
-{% from "form_components/_render_sex_radio_buttons.html" import render_sex %}
-{% from "form_components/_redirect_auth.html" import render_redirect_auth %}
+{% from "form_components/_render_field.html" import render_field, render_submit_button, render_radio_field, render_file_field %}
 
 {% block styles %}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/16.0.4/css/intlTelInput.css">
@@ -16,8 +14,8 @@
                 <img class="img-fluid w-100" src="{{ url_for('static', filename='assets/img/illustrations/register.svg') }}">
             </div>
             <div class="col-md-5 col-xl-4 text-center text-md-start">
-                <h2 class="display-6 fw-bold mb-5"><span class="underline pb-1"><strong>Register</strong></span></h2>
-                <form method="post">
+                <h2 class="display-6 fw-bold mb-5"><span class="underline pb-1"><strong>Register as Reviewer</strong></span></h2>
+                <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
                     {{ form.hidden_tag() }}
 
                     {{ render_field(form.uid) }}
@@ -29,16 +27,14 @@
                     {{ render_field(form.phone) }}
                     {{ render_field(form.email) }}
 
-                    {{ render_sex(form.sex) }}
+                    {{ render_radio_field(form.sex) }}
 
                     {{ render_field(form.password) }}
                     {{ render_field(form.password2) }}
 
-                    <div class="mb-5">
-                        {{ form.submit() }}
-                    </div>
+                    {{ render_file_field(form.pdf) }}
 
-                    {{ render_redirect_auth(desc=["Have an account?", "Log in"], route='auth.login') }}
+                    {{ render_submit_button(form.submit) }}
                 </form>
             </div>
         </div>

@@ -14,7 +14,16 @@
                 <li class="nav-item"><a class="nav-link active" href="{{ url_for('main.about') }}">About</a></li>
             </ul>
             <a class="btn btn-primary shadow" role="button" href="{{ url_for('auth.login') }}">Login</a>
-            <a class="ms-2 btn btn-danger shadow" role="button" href="{{ url_for('auth.register') }}">Register</a>
+            <div class="dropdown ms-2">
+                <button class="btn btn-danger dropdown-toggle" type="button" id="dropdownMenuButton1"
+                    data-bs-toggle="dropdown" aria-expanded="false">
+                    Register
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                    <li><a class="dropdown-item" href="{{ url_for('auth.register_researcher') }}">As Researcher</a></li>
+                    <li><a class="dropdown-item" href="{{ url_for('auth.register_reviewer') }}">As Reviewer</a></li>
+                </ul>
+            </div>
             {% else %}
                 <li class="nav-item"><a class="nav-link active" href="{{ url_for('main.pdfs') }}">Pdfs</a></li>
                 <li class="nav-item"><a class="nav-link active" href="{{ url_for('main.about') }}">About</a></li>

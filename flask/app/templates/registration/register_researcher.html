@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% from "form_components/_render_field.html" import render_field, render_submit_button, render_radio_field %}
+
+{% block styles %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/16.0.4/css/intlTelInput.css">
+{% endblock %}
+
+
+{% block content %}
+<section class="py-4 py-md-5 my-5">
+    <div class="container py-md-5">
+        <div class="row">
+            <div class="col-md-6 text-center">
+                <img class="img-fluid w-100" src="{{ url_for('static', filename='assets/img/illustrations/register.svg') }}">
+            </div>
+            <div class="col-md-5 col-xl-4 text-center text-md-start">
+                <h2 class="display-6 fw-bold mb-5"><span class="underline pb-1"><strong>Register as Researcher</strong></span></h2>
+                <form method="post">
+                    {{ form.hidden_tag() }}
+
+                    {{ render_field(form.uid) }}
+                    {{ render_field(form.username) }}
+                    {{ render_field(form.firstname) }}
+                    {{ render_field(form.lastname) }}
+                    {{ render_field(form.birthdate) }}
+                    {{ render_field(form.nationality) }}
+                    {{ render_field(form.phone) }}
+                    {{ render_field(form.email) }}
+
+                    {{ render_radio_field(form.sex) }}
+
+                    {{ render_field(form.password) }}
+                    {{ render_field(form.password2) }}
+
+                    {{ render_submit_button(form.submit) }}
+                </form>
+            </div>
+        </div>
+    </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/16.0.4/js/intlTelInput.min.js"></script>
+<script>
+    var wtf_phone_field = document.getElementById('phone');
+    wtf_phone_field.style.position = 'absolute';
+    wtf_phone_field.style.top = '-9999px';
+    wtf_phone_field.style.left = '-9999px';
+    wtf_phone_field.parentElement.insertAdjacentHTML('beforeend', '<div><input type="tel" id="_phone" class="shadow-sm form-control"></div>');
+    var fancy_phone_field = document.getElementById('_phone');
+    var fancy_phone_iti = window.intlTelInput(fancy_phone_field, {
+        preferredCountries: ["it","us", "fr","de"],
+        separateDialCode: true,
+        utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/16.0.4/js/utils.js",
+    });
+    fancy_phone_iti.setNumber(wtf_phone_field.value);
+    fancy_phone_field.addEventListener('blur', function() {
+        wtf_phone_field.value = fancy_phone_iti.getNumber();
+    });
+</script>
+{% endblock %}
