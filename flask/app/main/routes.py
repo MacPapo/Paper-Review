@@ -38,8 +38,6 @@ def about():
     return render_template("about.html", title="About")
 
 
-
-
 @bp.route("/pdfs")
 @login_required  # this decorator will make sure that the user is logged in
 def pdfs():

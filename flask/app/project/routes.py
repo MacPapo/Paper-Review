@@ -1,4 +1,5 @@
 import os
+from urllib.parse import unquote
 from datetime import datetime
 from pathlib import Path
 from flask import render_template, flash, redirect, url_for
@@ -84,9 +85,9 @@ def create():
 
         new_version = Version(
             version_number=1,
-            project_name=form.title.data,
+            project_title=form.title.data,
             project_description=form.description.data,
-            project_state="Submitted",
+            project_status="Submitted",
             pid=new_project.pid,
             created_at=datetime.now(),
             updated_at=datetime.now(),
@@ -112,7 +113,7 @@ def create():
         # 9. The user is redirected to the home page.
         redirect(url_for("main.index"))
 
-    return render_template("upload.html", title="Upload", form=form)
+    return render_template("projects_components/create_project.html", title="Upload", form=form)
 
 
 @bp.route("/project/view/<int:vid>")
@@ -124,6 +125,23 @@ def view(vid):
         .first_or_404()
     )
 
+    pdfs_raw = (
+        PDF.query
+        .join(PDFVersions)
+        .filter_by(vid=vid)
+        .all()
+    )
+
+    crypt = Crypt()
+    pdfs = []
+    for pdf in pdfs_raw:
+        pdfs.append(crypt.decrypt(pdf.key, pdf.id))
+
+    retrive_file_name = lambda n: os.path.basename(unquote(Path(n).stem))[:-20]
+    names = []
+    for pdf in pdfs:
+        names.append(retrive_file_name(pdf))
+
     return render_template(
-        "view.html", title="View Project", version=version
+        "view.html", title="View Project", version=version, pdfs=zip(pdfs,names)
     )
