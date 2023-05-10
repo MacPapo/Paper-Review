@@ -6,3 +6,4 @@
 /flask/app/static/.DS_Store
 /flask/app/templates/.DS_Store
 /flask/migrations/.DS_Store
+/db/db_data/

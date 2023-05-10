@@ -25,12 +25,22 @@
                 </ul>
             </div>
             {% else %}
-                <li class="nav-item"><a class="nav-link active" href="{{ url_for('main.pdfs') }}">Pdfs</a></li>
-                <li class="nav-item"><a class="nav-link active" href="{{ url_for('main.about') }}">About</a></li>
+
+            <div class="dropdown">
+                <a class="btn dropdown-toggle" type="button" id="dropdownMenuButtonProjects"
+                   data-bs-toggle="dropdown" aria-expanded="false">
+                    Projects
+                </a>
+                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButtonProjects">
+                    <li><a class="dropdown-item" href="{{ url_for('project.projects') }}">Your Projects</a></li>
+                    <li><a class="dropdown-item" href="{{ url_for('project.create') }}">Add new Project</a></li>
+                </ul>
+            </div>
+            <li class="nav-item"><a class="nav-link active" href="{{ url_for('main.about') }}">About</a></li>
             </ul>
             <div class="dropdown">
                 <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1"
-                    data-bs-toggle="dropdown" aria-expanded="false">
+                        data-bs-toggle="dropdown" aria-expanded="false">
                     {{ current_user.researcher_fullname() }}
                 </button>
                 <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">

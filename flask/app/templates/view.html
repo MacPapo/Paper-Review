@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<section class="py-4 py-md-5 my-5">
+    <div class="container py-md-5">
+        <div class="row">
+            <div class="mb-3">
+                <h1 class="fw-bold">{{ version.project_title }}</h1>
+                <p class="lead">{{ version.project_description }}</p>
+                <p class="lead">{{ version.project_status }}</p>
+                <p class="lead">{{ version.time_since_creation() }}</p>
+                <p class="lead">{{ version.time_since_last_update() }}</p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

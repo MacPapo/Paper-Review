@@ -1,8 +1,8 @@
-"""restore tables
+"""Update tables
 
-Revision ID: be373dbd34f7
+Revision ID: d957375b988c
 Revises: 
-Create Date: 2023-05-10 11:04:02.069482
+Create Date: 2023-05-10 15:52:48.637124
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision = 'be373dbd34f7'
+revision = 'd957375b988c'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -65,9 +65,9 @@ def upgrade():
     op.create_table('version',
     sa.Column('vid', sa.Integer(), nullable=False),
     sa.Column('version_number', sa.Integer(), nullable=False),
-    sa.Column('project_name', sa.String(length=64), nullable=False),
+    sa.Column('project_title', sa.String(length=64), nullable=False),
     sa.Column('project_description', sa.Text(), nullable=False),
-    sa.Column('project_state', postgresql.ENUM('Approved', 'Submitted', 'Requires changes', 'Not Approved', name='status_enum'), nullable=True),
+    sa.Column('project_status', postgresql.ENUM('Approved', 'Submitted', 'Requires changes', 'Not Approved', name='status_enum'), nullable=True),
     sa.Column('pid', sa.Integer(), nullable=True),
     sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.Column('updated_at', sa.DateTime(), nullable=True),

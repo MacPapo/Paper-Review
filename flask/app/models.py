@@ -129,14 +129,17 @@ class Project(db.Model):
     pid = db.Column(db.Integer, primary_key=True)
     rsid = db.Column(db.String(16), db.ForeignKey("researcher.rsid"))
 
+    def get_id(self):
+        return self.pid
+
 
 class Version(db.Model):
     # General Data
     vid = db.Column(db.Integer, primary_key=True)
     version_number = db.Column(db.Integer, nullable=False)
-    project_name = db.Column(db.String(64), nullable=False)
+    project_title = db.Column(db.String(64), nullable=False)
     project_description = db.Column(db.Text, nullable=False)
-    project_state = db.Column(
+    project_status = db.Column(
         ENUM(
             "Approved",
             "Submitted",
