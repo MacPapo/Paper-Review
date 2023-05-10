@@ -17,7 +17,7 @@ class PDF(db.Model):
         return "<PDF {}>".format(self.id)
 
 
-class User(UserMixin, db.Model):
+class User(UserMixin,db.Model):
     # General Data
     uid = db.Column(db.String(16), index=True, primary_key=True)
     username = db.Column(db.String(32), index=True, unique=True, nullable=False)
@@ -35,8 +35,7 @@ class User(UserMixin, db.Model):
     updated_at = db.Column(db.DateTime, default=datetime.utcnow)
     last_seen = db.Column(db.DateTime, default=datetime.utcnow)
 
-    def get_id(self):
-        return self.uid
+
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -84,12 +83,7 @@ class Researcher(UserMixin, db.Model):
     # General Data
     rsid = db.Column(db.String(16), db.ForeignKey("user.uid"), primary_key=True)
 
-    def get_id(self):
-        return self.rsid
-
-    def is_authenticated(self):
-        return self.authenticated
-
+    
     # Utils
     def get_this_user(self):
         return (
@@ -98,10 +92,10 @@ class Researcher(UserMixin, db.Model):
             .first()
         )
 
-    def researcher_fullname(self):
+    def fullname(self):
         return self.get_this_user().fullname()
 
-    def researcher_username(self):
+    def username(self):
         return self.get_this_user().username
 
     def time_since_creation(self):
@@ -112,6 +106,9 @@ class Researcher(UserMixin, db.Model):
 
     def time_since_last_seen(self):
         return self.get_this_user().time_since_last_seen()
+
+    def get_id(self):
+        return self.rsid
 
     # End Utils
 
@@ -124,9 +121,31 @@ class Reviewer(UserMixin, db.Model):
     rvid = db.Column(db.String(16), db.ForeignKey("user.uid"), primary_key=True)
     pdf_id = db.Column(BYTEA, db.ForeignKey("pdf.id"), nullable=False)
 
+       # Utils
+    def get_this_user(self):
+        return (
+            User.query.join(Reviewer, User.uid == Reviewer.rvid)
+            .filter_by(rvid=self.rvid)
+            .first()
+        )
+
+    def fullname(self):
+        return self.get_this_user().fullname()
+
+    def username(self):
+        return self.get_this_user().username
+
+    def time_since_creation(self):
+        return self.get_this_user().time_since_creation()
+
+    def time_since_update(self):
+        return self.get_this_user().time_since_update()
+
+    def time_since_last_seen(self):
+        return self.get_this_user().time_since_last_seen()
+
     def get_id(self):
         return self.rvid
-
 
 class Project(db.Model):
     # General Data
@@ -171,21 +190,73 @@ class UserV(UserMixin):
 
     def search_user(self, username):
         query = (
-            self.userview.select().where(self.userview.c.username == username).fetch(1)
+            self.userview.select().where(self.userview.c.username == username)
         )
         result = db.engine.connect().execute(query).first()
         if result is None:
             return None
         self.id = result.uid
+        self.rsid = result.rsid
+        self.rvid = result.rvid
+        self.created_at = result.created_at
+        self.updated_at = result.updated_at
+        self.last_seen = result.last_seen
+        self.email = result.email
+        self.username = result.username
+        self.first_name = result.first_name
+        self.last_name = result.last_name
+        self.birthdate = result.birthdate
+        self.sex = result.sex
+        self.password_hash = result.password_hash
+        self.nationality = result.nationality
+        self.phone = result.phone
         return result
+
+    def gravatar(self, size=64, default="identicon", rating="g"):
+        # https://en.gravatar.com/site/implement/images/
+        # https://en.gravatar.com/site/implement/hash/
+        digest = md5(self.email.lower().encode("utf-8")).hexdigest()
+        return "https://www.gravatar.com/avatar/{}?s={}&d={}&r={}".format(
+            digest, size, default, rating
+        )
+
+    def fullname(self):
+        return "{} {}".format(self.first_name, self.last_name)
+
+    def format_birth_date(self):
+        return self.birthdate.strftime("%Y-%m-%d")
+
+
+    def humanize_natural(self, date):
+        return humanize.naturaltime(datetime.utcnow() - date)
+
+    def humanize_date(self, date):
+        return humanize.naturaldate(date)
 
     def check_password(self, result, password):
         return check_password_hash(result.password_hash, password)
 
+    def time_since_creation(self):
+        return self.humanize_date(self.created_at)
+
+    def time_since_update(self):
+        return self.humanize_natural(self.updated_at)
+
+    def time_since_last_seen(self):
+        return self.humanize_natural(self.last_seen)
+
     def get_id(self):
         return self.id
 
+    def get_user(self):
+        if(self.rsid is None):
+            return Reviewer.query.get(self.rvid)
+        else:
+            return Researcher.query.get(self.rsid)
 
 @login.user_loader
-def load_researcher(rsid):
-    return Researcher.query.get(rsid)
+def load_researcher(id):
+    result = Researcher.query.get(id)
+    if result is None:
+        return Reviewer.query.get(id)
+    return result

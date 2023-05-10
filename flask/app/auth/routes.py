@@ -14,7 +14,7 @@ from app.auth.forms import (
     RegistrationReviewerForm,
     EditUserForm,
 )
-from sqlalchemy import text, Table
+from sqlalchemy import text, Table, MetaData
 
 
 @bp.route("/login", methods=["GET", "POST"])
@@ -29,6 +29,7 @@ def login():
 
         user = UserV()
         user_data = user.search_user(form.username.data)
+        logger.info("dati:%s", user_data)
         # Non esiste utentecon questo  username
         if user_data is None or not user.check_password(user_data, form.password.data):
             current_app.logger.info(
@@ -38,16 +39,12 @@ def login():
             return redirect(url_for("auth.login"))
         # Controllo se è un ricercatore o reviewer
 
-        if user_data.rsid is None:
-            current_app.logger.info("User %s is not a researcher", form.username.data)
-            return redirect(url_for("auth.login"))
-        else:
-            current_app.logger.info("User %s is a researcher", form.username.data)
-            login_user(user, remember=form.remember_me.data)
-            next_page = request.args.get("next")
-            if not next_page or url_parse(next_page).netloc != "":
-                next_page = url_for("main.index")
-                return redirect(next_page)
+        user_session = user.get_user()
+        login_user(user_session, remember=form.remember_me.data)
+        next_page = request.args.get("next")
+        if not next_page or url_parse(next_page).netloc != "":
+            next_page = url_for("main.index")
+            return redirect(next_page)
     return render_template("login.html", title="Sign In", form=form)
 
 
@@ -158,13 +155,12 @@ def register_reviewer():
 @bp.route("/user/<username>")
 @login_required
 def profile(username):
-    # TODO: add a check to see if the user is a researcher or a reviewer
-    user = (
-        User.query.join(Researcher, User.uid == Researcher.rsid)
-        .filter(User.username == username)
-        .first_or_404()
-    )
-    user_type = "Researcher"
+    user = UserV()
+    result = user.search_user(username)
+    if   result.rsid is  not None:
+        user_type = "Researcher"
+    else:
+        user_type = "Reviewer"
     return render_template(
         "profile.html", title="profile", user=user, user_type=user_type
     )
@@ -200,12 +196,15 @@ def create_userv():
     view_name = "userv"
     table1 = Table("user", db.metadata, autoload_with=db.engine, schema="public")
     table2 = Table("researcher", db.metadata, autoload_with=db.engine, schema="public")
+    table3 = Table("reviewer", db.metadata, autoload_with=db.engine, schema="public")
     query = """
     CREATE  MATERIALIZED VIEW IF NOT EXISTS {view} AS
     SELECT *
     FROM public.{t1} u left join public.{t2} r on u.uid = r.rsid
+       left join public.{t3} rv on u.uid = rv.rvid
+
     """.format(
-        view=view_name, t1=table1.name, t2=table2.name
+        view=view_name, t1=table1.name, t2=table2.name,t3=table3.name
     )
 
     db.session.execute(text(query))
