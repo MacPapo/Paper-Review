@@ -1,8 +1,8 @@
-"""Update tables
+"""Table restore
 
-Revision ID: d957375b988c
+Revision ID: b09e617d0ea3
 Revises: 
-Create Date: 2023-05-10 15:52:48.637124
+Create Date: 2023-05-10 17:56:50.163093
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision = 'd957375b988c'
+revision = 'b09e617d0ea3'
 down_revision = None
 branch_labels = None
 depends_on = None

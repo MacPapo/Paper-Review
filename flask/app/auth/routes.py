@@ -29,8 +29,7 @@ def login():
 
         user = UserV()
         user_data = user.search_user(form.username.data)
-        logger.info("dati:%s", user_data)
-        # Non esiste utentecon questo  username
+        # Non esiste utente con questo username
         if user_data is None or not user.check_password(user_data, form.password.data):
             current_app.logger.info(
                 "Invalid username or password for user %s", form.username.data
