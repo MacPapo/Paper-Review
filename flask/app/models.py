@@ -10,6 +10,7 @@ from app.modules.humanizeme import (
     humanize_date as naturaldate,
 )
 from app.modules.truncate_strings import truncate_string
+from app.modules.helper_query import *
 
 
 class PDF(db.Model):
