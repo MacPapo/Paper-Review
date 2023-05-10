@@ -1,4 +1,6 @@
 {% extends "base.html" %}
+{% from "form_components/_render_field.html" import render_field %}
+{% from "form_components/_render_sex_radio_buttons.html" import render_sex %}
 
 {% block content %}
 <section class="py-4 py-md-5 my-5">
@@ -11,43 +13,19 @@
                 <h2 class="display-6 fw-bold mb-5"><span class="underline pb-1"><strong>Edit Profile</strong></span></h2>
                 <form action="" method="post">
                     {{ form.hidden_tag() }}
-                    <div class="mb-3">
-                        {{ form.first_name() }}
-                        {% for error in form.first_name.errors %}
-                        <span style="color: red;">[{{ error }}]</span>
-                        {% endfor %}
-                    </div>
-                    <div class="mb-3">
-                        {{ form.last_name() }}
-                        {% for error in form.last_name.errors %}
-                        <span style="color: red;">[{{ error }}]</span>
-                        {% endfor %}
-                    </div>
-                    <div class="mb-3">
-                        {{ form.birthdate() }}
-                        {% for error in form.birthdate.errors %}
-                        <span style="color: red;">[{{ error }}]</span>
-                        {% endfor %}
-                    </div>
-                    <div class="mb-3">
-                        {{ form.nationality() }}
-                        {% for error in form.nationality.errors %}
-                        <span style="color: red;">[{{ error }}]</span>
-                        {% endfor %}
-                    </div>
-                    <div class="mb-3">
-                        {{ form.sex(class="shadow-sm form-control") }}
-                        {% for error in form.sex.errors %}
-                        <span style="color: red;">[{{ error }}]</span>
-                        {% endfor %}
-                    </div>
+
+                    {{ render_field(form.first_name) }}
+                    {{ render_field(form.last_name) }}
+                    {{ render_field(form.birthdate) }}
+                    {{ render_field(form.nationality) }}
+                    {{ render_sex(form.sex) }}
+
                     <div class="mb-5">
                         {{ form.submit() }}
                     </div>
                 </form>
             </div>
         </div>
-    </div>
     </div>
 </section>
 {% endblock %}

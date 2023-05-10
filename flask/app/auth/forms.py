@@ -34,7 +34,7 @@ class LoginUserForm(FlaskForm):
             "size": "32",
         },
     )
-    remember_me = BooleanField("Remember Me")
+    remember_me = BooleanField("Remember me")
     submit = SubmitField("Sign In", render_kw={"class": "btn btn-primary"})
 
 
@@ -49,7 +49,7 @@ class RegistrationUserForm(FlaskForm):
     ).date()
 
     uid = StringField(
-        "Username",
+        "User ID",
         validators=[DataRequired(), Length(min=16, max=16)],
         render_kw={
             "class": "shadow-sm form-control",
@@ -58,7 +58,7 @@ class RegistrationUserForm(FlaskForm):
         },
     )
     username = StringField(
-        "User Name",
+        "Username",
         validators=[DataRequired(), Length(min=6, max=32)],
         render_kw={
             "class": "shadow-sm form-control",
@@ -98,11 +98,18 @@ class RegistrationUserForm(FlaskForm):
             "size": 64,
         },
     )
+
+
     sex = RadioField(
         "Sex",
         choices=[("M", "M"), ("F", "F"), ("Other", "Other")],
+        render_kw={
+            "class": "form-check-input",
+        },
         validators=[DataRequired()],
     )
+
+
     nationality = CountrySelectField(
         default="IT", render_kw={"class": "shadow-sm form-control"}
     )

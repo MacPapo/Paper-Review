@@ -1,4 +1,6 @@
 {% extends "base.html" %}
+{% from "form_components/_render_field.html" import render_field %}
+{% from "form_components/_redirect_auth.html" import render_redirect_auth %}
 
 {% block content %}
     <section class="py-4 py-md-5 my-5">
@@ -7,31 +9,22 @@
                 <div class="col-md-6 text-center"><img class="img-fluid w-100" src="{{ url_for('static', filename='assets/img/illustrations/login.svg') }}"></div>
                 <div class="col-md-5 col-xl-4 text-center text-md-start">
                     <h2 class="display-6 fw-bold mb-5"><span class="underline pb-1"><strong>Login</strong><br></span></h2>
-                    <form action="" method="post" novalidate>
+                    <form action="" method="post" class="needs-validation" novalidate>
                         {{ form.hidden_tag() }}
+
+                        {{ render_field(form.username) }}
+                        {{ render_field(form.password) }}
+
                         <div class="mb-3">
-                            {{ form.username() }}
-                            {% for error in form.username.errors %}
-                            <span style="color: red;">[{{ error }}]</span>
-                            {% endfor %}
+                            {{ form.remember_me.label }}
+                            {{ form.remember_me() }}
                         </div>
-                        <div class="mb-3">
-                            {{ form.password() }}
-                            {% for error in form.password.errors %}
-                            <span style="color: red;">[{{ error }}]</span>
-                            {% endfor %}
-                        </div>
-                        <p>{{ form.remember_me() }} {{ form.remember_me.label }}</p>
+
                         <div class="mb-5">
                             {{ form.submit() }}
                         </div>
                     </form>
-                    <p class="text-muted">Have an account? <a href="{{ url_for('auth.register') }}">Register&nbsp;<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icon-tabler-arrow-narrow-right">
-                                    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                                    <line x1="5" y1="12" x2="19" y2="12"></line>
-                                    <line x1="15" y1="16" x2="19" y2="12"></line>
-                                    <line x1="15" y1="8" x2="19" y2="12"></line>
-                                </svg></a>&nbsp;</p>
+                    {{ render_redirect_auth(desc=["Don't have an account?", "Sign up"], route='auth.register') }}
                 </div>
             </div>
         </div>

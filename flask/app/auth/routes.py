@@ -118,14 +118,15 @@ def edit_profile(username):
 
 def create_userv():
     # param query to be more safe against sql injection
+    view_name = "userv"
     table1 = Table("user", db.metadata, autoload_with=db.engine, schema="public")
     table2 = Table("researcher", db.metadata, autoload_with=db.engine, schema="public")
     query = """
-    CREATE  MATERIALIZED VIEW IF NOT EXISTS userv AS
+    CREATE  MATERIALIZED VIEW IF NOT EXISTS {view} AS
     SELECT *
     FROM public.{t1} u left join public.{t2} r on u.uid = r.rsid
     """.format(
-        t1=table1.name, t2=table2.name
+        view=view_name, t1=table1.name, t2=table2.name
     )
 
     db.session.execute(text(query))
@@ -134,13 +135,11 @@ def create_userv():
 
 def refresh_userv():
     # param query to be more safe against sql injection
-    table1 = Table("user", db.metadata, autoload_with=db.engine, schema="public")
-    table2 = Table("researcher", db.metadata, autoload_with=db.engine, schema="public")
-
+    view_table = Table("userv", db.metadata, autoload_with=db.engine, schema="public")
     query = """
-    REFRESH MATERIALIZED VIEW  userv
+    REFRESH MATERIALIZED VIEW {view}
     """.format(
-        t1=table1.name, t2=table2.name
+        view=view_table.name
     )
 
     db.session.execute(text(query))
