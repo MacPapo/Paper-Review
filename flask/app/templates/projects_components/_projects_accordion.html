@@ -1,0 +1,72 @@
+{% macro render_status_bedge(status) %}
+
+    {% if status == 'Approved' %}
+        <span class="badge text-bg-success">{{ status }}</span>
+    {% elif status == 'Submitted' %}
+        <span class="badge text-bg-primary">{{ status }}</span>
+    {% elif status == 'Requires changes' %}
+        <span class="badge text-bg-warning">{{ status }}</span>
+    {% elif status == 'Not Approved' %}
+        <span class="badge text-bg-danger">{{ status }}</span>
+    {% endif %}
+
+{% endmacro %}
+
+{% macro render_popover(desc, x) %}
+<button type="button" class="btn btn-light border" data-bs-container="body" data-bs-toggle="popover" data-bs-trigger="hover focus" data-bs-placement="top" data-bs-content="{{ desc }}">
+    {{ x }}
+</button>
+{% endmacro %}
+
+{% macro render_accordion_body(x) %}
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-6">
+            {{ render_popover('Time since creation', x.time_since_creation()) }}
+        </div>
+        <div class="col-md-6">
+            {{ render_popover('Time since last update', x.time_since_update()) }}
+        </div>
+    </div>
+    <div class="row my-5">
+        <div class="col-md-12">
+            {{ x.truncate_desc() }}
+        </div>
+    </div>
+</div>
+
+{% endmacro %}
+
+{% macro render_accordion(x) %}
+
+<div class="accordion-item border">
+    <h2 class="accordion-header">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapse{{ x.pid }}" aria-expanded="false" aria-controls="flush-collapse{{ x.pid }}">
+            {{ x.project_name }} &nbsp;{{ render_status_bedge(x.project_state) }}
+        </button>
+    </h2>
+    <div id="flush-collapse{{ x.pid }}" class="accordion-collapse collapse" data-bs-parent="#accordionFlushProject">
+        <div class="accordion-body" style="overflow-wrap: break-word;">
+            {{ render_accordion_body(x) }}
+        </div>
+        <div class="btn-group" role="group" aria-label="Actions">
+            <button type="button" class="btn btn-primary">View</button>
+            <button type="button" class="btn btn-warning">Edit</button>
+            <button type="button" class="btn btn-danger">Delete</button>
+        </div>
+    </div>
+</div>
+
+{% endmacro %}
+
+
+{% macro render_accordions(field) %}
+
+<div class="accordion accordion-flush" id="accordionFlushProject">
+    {% for x in field %}
+        {{ render_accordion(x) }}
+    {% endfor %}
+</div>
+
+{% endmacro %}

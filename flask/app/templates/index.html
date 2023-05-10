@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% from "projects_components/_projects_accordion.html" import render_accordions %}
 
 {% block content %}
 <header class="pt-5">
@@ -31,27 +32,10 @@
                             <!-- For Spacing -->
                         <div class="mx-auto" style="height: 25px;"></div>
                         {% else %}
-                        <table class="table">
-                            <thead>
-                              <tr>
-                                <th scope="col">Project ID</th>
-                                <th scope="col">Project name</th>
-                                <th scope="col">Status</th>
-                                <th scope="col">Last Updated</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                                {% for project in projects %}
-                                <tr>
-                                    <th scope="row">{{ project.pid }}</th>
-                                    <td>{{ project.project_name }}</td>
-                                    <td>{{ project.project_state }}</td>
-                                    <td>{{ project.updated_at.strftime("%m/%d/%Y, %H:%M:%S") }}</td>
-                                  </tr>
-                                {% endfor %}
-                            </tbody>
-                          </table>
-                       
+
+                        {{ render_accordions(projects) }}
+
+
                         <!-- For Spacing -->
                         <div class="mx-auto" style="height: 100px;"></div>
 
@@ -63,11 +47,19 @@
                         <div class="text-center position-relative"><img class="img-fluid" src="{{ url_for('static', filename='assets/img/illustrations/meeting.svg') }}" style="width: 800px;"></div>
                     </div>
                     <h1 class="display-4 fw-bold mb-5">Welcome to Project0</span>.</h1>
-                    <p class="fs-5 text-muted mb-5">Welcome!Take a tour of our site</p>
+                    <p class="fs-5 text-muted mb-5">Welcome! Take a tour of our site</p>
                     {% endif %}
                 </div>
             </div>
         </div>
     </div>
 </header>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script type="text/javascript">
+const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]')
+const popoverList = [...popoverTriggerList].map(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl))
+</script>
 {% endblock %}

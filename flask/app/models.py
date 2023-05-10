@@ -1,4 +1,3 @@
-import humanize
 from werkzeug.security import generate_password_hash, check_password_hash
 from hashlib import md5  # for gravatar
 from datetime import datetime
@@ -6,6 +5,8 @@ from flask_login import UserMixin
 from sqlalchemy import MetaData
 from sqlalchemy.dialects.postgresql import BYTEA, ENUM  # Import BYTEA for postgres
 from app import db, login
+from app.modules.humanizeme import humanize_natural as naturaltime, humanize_date as naturaldate
+from app.modules.truncate_strings import truncate_string
 
 
 class PDF(db.Model):
@@ -59,20 +60,15 @@ class User(UserMixin, db.Model):
     def format_birth_date(self):
         return self.birthdate.strftime("%Y-%m-%d")
 
-    def humanize_natural(self, date):
-        return humanize.naturaltime(datetime.utcnow() - date)
-
-    def humanize_date(self, date):
-        return humanize.naturaldate(date)
-
     def time_since_creation(self):
-        return self.humanize_date(self.created_at)
+        return naturaldate(self.created_at)
 
     def time_since_update(self):
-        return self.humanize_natural(self.updated_at)
+        return naturaltime(self.updated_at)
 
     def time_since_last_seen(self):
-        return self.humanize_natural(self.last_seen)
+        return naturaltime(self.last_seen)
+
 
     # End Utils
 
@@ -156,6 +152,15 @@ class Version(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow)
 
+
+    def time_since_creation(self):
+        return naturaldate(self.created_at)
+
+    def time_since_update(self):
+        return naturaltime(self.updated_at)
+
+    def truncate_desc(self):
+        return truncate_string(text=self.project_description, length=200)
 
 class PDFVersions(db.Model):
     # General Data

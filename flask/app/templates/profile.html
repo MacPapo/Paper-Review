@@ -6,11 +6,6 @@
         <div class="row">
             <div class="container">
                 <div class="main-body">
-                    <ul>
-                        <li>CRAETED: {{ user.time_since_creation() }}</li>
-                        <li>UPDATED: {{ user.time_since_update() }}</li>
-                        <li>LAST SEEN: {{ user.time_since_last_seen() }}</li>
-                    </ul>
                     <div class="row gutters-sm">
                         <div class="col-md-4 mb-3">
                             {% include 'profile_components/_profile_avatar.html' %}
