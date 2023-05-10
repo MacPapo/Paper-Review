@@ -21,13 +21,24 @@ def before_request():
 def index():
     latest_versions = []
     if current_user.is_authenticated:
-        projects = (
-            Project.query.join(Researcher).filter_by(rsid=current_user.rsid).all()
-        )
-        for project in projects:
-            latest_versions.append(
-                Version.query.join(Project).filter_by(pid=project.pid).first()
+        id = current_user.get_id()
+        result = Researcher.query.filter_by(rsid=id).first()
+        if result is None:
+            projects = (
+                db.session.query(Project).all()
+                )
+            for project in projects:
+                latest_versions.append(
+                    Version.query.join(Project).filter_by(pid=project.pid).first()
+                )
+        else:
+            projects = (
+                Project.query.join(Researcher).filter_by(rsid=current_user.rsid).all()
             )
+            for project in projects:
+                latest_versions.append(
+                    Version.query.join(Project).filter_by(pid=project.pid).first()
+                )
     return render_template(
         "index.html", title="Home", projects=latest_versions, len=len(latest_versions)
     )
