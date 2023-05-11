@@ -11,7 +11,6 @@
             <ul class="navbar-nav mx-auto">
                 <li class="nav-item"><a class="nav-link active" href="{{ url_for('main.index') }}">Home</a></li>
             {% if current_user.is_anonymous %}
-                <li class="nav-item"><a class="nav-link active" href="{{ url_for('main.about') }}">About</a></li>
             </ul>
             <a class="btn btn-primary shadow" role="button" href="{{ url_for('auth.login') }}">Login</a>
             <div class="dropdown ms-2">
@@ -26,6 +25,7 @@
             </div>
             {% else %}
 
+            {% if current_user.type == "researcher" %}
             <div class="dropdown">
                 <a class="btn dropdown-toggle" type="button" id="dropdownMenuButtonProjects"
                    data-bs-toggle="dropdown" aria-expanded="false">
@@ -36,12 +36,23 @@
                     <li><a class="dropdown-item" href="{{ url_for('project.create') }}">Add new Project</a></li>
                 </ul>
             </div>
+            {% else %}
+            <div class="dropdown">
+                <a class="btn dropdown-toggle" type="button" id="dropdownMenuButtonProjects"
+                   data-bs-toggle="dropdown" aria-expanded="false">
+                    Projects
+                </a>
+                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButtonProjects">
+                    <li><a class="dropdown-item" href="{{ url_for('project.projects') }}">All Projects</a></li>
+                </ul>
+            </div>
+            {% endif %}
             <li class="nav-item"><a class="nav-link active" href="{{ url_for('main.about') }}">About</a></li>
             </ul>
             <div class="dropdown">
                 <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1"
                     data-bs-toggle="dropdown" aria-expanded="false">
-                    {{ current_user.first_name }}
+                    {{ current_user.username }}
                 </button>
                 <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
                     <li><a class="dropdown-item" href="{{ url_for('auth.profile', username=current_user.username) }}">Profile</a></li>

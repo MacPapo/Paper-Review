@@ -10,6 +10,12 @@ from app.modules.humanizeme import (
 )
 from app.modules.truncate_strings import truncate_string
 
+pdf_version = db.Table(
+    "pdf_version",
+    db.Column("pdf_id", BYTEA, db.ForeignKey("pdf.id")),
+    db.Column("version_id", db.Integer, db.ForeignKey("version.vid")),
+)
+
 
 class PDF(db.Model):
     __tablename__ = "pdf"
@@ -20,7 +26,7 @@ class PDF(db.Model):
 
     # PDF relation to Reviewer
     reviewer = db.relationship("Reviewer", back_populates="pdf", uselist=False)
-    pdfversions = db.relationship("PDFVersion", backref="pdf", lazy=True)
+
     def __repr__(self):
         return "<PDF {}>".format(self.id)
 
@@ -34,15 +40,20 @@ class User(UserMixin, db.Model):
     birthdate = db.Column(db.Date)
     email = db.Column(db.String(120), index=True, unique=True)
     password_hash = db.Column(db.String(128))
-    sex = db.Column(ENUM("M", "F", "Other", name="gender_enum", create_type=False), nullable=False)
+    sex = db.Column(
+        ENUM("M", "F", "Other", name="gender_enum", create_type=False), nullable=False
+    )
     nationality = db.Column(db.String(32))
     phone = db.Column(db.String(16))
     department = db.Column(db.String(50))
-    type = db.Column(ENUM("researcher", "reviewer", name="user_type", create_type=False), nullable=False)
+    type = db.Column(
+        ENUM("researcher", "reviewer", name="user_type", create_type=False),
+        nullable=False,
+    )
 
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow)
-    last_seen = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow())
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow())
+    last_seen = db.Column(db.DateTime, default=datetime.utcnow())
 
     __mapper_args__ = {
         "polymorphic_identity": "user",
@@ -87,13 +98,10 @@ class User(UserMixin, db.Model):
 
 class Researcher(User):
     __tablename__ = "researcher"
-    rsid = db.Column(db.String(16), db.ForeignKey('user.uid'), primary_key=True)
-
+    rsid = db.Column(db.String(16), db.ForeignKey("user.uid"), primary_key=True)
     projects = db.relationship("Project", backref="researcher", lazy=True)
 
-    __mapper_args__ = {
-        "polymorphic_identity": "researcher"
-    }
+    __mapper_args__ = {"polymorphic_identity": "researcher"}
 
     def get_id(self):
         return self.rsid
@@ -101,7 +109,7 @@ class Researcher(User):
     # End Utils
 
     def __repr__(self):
-        return "<User {}>".format(self.rsid)
+        return "<Researcher {}>".format(self.rsid)
 
 
 class Reviewer(User):
@@ -125,11 +133,15 @@ class Reviewer(User):
 
 
 class Project(db.Model):
+    __tablename__ = "project"
+
     # General Data
     pid = db.Column(db.Integer, primary_key=True)
     rsid = db.Column(db.String(16), db.ForeignKey("researcher.rsid"))
 
+    # Project relation to Version
     versions = db.relationship("Version", backref="project", lazy=True)
+
     def get_id(self):
         return self.rsid
 
@@ -152,11 +164,11 @@ class Version(db.Model):
     )
     pid = db.Column(db.Integer, db.ForeignKey("project.pid"))
 
-    pdfversions = db.relationship("PDFVersions", backref="version", lazy=True)
+    contains = db.relationship("PDF", secondary=pdf_version, backref="version", lazy=True)
 
     # Project versione Status
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow())
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow())
 
     def time_since_creation(self):
         return naturaldate(self.created_at)
@@ -166,12 +178,6 @@ class Version(db.Model):
 
     def truncate_desc(self):
         return truncate_string(text=self.project_description, length=200)
-
-
-class PDFVersions(db.Model):
-    # General Data
-    id = db.Column(BYTEA, db.ForeignKey("pdf.id"), primary_key=True)
-    vid = db.Column(db.Integer, db.ForeignKey("version.vid"), primary_key=True)
 
 
 @login.user_loader

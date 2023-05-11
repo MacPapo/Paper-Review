@@ -11,6 +11,7 @@
                     
                     <h1 class="display-4 fw-bold mb-5">Welcome &nbsp;<span class="underline">{{ current_user.fullname() }}</span>.</h1>
 
+                    {% if current_user.type == "researcher" %}
                     <!-- For Spacing -->
                     <div class="mx-auto" style="height: 25px;"></div>
 
@@ -42,6 +43,9 @@
                         {% endif %}
 
                       </div>
+                      {% else %}
+                      <h2 class="display-4 fw-bold mb-5">Suca</span>.</h2>
+                      {% endif %}
                     {% else %}
                     <div class="col-12 col-lg-10 mx-auto">
                         <div class="text-center position-relative"><img class="img-fluid" src="{{ url_for('static', filename='assets/img/illustrations/meeting.svg') }}" style="width: 800px;"></div>

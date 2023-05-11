@@ -5,10 +5,10 @@
              class="rounded-circle shadow" width="150">
         <div class="mt-3">
           <h4>{{ user.fullname() }}</h4>
-          <p class="text-secondary mb-1">{{ user_type }}</p>
+          <p class="text-secondary mb-1">{{ user.type }}</p>
           <p class="text-muted font-size-sm">{{ user.uid }}</p>
           <button class="btn btn-primary">Follow</button>
-          <button class="btn btn-outline-primary" onclick="location.href='{{ url_for('auth.edit_profile', username=current_user.username() ) }}'">
+          <button class="btn btn-outline-primary" onclick="location.href='{{ url_for('auth.edit_profile', username=current_user.username ) }}'">
             Edit
           </button>
         </div>

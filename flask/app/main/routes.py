@@ -18,29 +18,21 @@ def before_request():
 @bp.route("/index")
 @bp.route("/home")
 def index():
-    latest_versions = []
     if current_user.is_authenticated:
-        id = current_user.get_id()
-        result = Researcher.query.filter_by(rsid=id).first()
-        if result is None:
-            projects = (
-                db.session.query(Project).all()
+        if current_user.type == "researcher":
+            projects = current_user.projects
+            versions = []
+            for p in projects:
+                versions.append(
+                    p.versions[-1]
                 )
-            for project in projects:
-                latest_versions.append(
-                    Version.query.join(Project).filter_by(pid=project.pid).first()
-                )
-        else:
-            projects = (
-                Project.query.join(Researcher).filter_by(rsid=current_user.rsid).all()
+            return render_template(
+                "index.html", title="Home", projects=versions, researcher=True
             )
-            for project in projects:
-                latest_versions.append(
-                    Version.query.join(Project).filter_by(pid=project.pid).first()
-                )
-    return render_template(
-        "index.html", title="Home", projects=latest_versions, len=len(latest_versions)
-    )
+        elif current_user.type == "reviewer":
+            projects = Project.query.all()
+            return render_template("index.html", title="Home", projects=projects)
+    return render_template("index.html", title="Home")
 
 
 @bp.route("/about")

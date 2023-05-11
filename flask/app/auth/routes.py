@@ -158,40 +158,72 @@ def register_reviewer():
     )
 
 
-# TODO: da rivedere
 @bp.route("/user/<username>")
 @login_required
 def profile(username):
-    user = []
-    result = user
-    if result.rsid is not None:
-        user_type = "Researcher"
+    researcher = Researcher.query.filter_by(username=username).first()
+    reviewer = Reviewer.query.filter_by(username=username).first()
+
+    if researcher is None and reviewer is None:
+        return render_template("errors/404.html"), 404
+
+    if researcher is not None:
+        latest_versions = []
+        for project in researcher.projects:
+            latest_versions.append(project.versions[-1])
+
+        res = [0, 0, 0, 0]
+        for version in latest_versions:
+            if version.project_status == "Approved":
+                res[0] += 1
+            elif version.project_status == "Submitted":
+                res[1] += 1
+            elif version.project_status == "Requires changes":
+                res[2] += 1
+            elif version.project_status == "Rejected":
+                res[3] += 1
+
+        calc_percentage = lambda x, y: round((x / y) * 100) if y != 0 else 0
+
+        return render_template(
+            "profile.html",
+            title="profile",
+            user=researcher,
+            approved=calc_percentage(res[0], len(latest_versions)),
+            submitted=calc_percentage(res[1], len(latest_versions)),
+            requires_changes=calc_percentage(res[2], len(latest_versions)),
+            rejected=calc_percentage(res[3], len(latest_versions)),
+        )
     else:
-        user_type = "Reviewer"
-    return render_template(
-        "profile.html", title="profile", user=user, user_type=user_type
-    )
+        return render_template(
+            "profile.html",
+            title="profile",
+            user=reviewer,
+            approved=0,
+            submitted=0,
+            requires_changes=0,
+            rejected=0,
+        )
 
 
 @bp.route("/user/<username>/edit", methods=["GET", "POST"])
 @login_required
 def edit_profile(username):
-    this_user = current_user.get_this_user()
     form = EditUserForm()
     if form.validate_on_submit():
-        this_user.first_name = form.first_name.data
-        this_user.last_name = form.last_name.data
-        this_user.birthdate = form.birthdate.data
-        this_user.sex = form.sex.data
-        this_user.nationality = form.nationality.data
-        this_user.updated_at = datetime.now()
+        current_user.first_name = form.first_name.data
+        current_user.last_name = form.last_name.data
+        current_user.birthdate = form.birthdate.data
+        current_user.sex = form.sex.data
+        current_user.nationality = form.nationality.data
+        current_user.updated_at = datetime.now()
         db.session.commit()
         flash("Your changes have been saved.")
-        return redirect(url_for("auth.profile", username=this_user.username))
+        return redirect(url_for("auth.profile", username=current_user.username))
     elif request.method == "GET":
-        form.first_name.data = this_user.first_name
-        form.last_name.data = this_user.last_name
-        form.birthdate.data = this_user.birthdate
-        form.sex.data = this_user.sex
-        form.nationality.data = this_user.nationality
+        form.first_name.data = current_user.first_name
+        form.last_name.data = current_user.last_name
+        form.birthdate.data = current_user.birthdate
+        form.sex.data = current_user.sex
+        form.nationality.data = current_user.nationality
     return render_template("edit_profile.html", title="Edit Profile", form=form)

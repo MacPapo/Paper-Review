@@ -8,19 +8,29 @@ from werkzeug.utils import secure_filename
 from app import db, firebase
 from app.project import bp
 from app.project.forms import UploadForm
-from app.models import PDF, Project, Version, Researcher, PDFVersions
+from app.models import PDF, Project, Version, Researcher
 from app.auth.crypt import Crypt
 
 
 @bp.route("/projects")
 @login_required
 def projects():
-    latest_versions = []
     if current_user.is_authenticated:
         if current_user.type == "reviewer":
-            return render_template("projects.html", title="Projects", projects=Project.query.all())
+            projects = Project.query.all()
+            versions = []
+            for p in projects:
+                versions.append(
+                    p.versions[-1]
+                )
+            return render_template("projects.html", title="All Projects", projects=versions)
         else:
-            return render_template("projects.html", title="Projects", user=current_user)
+            versions = []
+            for p in current_user.projects:
+                versions.append(
+                    p.versions[-1]
+                )
+            return render_template("projects.html", title="Your Projects", projects=versions)
     else:
         return redirect(url_for("auth.login"))
 
@@ -69,11 +79,12 @@ def create():
             pdf_urls.append(crypt.encrypt_url(firebase.upload(filename)))
 
         # 5. The encrypted files's url is saved to the database.
+        pdfs = []
         for pdf_url in pdf_urls:
-            db.session.add(PDF(id=pdf_url[0], key=pdf_url[1]))
+            pdfs.append(PDF(id=pdf_url[0], key=pdf_url[1]))
 
         # 5.1 Create a project object
-        new_project = Project(rsid=current_user.rsid)
+        new_project = Project(researcher=current_user)
         db.session.add(new_project)
         db.session.commit()
 
@@ -82,17 +93,17 @@ def create():
             project_title=form.title.data,
             project_description=form.description.data,
             project_status="Submitted",
-            pid=new_project.pid,
             created_at=datetime.now(),
             updated_at=datetime.now(),
+            project=new_project,
         )
 
         db.session.add(new_version)
         db.session.commit()
 
         # 5.2 cretate new PDFVersions objects
-        for pdf_url in pdf_urls:
-            db.session.add(PDFVersions(id=pdf_url[0], vid=new_version.vid))
+        for pdf in pdfs:
+            new_version.contains.append(pdf)
 
         # 6. The files are deleted from the server.
         for filename in files:
@@ -103,9 +114,7 @@ def create():
 
         # 8. A message is flashed to the user.
         flash("Congratulations, you have submitted a PDF!")
-
-        # 9. The user is redirected to the home page.
-        redirect(url_for("main.index"))
+        return redirect(url_for("main.index"))
 
     return render_template(
         "projects_components/create_project.html", title="Upload", form=form
@@ -116,8 +125,7 @@ def create():
 @login_required
 def view(vid):
     version = Version.query.filter_by(vid=vid).first_or_404()
-
-    pdfs_raw = PDF.query.join(PDFVersions).filter_by(vid=vid).all()
+    pdfs_raw = version.contains
 
     crypt = Crypt()
     pdfs = []

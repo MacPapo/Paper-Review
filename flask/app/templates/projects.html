@@ -6,20 +6,32 @@
 <section class="py-4 py-md-5 my-5">
     <div class="container py-md-5">
         <div class="row">
-            {% if role="researcher"%}
-            {% if projects %}
-            <h2 class="text-center mb-4">Your projects</h2>
-            {{ render_accordions(projects) }}
-            {% else %}
-            {% else %}
-            <div class="col-12">
-                <div class="alert alert-info" role="alert">
-                    <h4 class="alert-heading">No projects yet!</h4>
-                    <p>You don't have any projects yet. Create one by clicking the button below.</p>
-                    <hr>
-                    <a href="{{ url_for('project.create') }}" class="btn btn-primary">Create project</a>
+            {% if current_user.type == "researcher" %}
+                {% if projects %}
+                    <h2 class="text-center mb-4">Your projects</h2>
+                    {{ render_accordions(projects) }}
+                {% else %}
+                <div class="col-12">
+                    <div class="alert alert-info" role="alert">
+                        <h4 class="alert-heading">No projects yet!</h4>
+                        <p>You don't have any projects yet. Create one by clicking the button below.</p>
+                        <hr>
+                        <a href="{{ url_for('project.create') }}" class="btn btn-primary">Create project</a>
+                    </div>
                 </div>
-            </div>
+                {% endif %}
+            {% else %}
+                {% if projects %}
+                    <h2 class="text-center mb-4">Projects</h2>
+                    {{ render_accordions(projects) }}
+                {% else %}
+                <div class="col-12">
+                    <div class="alert alert-info" role="alert">
+                        <h4 class="alert-heading">No projects yet!</h4>
+                        <p>There are no projects yet. Please check back later.</p>
+                    </div>
+                </div>
+                {% endif %}
             {% endif %}
         </div>
     </div>
