@@ -20,7 +20,7 @@ class PDF(db.Model):
 
     # PDF relation to Reviewer
     reviewer = db.relationship("Reviewer", back_populates="pdf", uselist=False)
-
+    pdfversions = db.relationship("PDFVersion", backref="pdf", lazy=True)
     def __repr__(self):
         return "<PDF {}>".format(self.id)
 
@@ -89,6 +89,8 @@ class Researcher(User):
     __tablename__ = "researcher"
     rsid = db.Column(db.String(16), db.ForeignKey('user.uid'), primary_key=True)
 
+    projects = db.relationship("Project", backref="researcher", lazy=True)
+
     __mapper_args__ = {
         "polymorphic_identity": "researcher"
     }
@@ -127,6 +129,7 @@ class Project(db.Model):
     pid = db.Column(db.Integer, primary_key=True)
     rsid = db.Column(db.String(16), db.ForeignKey("researcher.rsid"))
 
+    versions = db.relationship("Version", backref="project", lazy=True)
     def get_id(self):
         return self.rsid
 
@@ -148,6 +151,8 @@ class Version(db.Model):
         )
     )
     pid = db.Column(db.Integer, db.ForeignKey("project.pid"))
+
+    pdfversions = db.relationship("PDFVersions", backref="version", lazy=True)
 
     # Project versione Status
     created_at = db.Column(db.DateTime, default=datetime.utcnow)

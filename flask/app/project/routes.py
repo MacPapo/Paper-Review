@@ -17,16 +17,10 @@ from app.auth.crypt import Crypt
 def projects():
     latest_versions = []
     if current_user.is_authenticated:
-        projects = (
-            Project.query.join(Researcher).filter_by(rsid=current_user.get_id()).all()
-        )
-        for project in projects:
-            latest_versions.append(
-                Version.query.join(Project).filter_by(pid=project.get_id()).first()
-            )
-        return render_template(
-            "projects.html", title="Projects", projects=latest_versions
-        )
+        if current_user.type == "reviewer":
+            return render_template("projects.html", title="Projects", projects=Project.query.all())
+        else:
+            return render_template("projects.html", title="Projects", user=current_user)
     else:
         return redirect(url_for("auth.login"))
 
@@ -113,24 +107,17 @@ def create():
         # 9. The user is redirected to the home page.
         redirect(url_for("main.index"))
 
-    return render_template("projects_components/create_project.html", title="Upload", form=form)
+    return render_template(
+        "projects_components/create_project.html", title="Upload", form=form
+    )
 
 
 @bp.route("/project/view/<int:vid>")
 @login_required
 def view(vid):
-    version = (
-        Version.query
-        .filter_by(vid=vid)
-        .first_or_404()
-    )
+    version = Version.query.filter_by(vid=vid).first_or_404()
 
-    pdfs_raw = (
-        PDF.query
-        .join(PDFVersions)
-        .filter_by(vid=vid)
-        .all()
-    )
+    pdfs_raw = PDF.query.join(PDFVersions).filter_by(vid=vid).all()
 
     crypt = Crypt()
     pdfs = []
@@ -143,5 +130,5 @@ def view(vid):
         names.append(retrive_file_name(pdf))
 
     return render_template(
-        "view.html", title="View Project", version=version, pdfs=zip(pdfs,names)
+        "view.html", title="View Project", version=version, pdfs=zip(pdfs, names)
     )
