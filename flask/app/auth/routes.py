@@ -7,43 +7,67 @@ from flask_login import current_user, login_user, logout_user, login_required
 from werkzeug.urls import url_parse  # this is used to parse the url
 from app import db, firebase
 from app.auth import bp, crypt, logger
-from app.models import User, Researcher, Reviewer, UserV, PDF
+from app.models import Researcher, Reviewer, PDF
 from app.auth.forms import (
     LoginUserForm,
     RegistrationResearcherForm,
     RegistrationReviewerForm,
     EditUserForm,
 )
-from sqlalchemy import text, Table, MetaData
 
 
 @bp.route("/login", methods=["GET", "POST"])
 def login():
     if current_user.is_authenticated:
         return redirect(url_for("main.index"))
+
     form = LoginUserForm()
     if form.validate_on_submit():
+        researcher = Researcher.query.filter_by(username=form.username.data).first()
+        reviewer = Reviewer.query.filter_by(username=form.username.data).first()
 
-        create_userv()
-        refresh_userv()
-
-        user = UserV()
-        user_data = user.search_user(form.username.data)
-        # Non esiste utente con questo username
-        if user_data is None or not user.check_password(user_data, form.password.data):
+        # Researcher and Reviewer are None if the username is not found
+        if researcher is None and reviewer is None:
             current_app.logger.info(
                 "Invalid username or password for user %s", form.username.data
             )
             flash("Invalid username or password")
             return redirect(url_for("auth.login"))
-        # Controllo se è un ricercatore o reviewer
 
-        user_session = user.get_user()
-        login_user(user_session, remember=form.remember_me.data)
-        next_page = request.args.get("next")
-        if not next_page or url_parse(next_page).netloc != "":
-            next_page = url_for("main.index")
-            return redirect(next_page)
+        # Researcher exists and password is incorrect
+        if researcher is not None and not researcher.check_password(form.password.data):
+            current_app.logger.info(
+                "Invalid username or password for user %s", form.username.data
+            )
+            flash("Invalid username or password")
+            return redirect(url_for("auth.login"))
+
+        # Reviewer exists and password is incorrect
+        if reviewer is not None and not reviewer.check_password(form.password.data):
+            current_app.logger.info(
+                "Invalid username or password for user %s", form.username.data
+            )
+            flash("Invalid username or password")
+            return redirect(url_for("auth.login"))
+
+        # Researcher exists and password is correct
+        if researcher is not None and researcher.check_password(form.password.data):
+            login_user(researcher, remember=form.remember_me.data)
+            flash("Welcome back, {}".format(researcher.fullname()))
+            next_page = request.args.get("next")
+            if not next_page or url_parse(next_page).netloc != "":
+                next_page = url_for("main.index")
+                return redirect(next_page)
+
+        # Reviewer exists and password is correct
+        if reviewer is not None and reviewer.check_password(form.password.data):
+            login_user(reviewer, remember=form.remember_me.data)
+            flash("Welcome back, {}".format(reviewer.fullname()))
+            next_page = request.args.get("next")
+            if not next_page or url_parse(next_page).netloc != "":
+                next_page = url_for("main.index")
+                return redirect(next_page)
+
     return render_template("login.html", title="Sign In", form=form)
 
 
@@ -57,9 +81,10 @@ def logout():
 def register_researcher():
     if current_user.is_authenticated:
         return redirect(url_for("main.index"))
+
     form = RegistrationResearcherForm()
     if form.validate_on_submit():
-        user = User(
+        researcher = Researcher(
             uid=form.uid.data.upper(),
             username=form.username.data,
             first_name=form.firstname.data,
@@ -72,16 +97,10 @@ def register_researcher():
             created_at=datetime.now(),
             updated_at=datetime.now(),
         )
-        user.set_password(form.password.data)
+        researcher.set_password(form.password.data)
 
-        db.session.add(user)
+        db.session.add(researcher)
         db.session.commit()
-
-        db.session.add(Researcher(rsid=user.uid))
-        db.session.commit()
-
-        create_userv()
-        refresh_userv()
 
         flash("Congratulations, you are now a registered user!")
         return redirect(url_for("auth.login"))
@@ -94,29 +113,9 @@ def register_researcher():
 def register_reviewer():
     if current_user.is_authenticated:
         return redirect(url_for("main.index"))
+
     form = RegistrationReviewerForm()
     if form.validate_on_submit():
-        user = User(
-            uid=form.uid.data.upper(),
-            username=form.username.data,
-            first_name=form.firstname.data,
-            last_name=form.lastname.data,
-            birthdate=form.birthdate.data,
-            email=form.email.data,
-            sex=form.sex.data,
-            nationality=form.nationality.data,
-            phone=form.phone.data,
-            created_at=datetime.now(),
-            updated_at=datetime.now(),
-        )
-        user.set_password(form.password.data)
-
-        db.session.add(user)
-        db.session.commit()
-
-        logger.info("User %s created", user.username)
-
-
         correct_file_name = lambda n: os.path.join(
             "uploads",
             Path(secure_filename(n)).stem
@@ -129,20 +128,28 @@ def register_reviewer():
 
         cr = crypt.Crypt()
         pdf_cr = cr.encrypt_url(firebase.upload(filename))
-        db.session.add(PDF(id=pdf_cr[0], key=pdf_cr[1]))
-        db.session.commit()
-
-        logger.info("PDF %s created", filename)
-
+        pdf = PDF(id=pdf_cr[0], key=pdf_cr[1])
         os.remove(filename)
 
-        reviewer = Reviewer(rvid=user.uid, pdf_id=pdf_cr[0])
+        reviewer = Reviewer(
+            uid=form.uid.data.upper(),
+            username=form.username.data,
+            first_name=form.firstname.data,
+            last_name=form.lastname.data,
+            birthdate=form.birthdate.data,
+            email=form.email.data,
+            sex=form.sex.data,
+            nationality=form.nationality.data,
+            phone=form.phone.data,
+            created_at=datetime.now(),
+            updated_at=datetime.now(),
+            pdf=pdf,
+        )
+        reviewer.set_password(form.password.data)
+
+        db.session.add(pdf)
         db.session.add(reviewer)
         db.session.commit()
-        logger.info("Reviewer %s created", reviewer.rvid)
-
-        create_userv()
-        refresh_userv()
 
         flash("Congratulations, you are now a registered user!")
         return redirect(url_for("auth.login"))
@@ -151,12 +158,13 @@ def register_reviewer():
     )
 
 
+# TODO: da rivedere
 @bp.route("/user/<username>")
 @login_required
 def profile(username):
-    user = UserV()
-    result = user.search_user(username)
-    if   result.rsid is  not None:
+    user = []
+    result = user
+    if result.rsid is not None:
         user_type = "Researcher"
     else:
         user_type = "Reviewer"
@@ -179,7 +187,6 @@ def edit_profile(username):
         this_user.updated_at = datetime.now()
         db.session.commit()
         flash("Your changes have been saved.")
-        refresh_userv()
         return redirect(url_for("auth.profile", username=this_user.username))
     elif request.method == "GET":
         form.first_name.data = this_user.first_name
@@ -188,36 +195,3 @@ def edit_profile(username):
         form.sex.data = this_user.sex
         form.nationality.data = this_user.nationality
     return render_template("edit_profile.html", title="Edit Profile", form=form)
-
-
-def create_userv():
-    # param query to be more safe against sql injection
-    view_name = "userv"
-    table1 = Table("user", db.metadata, autoload_with=db.engine, schema="public")
-    table2 = Table("researcher", db.metadata, autoload_with=db.engine, schema="public")
-    table3 = Table("reviewer", db.metadata, autoload_with=db.engine, schema="public")
-    query = """
-    CREATE  MATERIALIZED VIEW IF NOT EXISTS {view} AS
-    SELECT *
-    FROM public.{t1} u left join public.{t2} r on u.uid = r.rsid
-       left join public.{t3} rv on u.uid = rv.rvid
-
-    """.format(
-        view=view_name, t1=table1.name, t2=table2.name,t3=table3.name
-    )
-
-    db.session.execute(text(query))
-    db.session.commit()
-
-
-def refresh_userv():
-    # param query to be more safe against sql injection
-    view_table = Table("userv", db.metadata, autoload_with=db.engine, schema="public")
-    query = """
-    REFRESH MATERIALIZED VIEW {view}
-    """.format(
-        view=view_table.name
-    )
-
-    db.session.execute(text(query))
-    db.session.commit()

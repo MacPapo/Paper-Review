@@ -1,8 +1,8 @@
-"""Table restore
+"""SAAS
 
-Revision ID: b09e617d0ea3
+Revision ID: 6a5e135bf934
 Revises: 
-Create Date: 2023-05-10 17:56:50.163093
+Create Date: 2023-05-11 11:09:00.420526
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision = 'b09e617d0ea3'
+revision = '6a5e135bf934'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -28,12 +28,14 @@ def upgrade():
     sa.Column('username', sa.String(length=32), nullable=False),
     sa.Column('first_name', sa.String(length=32), nullable=True),
     sa.Column('last_name', sa.String(length=64), nullable=True),
-    sa.Column('birthdate', sa.DateTime(), nullable=True),
+    sa.Column('birthdate', sa.Date(), nullable=True),
     sa.Column('email', sa.String(length=120), nullable=True),
     sa.Column('password_hash', sa.String(length=128), nullable=True),
-    sa.Column('sex', postgresql.ENUM('M', 'F', 'Other', name='gender_enum'), nullable=True),
+    sa.Column('sex', postgresql.ENUM('M', 'F', 'Other', name='gender_enum'), nullable=False),
     sa.Column('nationality', sa.String(length=32), nullable=True),
     sa.Column('phone', sa.String(length=16), nullable=True),
+    sa.Column('department', sa.String(length=50), nullable=True),
+    sa.Column('type', postgresql.ENUM('researcher', 'reviewer', name='user_type'), nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.Column('updated_at', sa.DateTime(), nullable=True),
     sa.Column('last_seen', sa.DateTime(), nullable=True),
@@ -54,7 +56,8 @@ def upgrade():
     sa.Column('pdf_id', postgresql.BYTEA(), nullable=False),
     sa.ForeignKeyConstraint(['pdf_id'], ['pdf.id'], ),
     sa.ForeignKeyConstraint(['rvid'], ['user.uid'], ),
-    sa.PrimaryKeyConstraint('rvid')
+    sa.PrimaryKeyConstraint('rvid'),
+    sa.UniqueConstraint('pdf_id')
     )
     op.create_table('project',
     sa.Column('pid', sa.Integer(), nullable=False),

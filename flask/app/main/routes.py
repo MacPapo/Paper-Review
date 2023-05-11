@@ -10,8 +10,7 @@ from app.auth.crypt import Crypt
 @bp.before_request
 def before_request():
     if current_user.is_authenticated:
-        this_user = current_user.get_this_user()
-        this_user.last_seen = datetime.utcnow()
+        current_user.last_seen = datetime.utcnow()
         db.session.commit()
 
 
