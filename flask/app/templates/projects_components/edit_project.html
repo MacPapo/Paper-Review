@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% from "form_components/_render_field.html" import render_multiple_file_field %}
+{% block content %}
+<section class="py-4 py-md-5 my-5">
+    <div class="container py-md-5">
+        <div class="row">
+            <div class="mb-3">
+                <h2 class="display-8 fw-bold mb-2"> project</h2>
+                <p class="display-8 mb-5">Please provide a title, a descriprion and as many PDFs you desire.</p>
+                <form method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
+                    {{ form.hidden_tag() }}
+                    <div class="form-group mb-4">
+                        {{ form.title(class="form-control", placeholder="Title", required=True) }}
+                        <div class="invalid-feedback">
+                            Please provide a valid title.
+                        </div>
+                    </div>
+                    <div class="form-group mb-4">
+                        {{ form.description(class="form-control", placeholder="Description", rows="7", required=True) }}
+                        <div class="invalid-feedback">
+                            Please provide a valid description.
+                        </div>
+                    </div>
+                    {% for link, name in pdfs %}
+                    <div>
+                        <!-- Button trigger modal -->
+                        <div class="dropdown">
+                            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1"
+                                data-bs-toggle="dropdown" aria-expanded="false">
+                                {{ name }}
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                                <li><a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#exampleModal">View</a></li>
+                                <li><a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#editModal">Edit</a></li>
+                                <li><a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#editModal">Delete</a></li>
+                            </ul>
+                        </div>
+
+                        <!-- Modal -->
+                        <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                            <div class="modal-dialog modal-xl">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h1 class="modal-title fs-5" id="exampleModalLabel"> edit {{ name }}</h1>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        {{ render_multiple_file_field(form_pdf.pdfs) }}
+
+                                        {{ form_pdf.submit(class="btn btn-primary") }}          
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Modal -->
+                        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                            <div class="modal-dialog modal-xl">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h1 class="modal-title fs-5" id="exampleModalLabel">{{ name }}</h1>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="ratio ratio-4x3">
+                                            <embed class="embed-responsive-item" src="{{ link }}"></embed>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

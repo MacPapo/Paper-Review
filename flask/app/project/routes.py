@@ -140,3 +140,41 @@ def view(vid):
     return render_template(
         "view.html", title="View Project", version=version, pdfs=zip(pdfs, names)
     )
+
+
+@bp.route("/project/edit_project/<int:vid>")
+@login_required
+def edit_project(vid):
+    form = UploadForm()
+    form_pdf = UploadForm()
+
+    version = Version.query.filter_by(vid=vid).first_or_404()
+    form.title.data = version.project_title
+    form.description.data = version.project_description
+
+    if form.validate_on_submit():
+        print("d")
+
+    if form_pdf.validate_on_submit():
+        print("d")
+
+    pdfs_raw = version.contains
+
+    crypt = Crypt()
+    pdfs = []
+    for pdf in pdfs_raw:
+        pdfs.append(crypt.decrypt(pdf.key, pdf.id))
+
+    retrive_file_name = lambda n: os.path.basename(unquote(Path(n).stem))[:-20]
+    names = []
+    for pdf in pdfs:
+        names.append(retrive_file_name(pdf))
+
+    return render_template(
+        "projects_components/edit_project.html", 
+        title="View Project",
+        pdfs=zip(pdfs, names),
+        form = form,
+        form_pdf = form_pdf,
+        vid = vid
+    )

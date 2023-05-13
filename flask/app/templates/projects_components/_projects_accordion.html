@@ -21,14 +21,6 @@
 {% macro render_accordion_body(x) %}
 
 <div class="container">
-    <div class="row">
-        <div class="col-md-6">
-            {{ render_popover('Time since creation', x.time_since_creation()) }}
-        </div>
-        <div class="col-md-6">
-            {{ render_popover('Time since last update', x.time_since_update()) }}
-        </div>
-    </div>
     <div class="row my-5">
         <div class="col-md-12">
             {{ x.truncate_desc() }}
@@ -43,18 +35,40 @@
 <div class="accordion-item border">
     <h2 class="accordion-header">
         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapse{{ x.pid }}" aria-expanded="false" aria-controls="flush-collapse{{ x.pid }}">
-            {{ x.project_title }} &nbsp;{{ render_status_bedge(x.project_status) }}
+            {{ x.project_title }}
+
+            <!-- For Spacing -->
+            <div class="flex-grow-1"></div>
+
+            {{ render_status_bedge(x.project_status) }}
+
+            <!-- For Spacing -->
+            <div class="mx-auto" style="width: 30px;"></div>
         </button>
     </h2>
     <div id="flush-collapse{{ x.pid }}" class="accordion-collapse collapse" data-bs-parent="#accordionFlushProject">
+       
         <div class="accordion-body" style="overflow-wrap: break-word;">
             {{ render_accordion_body(x) }}
         </div>
-        <div class="btn-group" role="group" aria-label="Actions">
+
+        <div class="row">
+            <!--  Così mi sembra più pulito cosa dite? -->
+            <!-- <div class="col-md-6">
+                {{ render_popover('Time since creation', x.time_since_creation()) }}
+            </div>
+            <div class="col-md-6">
+                    {{ render_popover('Time since last update', x.time_since_update()) }}
+            </div>  -->
+
+            <div class="btn-group" role="group" aria-label="Actions">
             <button onclick="window.location.href='{{ url_for('project.view', vid=x.vid) }}'" type="button" class="btn btn-primary">View</button>
             <button type="button" class="btn btn-warning">Edit</button>
             <button type="button" class="btn btn-danger">Delete</button>
         </div>
+        </div>
+
+        
     </div>
 </div>
 
