@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% from "projects_components/_projects_accordion.html" import render_status_bedge,render_accordion_no_button %}
+
+{% block content %}
+<section class="py-4 py-md-5 my-5">
+    <div class="container py-md-5">
+        <div class="row">
+            <div class="col">
+                <h2>Add Notes {{ version.project_title }}</h2>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <p>Created {{ version.time_since_creation() }}</p>
+            </div>
+            <div class="col">
+                <p>Updated {{ version.time_since_update() }}</p>
+            </div>
+            <div class="col">
+                Status {{ render_status_bedge(version.project_status) }}
+            </div>
+        </div>
+        {% for pdf, name in pdfs %}
+            {{ render_accordion_no_button(name,pdf) }}
+        {% endfor %}
+        <button type="button" >
+            Confirm
+        </button>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+</script>
+{% endblock %}

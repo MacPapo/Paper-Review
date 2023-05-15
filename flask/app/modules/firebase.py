@@ -21,5 +21,5 @@ class Firebase:
         self.storage.child("files/" + file).put(file)
         return self.storage.child("files/" + file).get_url(None)
 
-    def download(self, url, file):
-        self.storage.child("files/" + url).download(file)
+    def download(self, url,path):
+        self.storage.child("files/" + url).download(url,path)

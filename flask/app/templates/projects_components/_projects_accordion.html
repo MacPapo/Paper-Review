@@ -13,7 +13,7 @@
 {% endmacro %}
 
 {% macro render_popover(desc, x) %}
-<button type="button" class="btn btn-light border" data-bs-container="body" data-bs-toggle="popover" data-bs-trigger="hover focus" data-bs-placement="top" data-bs-content="{{ desc }}">
+<button type="button" class="btn btn-light border" data-bs-container="boy" data-bs-toggle="popover" data-bs-trigger="hover focus" data-bs-placement="top" data-bs-content="{{ desc }}">
     {{ x }}
 </button>
 {% endmacro %}
@@ -38,35 +38,55 @@
 
 {% endmacro %}
 
-{% macro render_accordion(x) %}
-
+{% macro render_accordion(x,type) %}
 <div class="accordion-item border">
     <h2 class="accordion-header">
-        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapse{{ x.pid }}" aria-expanded="false" aria-controls="flush-collapse{{ x.pid }}">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+            data-bs-target="#flush-collapse{{ x.pid }}" aria-expanded="false" aria-controls="flush-collapse{{ x.pid }}">
             {{ x.project_title }} &nbsp;{{ render_status_bedge(x.project_status) }}
         </button>
     </h2>
     <div id="flush-collapse{{ x.pid }}" class="accordion-collapse collapse" data-bs-parent="#accordionFlushProject">
         <div class="accordion-body" style="overflow-wrap: break-word;">
             {{ render_accordion_body(x) }}
-        </div>
-        <div class="btn-group" role="group" aria-label="Actions">
-            <button onclick="window.location.href='{{ url_for('project.view', vid=x.vid) }}'" type="button" class="btn btn-primary">View</button>
-            <button type="button" class="btn btn-warning">Edit</button>
-            <button type="button" class="btn btn-danger">Delete</button>
-        </div>
-    </div>
+            </div>
+            {% if type == 'researcher' %}
+            <div class="btn-group" role="group" aria-label="Actions">
+                <button onclick="window.location.href='{{ url_for('project.view', vid=x.vid) }}'" type="button"
+                    class="btn btn-primary">View</button>
+                <button type="button" class="btn btn-warning">Edit</button>
+                <button type="button" class="btn btn-danger">Delete</button>
+            </div>
+            {% else %}
+            <div class="btn-group" role="group" aria-label="Actions">
+                <button onclick="window.location.href='{{ url_for('project.view', vid=x.vid) }}'" type="button"
+                    class="btn btn-primary">View</button>
+                <button onclick="window.location.href='{{url_for('project.note',vid=x.vid)}}'" type="button"
+                    class="btn btn-warning">Add Note</button>
+                <button type="button" class="btn btn-danger">Delete</button>
+            </div>
+            {% endif %}
+            </div>
+            </div>
+
+{% endmacro %}
+
+
+{% macro render_accordions(field,type) %}
+
+<div class="accordion accordion-flush" id="accordionFlushProject">
+    {% for x in field %}
+        {{ render_accordion(x,type) }}
+    {% endfor %}
 </div>
 
 {% endmacro %}
 
 
-{% macro render_accordions(field) %}
-
-<div class="accordion accordion-flush" id="accordionFlushProject">
-    {% for x in field %}
-        {{ render_accordion(x) }}
-    {% endfor %}
-</div>
-
+{% macro render_accordion_no_button(name,pdf) %}
+  <!-- Button trigger modal -->
+        <button type="button" class="btn btn-primary"
+            onclick="window.location.href='{{ url_for('project.pdf', pdf_name = name) }}'">
+            {{ name }}
+        </button>
 {% endmacro %}

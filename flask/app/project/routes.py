@@ -1,4 +1,5 @@
 import os
+import fitz
 from urllib.parse import unquote
 from datetime import datetime
 from pathlib import Path
@@ -10,7 +11,7 @@ from app.project import bp
 from app.project.forms import UploadForm
 from app.models import PDF, Project, Version, Researcher
 from app.auth.crypt import Crypt
-
+from app.modules.firebase import Firebase
 
 @bp.route("/projects")
 @login_required
@@ -22,7 +23,7 @@ def projects():
             for p in projects:
                 versions.append(
                     p.versions[-1]
-                )
+               )
             return render_template("projects.html", title="All Projects", projects=versions)
         else:
             versions = []
@@ -140,3 +141,44 @@ def view(vid):
     return render_template(
         "view.html", title="View Project", version=version, pdfs=zip(pdfs, names)
     )
+
+@bp.route("/project/note/<int:vid>")
+@login_required
+def note(vid):
+    version = Version.query.filter_by(vid=vid).first_or_404()
+    pdfs_raw = version.contains
+
+    crypt = Crypt()
+    pdfs = []
+    for pdf in pdfs_raw:
+        pdfs.append(crypt.decrypt(pdf.key, pdf.id))
+
+    retrive_file_name = lambda n: os.path.basename(unquote(Path(n).stem))[:-20]
+    names = []
+    for pdf in pdfs:
+        names.append(retrive_file_name(pdf))
+
+    return render_template(
+        "note.html", title="Add Note Project", version=version, pdfs=zip(pdfs, names)
+    )
+
+@bp.route("/project/pdf/<pdf_name>",methods=['GET'])
+@login_required
+def pdf(pdf_name):
+    clean_url = lambda url: url.replace("files/", "")
+    pdf_link=""
+    retrive_file_name = lambda n: os.path.basename(unquote(Path(n).stem))[:-20]
+    crypt = Crypt()
+    pdfs=[]
+    pdf_rst = PDF.query.all()
+    if pdf_rst:
+        for pdf in pdf_rst:
+            pdfs.append(crypt.decrypt(pdf.key, pdf.id))
+    for pdf in pdfs:
+        if pdf_name == retrive_file_name(pdf):
+            pdf_link = pdf
+            break
+    path = unquote(pdf_link.split('/o/')[1].split('?')[0])
+    path = clean_url(path)
+    firebase.download(path,path)
+    return render_template("pdf.html",title=path,path=pdf_link)
