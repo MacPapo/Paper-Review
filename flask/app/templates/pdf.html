@@ -1,25 +1,34 @@
-<!--Get the samples from https://www.adobe.com/go/pdfembedapi_samples-->
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="en">
+
 <head>
- <title>Adobe Acrobat Services PDF Embed API Sample</title>
- <meta charset="utf-8"/>
- <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
- <meta id="viewport" name="viewport" content="width=device-width, initial-scale=1"/>
+    <meta charset="UTF-8" />
+    <meta name="description" content="App" />
+    <meta name="keywords" content="App" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>{{ title }} - project0</title>
+
+    {% block styles %}
+    {% endblock %}
+    {% block content %}
 </head>
+
 <body style="margin: 0px">
- <div id="adobe-dc-view"></div>
- <script src="https://acrobatservices.adobe.com/view-sdk/viewer.js"></script>
- <script type="text/javascript">
-    document.addEventListener("adobe_dc_view_sdk.ready", function()
-    {
-        var adobeDCView = new AdobeDC.View({clientId: "7b3fa4b76de4458ea63535ac28f82dde", divId: "adobe-dc-view"});
-        adobeDCView.previewFile(
-       {
-          content:   {location: {url: "/static/download/prova.pdf"}},
-          metaData: {fileName: "prova.pdf"}
-       });
-    });
- </script>
+    <div id="adobe-dc-view"></div>
+    <script src="https://acrobatservices.adobe.com/view-sdk/viewer.js"></script>
+    <script type="text/javascript">
+        document.addEventListener("adobe_dc_view_sdk.ready", function () {
+            var adobeDCView = new AdobeDC.View({ clientId: "7b3fa4b76de4458ea63535ac28f82dde", divId: "adobe-dc-view" });
+            adobeDCView.previewFile(
+                {
+                    content: { location: { url: "{{ path  }}" } },
+                    metaData: { fileName: "prova.pdf" }
+                });
+        });
+    </script>
 </body>
+{% endblock %}
+{% block scripts %}
+{% endblock %}
+
 </html>

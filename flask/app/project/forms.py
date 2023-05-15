@@ -13,3 +13,12 @@ class UploadForm(FlaskForm):
         for data in field.data:
             if not data.filename.endswith(".pdf"):
                 raise ValidationError("Only PDFs are allowed.")
+
+class AddNoteForm(FlaskForm):
+    newpdfs = MultipleFileField("PDF Files",validators=[DataRequired()])
+    submit = SubmitField("Submit")
+
+    def validate_pdf_files(self, field):
+        for data in field.data:
+            if not data.filename.endswith(".pdf"):
+                raise ValidationError("Only PDFs are allowed.")

@@ -46,10 +46,21 @@
 
 {% endmacro %}
 
+
 {% macro render_multiple_file_field(field) %}
 
 <div class="form-group mb-4">
     <label for="{{ field.id }}">PDF Files</label>
+    <input type="file" class="form-control" id="{{ field.id }}" name="{{ field.name }}" accept=".pdf" multiple>
+</div>
+
+{% endmacro %}
+
+
+{% macro render_newmultiple_file_field(field) %}
+
+<div class="form-group mb-4">
+    <label for="{{ field.id }}">PDF Annoted</label>
     <input type="file" class="form-control" id="{{ field.id }}" name="{{ field.name }}" accept=".pdf" multiple>
 </div>
 

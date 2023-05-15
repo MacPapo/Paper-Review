@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% from "projects_components/_projects_accordion.html" import render_status_bedge,render_accordion_no_button %}
+{% from "form_components/_render_field.html" import render_newmultiple_file_field,render_submit_button %}
 
 {% block content %}
 <section class="py-4 py-md-5 my-5">
@@ -23,9 +24,11 @@
         {% for pdf, name in pdfs %}
             {{ render_accordion_no_button(name,pdf) }}
         {% endfor %}
-        <button type="button" >
-            Confirm
-        </button>
+        <form method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
+            {{ form.hidden_tag() }}
+            {{ render_newmultiple_file_field(form.newpdfs) }}
+            {{ render_submit_button(form.sumbit) }}
+        </form>
     </div>
 </section>
 {% endblock %}
