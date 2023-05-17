@@ -31,26 +31,9 @@
                             </button>
                             <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
                                 <li><a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#exampleModal">View</a></li>
-                                <li><a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#editModal">Edit</a></li>
-                                <li><a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#editModal">Delete</a></li>
+                                <li><a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#exampleModal">Edit</a></li>
+                                <li><a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#exampleModal">Delete</a></li>
                             </ul>
-                        </div>
-
-                        <!-- Modal -->
-                        <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                            <div class="modal-dialog modal-xl">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h1 class="modal-title fs-5" id="exampleModalLabel"> edit {{ name }}</h1>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                    </div>
-                                    <div class="modal-body">
-                                        {{ render_multiple_file_field(form_pdf.pdfs) }}
-
-                                        {{ form_pdf.submit(class="btn btn-primary") }}          
-                                    </div>
-                                </div>
-                            </div>
                         </div>
 
                         <!-- Modal -->

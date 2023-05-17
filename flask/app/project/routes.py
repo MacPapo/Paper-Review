@@ -152,12 +152,6 @@ def edit_project(vid):
     form.title.data = version.project_title
     form.description.data = version.project_description
 
-    if form.validate_on_submit():
-        print("d")
-
-    if form_pdf.validate_on_submit():
-        print("d")
-
     pdfs_raw = version.contains
 
     crypt = Crypt()
@@ -178,3 +172,4 @@ def edit_project(vid):
         form_pdf = form_pdf,
         vid = vid
     )
+

@@ -13,7 +13,14 @@ from app.modules.truncate_strings import truncate_string
 pdf_version = db.Table(
     "pdf_version",
     db.Column("pdf_id", BYTEA, db.ForeignKey("pdf.id")),
-    db.Column("version_id", db.Integer, db.ForeignKey("version.vid")),
+    db.Column("version_id", db.Integer, db.ForeignKey("version.vid"))
+)
+
+
+draft_pdf = db.Table(
+    "draft_pdf",
+    db.Column("pdf_id", BYTEA, db.ForeignKey("pdf.id")),
+    db.Column("draft_id", db.Integer, db.ForeignKey("draft.did"))
 )
 
 
@@ -150,7 +157,7 @@ class Version(db.Model):
     # General Data
     vid = db.Column(db.Integer, primary_key=True)
     version_number = db.Column(db.Integer, nullable=False)
-    project_title = db.Column(db.String(64), nullable=False)
+    project_title = db.Column(db.String(256), nullable=False)
     project_description = db.Column(db.Text, nullable=False)
     project_status = db.Column(
         ENUM(
@@ -163,6 +170,8 @@ class Version(db.Model):
         )
     )
     pid = db.Column(db.Integer, db.ForeignKey("project.pid"))
+    draft_id = db.Column(db.Integer, db.ForeignKey("draft.did"), unique=True, nullable=True)
+    draft = db.relationship("Draft", back_populates="version", uselist=False)
 
     contains = db.relationship("PDF", secondary=pdf_version, backref="version", lazy=True)
 
@@ -178,6 +187,15 @@ class Version(db.Model):
 
     def truncate_desc(self):
         return truncate_string(text=self.project_description, length=200)
+
+
+class Draft(db.Model):
+    did = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(256), nullable=False)
+    description = db.Column(db.Text, nullable=False)
+
+    # Draft relation to Version
+    version = db.relationship("Version", back_populates="draft", uselist=False)
 
 
 @login.user_loader
