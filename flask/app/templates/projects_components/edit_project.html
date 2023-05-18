@@ -101,6 +101,7 @@
          formData.append('description', description);
 
          $('.existing-name').each(function() {
+            console.log($(this).val())
              formData.append('names', $(this).val() + '.pdf');
          });
 
@@ -147,6 +148,7 @@
          formData.append('description', description);
 
          $('.existing-name').each(function() {
+            console.log($(this).val())
              formData.append('names', $(this).val() + '.pdf');
          });
 
