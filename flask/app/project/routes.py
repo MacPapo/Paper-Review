@@ -81,14 +81,18 @@ def create():
     )
 
 
-@bp.route("/project/view/<int:vid>")
+@bp.route("/project/view/<int:pid>/<int:version_number>")
 @login_required
-def view(vid):
-    version = Version.query.filter_by(vid=vid).first_or_404()
-    pdfs = get_pdf(version.contains)
+def view(pid, version_number):
+    project = Project.query.filter_by(pid=pid).first_or_404()
+
+    if version_number > len(project.versions):
+        return render_template("errors/404.html"), 404
+    
+    get_pdf_lambda = lambda x: get_pdf(x)
 
     return render_template(
-        "view.html", title="View Project", version=version, pdfs=pdfs
+        "view.html", title="View Project", project=project, version_number = version_number, get_pdf_lambda=get_pdf_lambda
     )
 
 

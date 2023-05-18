@@ -1,54 +1,18 @@
 {% extends 'base.html' %}
 {% from "projects_components/_projects_accordion.html" import render_status_bedge %}
+{% from "projects_components/_project_info.html" import render_info, render_pdfs %}
 
 {% block content %}
 <section class="py-4 py-md-5 my-5">
     <div class="container py-md-5">
-        <div class="row">
-            <div class="col">
-                <h2>{{ version.project_title }}</h2>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col">
-                <p>Created {{ version.time_since_creation() }}</p>
-            </div>
-            <div class="col">
-                <p>Updated {{ version.time_since_update() }}</p>
-            </div>
-            <div class="col">
-                Status {{ render_status_bedge(version.project_status) }}
-            </div>
-        </div>
-        <div class="row">
-            <div class="col">
-                <p>{{ version.project_description }}</p>
-            </div>
-        </div>
-        {% for link, name in pdfs.items() %}
+        
+        {{ render_info(project.versions[version_number - 1]) }}
 
-        <!-- Button trigger modal -->
-        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
-            {{ name }}
-        </button>
-
-        <!-- Modal -->
-        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-xl">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h1 class="modal-title fs-5" id="exampleModalLabel">{{ name }}</h1>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="ratio ratio-4x3">
-                            <embed class="embed-responsive-item" src="{{ link }}"></embed>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        {% endfor %}
+        <hr class="hr" />
+        <br>
+        
+        {{ render_pdfs(get_pdf_lambda(project.versions[version_number - 1].contains)) }}
+        
     </div>
 </section>
 {% endblock %}

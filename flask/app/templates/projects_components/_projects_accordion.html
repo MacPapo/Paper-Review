@@ -53,16 +53,8 @@
         </div>
 
         <div class="row">
-            <!--  Così mi sembra più pulito cosa dite? -->
-            <!-- <div class="col-md-6">
-                {{ render_popover('Time since creation', x.time_since_creation()) }}
-            </div>
-            <div class="col-md-6">
-                    {{ render_popover('Time since last update', x.time_since_update()) }}
-            </div>  -->
-
             <div class="btn-group" role="group" aria-label="Actions">
-            <button onclick="window.location.href='{{ url_for('project.view', vid=x.vid) }}'" type="button" class="btn btn-primary">View</button>
+            <button onclick="window.location.href='{{ url_for('project.view', pid=x.pid, version_number=x.version_number) }}'" type="button" class="btn btn-primary">View</button>
             <button onclick="window.location.href='{{ url_for('project.edit', vid=x.vid) }}'" type="button" class="btn btn-warning">Edit</button>
             <button type="button" class="btn btn-danger">Delete</button>
         </div>
