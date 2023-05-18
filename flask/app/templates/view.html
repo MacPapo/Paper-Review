@@ -25,7 +25,7 @@
                 <p>{{ version.project_description }}</p>
             </div>
         </div>
-        {% for link, name in pdfs %}
+        {% for link, name in pdfs.items() %}
 
         <!-- Button trigger modal -->
         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">

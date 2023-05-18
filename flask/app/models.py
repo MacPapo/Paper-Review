@@ -13,14 +13,14 @@ from app.modules.truncate_strings import truncate_string
 pdf_version = db.Table(
     "pdf_version",
     db.Column("pdf_id", BYTEA, db.ForeignKey("pdf.id")),
-    db.Column("version_id", db.Integer, db.ForeignKey("version.vid"))
+    db.Column("version_id", db.Integer, db.ForeignKey("version.vid")),
 )
 
 
 draft_pdf = db.Table(
     "draft_pdf",
     db.Column("pdf_id", BYTEA, db.ForeignKey("pdf.id")),
-    db.Column("draft_id", db.Integer, db.ForeignKey("draft.did"))
+    db.Column("draft_id", db.Integer, db.ForeignKey("draft.did")),
 )
 
 
@@ -29,6 +29,7 @@ class PDF(db.Model):
 
     # General Data
     id = db.Column(BYTEA, primary_key=True)
+    filename = db.Column(db.String(256), nullable=False)
     key = db.Column(BYTEA, nullable=False)
 
     # PDF relation to Reviewer
@@ -170,10 +171,16 @@ class Version(db.Model):
         )
     )
     pid = db.Column(db.Integer, db.ForeignKey("project.pid"))
-    draft_id = db.Column(db.Integer, db.ForeignKey("draft.did"), unique=True, nullable=True)
+
+    # Version relation to Draft
+    draft_id = db.Column(
+        db.Integer, db.ForeignKey("draft.did"), unique=True, nullable=False
+    )
     draft = db.relationship("Draft", back_populates="version", uselist=False)
 
-    contains = db.relationship("PDF", secondary=pdf_version, backref="version", lazy=True)
+    contains = db.relationship(
+        "PDF", secondary=pdf_version, backref="version", lazy=True
+    )
 
     # Project versione Status
     created_at = db.Column(db.DateTime, default=datetime.utcnow())
@@ -193,6 +200,9 @@ class Draft(db.Model):
     did = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(256), nullable=False)
     description = db.Column(db.Text, nullable=False)
+
+    # Draft relation to PDF
+    contains = db.relationship("PDF", secondary=draft_pdf, backref="draft", lazy=True)
 
     # Draft relation to Version
     version = db.relationship("Version", back_populates="draft", uselist=False)

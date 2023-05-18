@@ -1,15 +1,11 @@
-import os
-from urllib.parse import unquote
 from datetime import datetime
-from pathlib import Path
-from flask import render_template, flash, redirect, url_for
+from flask import render_template, flash, redirect, url_for, request
 from flask_login import current_user, login_required
-from werkzeug.utils import secure_filename
-from app import db, firebase
-from app.project import bp
+from app import db
+from app.project import bp, logger
 from app.project.forms import UploadForm
-from app.models import PDF, Project, Version, Researcher
-from app.auth.crypt import Crypt
+from app.models import Project, Version, Draft, PDF
+from app.modules.pdf_helper import upload_pdf, get_pdf
 
 
 @bp.route("/projects")
@@ -20,17 +16,17 @@ def projects():
             projects = Project.query.all()
             versions = []
             for p in projects:
-                versions.append(
-                    p.versions[-1]
-                )
-            return render_template("projects.html", title="All Projects", projects=versions)
+                versions.append(p.versions[-1])
+            return render_template(
+                "projects.html", title="All Projects", projects=versions
+            )
         else:
             versions = []
             for p in current_user.projects:
-                versions.append(
-                    p.versions[-1]
-                )
-            return render_template("projects.html", title="Your Projects", projects=versions)
+                versions.append(p.versions[-1])
+            return render_template(
+                "projects.html", title="Your Projects", projects=versions
+            )
     else:
         return redirect(url_for("auth.login"))
 
@@ -40,53 +36,17 @@ def projects():
 def create():
     form = UploadForm()
     if form.validate_on_submit():
-        # Description of the lambda function:
-        # 1. secure_filename(n) returns a string of the filename with all the special characters removed.
-        #    For example, if n = "hello world.pdf", then secure_filename(n) = "hello world.pdf"
-        #
-        # 2. Path(secure_filename(n)).stem returns the filename without the extension.
-        #    For example, if n = "hello world.pdf", then Path(secure_filename(n)).stem = "hello world"
-        #
-        # 3. datetime.now().strftime("-%Y-%m-%d-%H:%M:%S") returns the current date and time in the format of "-YYYY-MM-DD-HH:MM:SS"
-        #    For example, if the current date and time is 2020-07-01 12:00:00, then datetime.now().strftime("-%Y-%m-%d-%H:%M:%S") = "-2020-07-01-12:00:00"
-        #
-        # 4. Putting it all together, if n = "hello world.pdf", then correct_file_name(n) = "uploads/hello world-2020-07-01-12:00:00.pdf"
-        #    If n = "hello world!.pdf", then correct_file_name(n) = "uploads/hello world!-2020-07-01-12:00:00.pdf"
-        #
-        # 5. os.path.join("uploads", Path(secure_filename(n)).stem + datetime.now().strftime("-%Y-%m-%d-%H:%M:%S") + ".pdf") returns the filename with the path.
-        #    For example, if n = "hello world.pdf", then os.path.join("uploads", Path(secure_filename(n)).stem + datetime.now().strftime("-%Y-%m-%d-%H:%M:%S") + ".pdf") = "uploads/hello world-2020-07-01-12:00:00.pdf"
-        correct_file_name = lambda n: os.path.join(
-            "uploads",
-            Path(secure_filename(n)).stem
-            + datetime.now().strftime("-%Y-%m-%d-%H:%M:%S")
-            + ".pdf",
-        )
-
-        # Description of the following code:
-        # 1. The user uploads some files.
-        # 2. The files are saved to the server.
-        files = []
-        for f in form.pdfs.data:
-            filename = correct_file_name(f.filename)
-            f.save(filename)
-            files.append(filename)
-
-        # 3. The files are uploaded to Firebase.
-        # 4. The Links that Firebase returns will be encrypted.
-        crypt = Crypt()
-        pdf_urls = []
-        for filename in files:
-            pdf_urls.append(crypt.encrypt_url(firebase.upload(filename)))
-
-        # 5. The encrypted files's url is saved to the database.
-        pdfs = []
-        for pdf_url in pdf_urls:
-            pdfs.append(PDF(id=pdf_url[0], key=pdf_url[1]))
+        pdfs = upload_pdf(form.pdfs.data)
 
         # 5.1 Create a project object
         new_project = Project(researcher=current_user)
         db.session.add(new_project)
         db.session.commit()
+
+        new_draft = Draft(
+            title=form.title.data,
+            description=form.description.data,
+        )
 
         new_version = Version(
             version_number=1,
@@ -96,18 +56,18 @@ def create():
             created_at=datetime.now(),
             updated_at=datetime.now(),
             project=new_project,
+            draft=new_draft,
         )
 
-        db.session.add(new_version)
+        new_draft.version = new_version
+
+        db.session.add(new_version, new_draft)
         db.session.commit()
 
         # 5.2 cretate new PDFVersions objects
         for pdf in pdfs:
+            new_draft.contains.append(pdf)
             new_version.contains.append(pdf)
-
-        # 6. The files are deleted from the server.
-        for filename in files:
-            os.remove(filename)
 
         # 7. The database is committed.
         db.session.commit()
@@ -125,51 +85,93 @@ def create():
 @login_required
 def view(vid):
     version = Version.query.filter_by(vid=vid).first_or_404()
-    pdfs_raw = version.contains
-
-    crypt = Crypt()
-    pdfs = []
-    for pdf in pdfs_raw:
-        pdfs.append(crypt.decrypt(pdf.key, pdf.id))
-
-    retrive_file_name = lambda n: os.path.basename(unquote(Path(n).stem))[:-20]
-    names = []
-    for pdf in pdfs:
-        names.append(retrive_file_name(pdf))
+    pdfs = get_pdf(version.contains)
 
     return render_template(
-        "view.html", title="View Project", version=version, pdfs=zip(pdfs, names)
+        "view.html", title="View Project", version=version, pdfs=pdfs
     )
 
 
-@bp.route("/project/edit_project/<int:vid>")
+@bp.route("/project/edit/<int:vid>")
 @login_required
-def edit_project(vid):
+def edit(vid):
     form = UploadForm()
     form_pdf = UploadForm()
 
-    version = Version.query.filter_by(vid=vid).first_or_404()
-    form.title.data = version.project_title
-    form.description.data = version.project_description
+    draft = Version.query.filter_by(vid=vid).first_or_404().draft
 
-    pdfs_raw = version.contains
+    form.title.data = draft.title
+    form.description.data = draft.description
 
-    crypt = Crypt()
-    pdfs = []
-    for pdf in pdfs_raw:
-        pdfs.append(crypt.decrypt(pdf.key, pdf.id))
-
-    retrive_file_name = lambda n: os.path.basename(unquote(Path(n).stem))[:-20]
-    names = []
-    for pdf in pdfs:
-        names.append(retrive_file_name(pdf))
+    pdfs = get_pdf(draft.contains)
 
     return render_template(
-        "projects_components/edit_project.html", 
+        "projects_components/edit_project.html",
         title="View Project",
-        pdfs=zip(pdfs, names),
-        form = form,
-        form_pdf = form_pdf,
-        vid = vid
+        counter=len(pdfs),
+        pdfs=pdfs,
+        form=form,
+        form_pdf=form_pdf,
+        vid=vid,
     )
 
+
+@bp.route("/project/edit_draft/<int:vid>", methods=["POST"])
+@login_required
+def edit_draft(vid):
+    if request.method == "POST":
+        draft = Version.query.filter_by(vid=vid).first_or_404().draft
+
+        draft.title = request.form.get("title")
+        draft.description = request.form.get("description")
+        names = request.form.getlist("names")
+
+        db.session.begin_nested()
+        pdfs = upload_pdf(request.files.getlist("files"))
+        for pdf in draft.contains:
+            if pdf.filename not in names:
+                draft.contains.remove(pdf)
+
+        for pdf in pdfs:
+            draft.contains.append(pdf)
+
+        db.session.commit()
+        return('', 204)
+
+@bp.route("/project/update_version/<int:vid>", methods=["POST"])
+@login_required
+def update_version(vid):
+    if request.method == "POST":
+        version = Version.query.filter_by(vid=vid).first_or_404()
+        draft = version.draft
+        project = version.project
+
+        new_draft = Draft(
+            title=draft.title,
+            description=draft.description,
+        )
+
+        for pdf in draft.contains:
+            new_draft.contains.append(pdf)
+
+        new_version = Version(
+            version_number=version.version_number + 1,
+            project_title=draft.title,
+            project_description=draft.description,
+            project_status=version.project_status,
+            created_at=datetime.now(),
+            updated_at=datetime.now(),
+            project=project,
+            draft=new_draft,
+        )
+
+        new_draft.version = new_version
+
+        db.session.add(new_version, new_draft)
+        db.session.commit()
+
+        for pdf in new_draft.contains:
+            new_version.contains.append(pdf)
+
+        db.session.commit()
+        return('', 204)
