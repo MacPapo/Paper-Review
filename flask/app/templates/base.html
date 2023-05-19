@@ -7,17 +7,19 @@
         <meta name="keywords" content="App" />
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
+
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800&amp;display=swap">
+
+        {% block styles %}
+        {% endblock %}
+
+
         {% if title %}
         <title>{{ title }} - project0</title>
         {% else %}
         <title>project0</title>
         {% endif %}
-
-        <link rel="stylesheet" href="{{ url_for('static', filename='assets/bootstrap/css/bootstrap.min.css') }}">
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800&amp;display=swap">
-        {% block styles %}
-        {% endblock %}
-
     </head>
 
     <body>
@@ -37,9 +39,9 @@
 
         {% include 'shared_components/_footer.html' %}
 
-        <script src="{{ url_for('static', filename='assets/bootstrap/js/bootstrap.min.js') }}"></script>
-        <script src="{{ url_for('static', filename='assets/js/startup-modern.js') }}"></script>
         <script src="https://code.jquery.com/jquery-3.7.0.js" integrity="sha256-JlqSTELeR4TLqP0OG9dxM7yDPqX1ox/HfgiSLBj8+kM=" crossorigin="anonymous"></script>
+        <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/startup-modern.js') }}"></script>
 
         {% block scripts %}
         {% endblock %}

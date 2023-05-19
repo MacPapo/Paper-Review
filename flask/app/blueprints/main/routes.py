@@ -1,10 +1,10 @@
 from datetime import datetime
-from flask import render_template, flash, redirect, url_for
+from flask import render_template
 from flask_login import current_user, login_required
 from app import db
-from app.main import bp
-from app.models import PDF, Project, Version, Researcher
-from app.auth.crypt import Crypt
+from app.models import PDF, Project
+from app.modules.crypt import Crypt
+from app.blueprints.main import bp
 
 
 @bp.before_request
@@ -23,9 +23,7 @@ def index():
             projects = current_user.projects
             versions = []
             for p in projects:
-                versions.append(
-                    p.versions[-1]
-                )
+                versions.append(p.versions[-1])
             return render_template(
                 "index.html", title="Home", projects=versions, researcher=True
             )

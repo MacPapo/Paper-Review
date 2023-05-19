@@ -3,9 +3,9 @@ from urllib.parse import unquote
 from datetime import datetime
 from pathlib import Path
 from werkzeug.utils import secure_filename
-from app import db, firebase
-from app.auth.crypt import Crypt
+from app import db
 from app.models import PDF
+from .crypt import Crypt
 
 
 def upload_pdf(pdfs):
@@ -51,7 +51,9 @@ def upload_pdf(pdfs):
     name_no_folder = lambda n: os.path.basename(n)
     out = []
     for index, pdf_url in enumerate(pdf_urls):
-        out.append(PDF(id=pdf_url[0], filename=name_no_folder(files[index]), key=pdf_url[1]))
+        out.append(
+            PDF(id=pdf_url[0], filename=name_no_folder(files[index]), key=pdf_url[1])
+        )
 
     # 6. The files are deleted from the server.
     for filename in files:

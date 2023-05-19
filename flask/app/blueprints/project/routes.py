@@ -2,8 +2,8 @@ from datetime import datetime
 from flask import render_template, flash, redirect, url_for, request
 from flask_login import current_user, login_required
 from app import db
-from app.project import bp
-from app.project.forms import UploadForm
+from app.blueprints.project import bp
+from app.blueprints.project.forms import UploadForm
 from app.models import Project, Version, Draft
 from app.modules.pdf_helper import upload_pdf, get_pdf
 
