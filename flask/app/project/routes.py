@@ -2,9 +2,9 @@ from datetime import datetime
 from flask import render_template, flash, redirect, url_for, request
 from flask_login import current_user, login_required
 from app import db
-from app.project import bp, logger
+from app.project import bp
 from app.project.forms import UploadForm
-from app.models import Project, Version, Draft, PDF
+from app.models import Project, Version, Draft
 from app.modules.pdf_helper import upload_pdf, get_pdf
 
 
@@ -14,16 +14,12 @@ def projects():
     if current_user.is_authenticated:
         if current_user.type == "reviewer":
             projects = Project.query.all()
-            versions = []
-            for p in projects:
-                versions.append(p.versions[-1])
+            versions = [p.versions[-1] for p in projects]
             return render_template(
                 "projects.html", title="All Projects", projects=versions
             )
         else:
-            versions = []
-            for p in current_user.projects:
-                versions.append(p.versions[-1])
+            versions = [p.versions[-1] for p in current_user.projects]
             return render_template(
                 "projects.html", title="Your Projects", projects=versions
             )
@@ -38,7 +34,6 @@ def create():
     if form.validate_on_submit():
         pdfs = upload_pdf(form.pdfs.data)
 
-        # 5.1 Create a project object
         new_project = Project(researcher=current_user)
         db.session.add(new_project)
         db.session.commit()
@@ -62,17 +57,13 @@ def create():
         new_draft.version = new_version
 
         db.session.add(new_version, new_draft)
+
+        # Add the PDF objects to the draft and version
+        new_draft.contains = pdfs
+        new_version.contains = pdfs
+
         db.session.commit()
 
-        # 5.2 cretate new PDFVersions objects
-        for pdf in pdfs:
-            new_draft.contains.append(pdf)
-            new_version.contains.append(pdf)
-
-        # 7. The database is committed.
-        db.session.commit()
-
-        # 8. A message is flashed to the user.
         flash("Congratulations, you have submitted a PDF!")
         return redirect(url_for("main.index"))
 
@@ -88,11 +79,15 @@ def view(pid, version_number):
 
     if version_number > len(project.versions):
         return render_template("errors/404.html"), 404
-    
+
     get_pdf_lambda = lambda x: get_pdf(x)
 
     return render_template(
-        "view.html", title="View Project", project=project, version_number = version_number, get_pdf_lambda=get_pdf_lambda
+        "view.html",
+        title="View Project",
+        project=project,
+        version_number=version_number,
+        get_pdf_lambda=get_pdf_lambda,
     )
 
 
@@ -130,17 +125,12 @@ def edit_draft(vid):
         draft.description = request.form.get("description")
         names = request.form.getlist("names")
 
-        db.session.begin_nested()
         pdfs = upload_pdf(request.files.getlist("files"))
-        for pdf in draft.contains:
-            if pdf.filename not in names:
-                draft.contains.remove(pdf)
-
-        for pdf in pdfs:
-            draft.contains.append(pdf)
+        draft.contains = [pdf for pdf in draft.contains if pdf.filename in names] + pdfs
 
         db.session.commit()
-        return('', 204)
+        return ("", 204)
+
 
 @bp.route("/project/update_version/<int:vid>", methods=["POST"])
 @login_required
@@ -153,10 +143,8 @@ def update_version(vid):
         new_draft = Draft(
             title=draft.title,
             description=draft.description,
+            contains=[pdf for pdf in draft.contains],
         )
-
-        for pdf in draft.contains:
-            new_draft.contains.append(pdf)
 
         new_version = Version(
             version_number=version.version_number + 1,
@@ -174,8 +162,23 @@ def update_version(vid):
         db.session.add(new_version, new_draft)
         db.session.commit()
 
-        for pdf in new_draft.contains:
-            new_version.contains.append(pdf)
+        new_version.contains = [pdf for pdf in new_draft.contains]
 
         db.session.commit()
-        return('', 204)
+        return ("", 204)
+
+
+@bp.route("/project/discard_draft/<int:vid>", methods=["POST"])
+@login_required
+def discard_draft(vid):
+    if request.method == "POST":
+        version = Version.query.filter_by(vid=vid).first_or_404()
+        draft = version.draft
+
+        draft.title = version.project_title
+        draft.description = version.project_description
+
+        draft.contains = [pdf for pdf in version.contains]
+
+        db.session.commit()
+        return ("", 204)

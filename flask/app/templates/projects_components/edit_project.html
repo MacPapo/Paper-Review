@@ -47,6 +47,7 @@
                     <br><br>
                     <button id="submit-draft" type="button">Submit Draft</button>
                     <button id="submit-project" type="button">Apply Draft to Project</button>
+                    <button id="discard-draft" type="button">Discard Draft</button>
             </div>
         </div>
     </div>
@@ -101,8 +102,9 @@
          formData.append('description', description);
 
          $('.existing-name').each(function() {
-            console.log($(this).val())
-             formData.append('names', $(this).val() + '.pdf');
+             var name = $(this).val() + '.pdf';
+             console.log(name)
+             formData.append('names', name);
          });
 
          for (var i = 0; i < files.length; i++) {
@@ -148,8 +150,9 @@
          formData.append('description', description);
 
          $('.existing-name').each(function() {
-            console.log($(this).val())
-             formData.append('names', $(this).val() + '.pdf');
+             var name = $(this).val() + '.pdf';
+             console.log(name)
+             formData.append('names', name);
          });
 
          for (var i = 0; i < files.length; i++) {
@@ -169,7 +172,7 @@
                      type: 'POST',
                      success: function(response) {
                          // Handle the success of the second POST request
-                         alert('Second request submitted successfully!');
+                         alert('Request submitted successfully!');
                          window.location.href = "{{ url_for('project.projects') }}";
                      },
                      error: function(error) {
@@ -178,6 +181,25 @@
                          console.log(error);
                      }
                  });
+             },
+             error: function(error) {
+                 alert('Error submitting the form. Please try again.');
+                 console.log(error);
+             }
+         });
+     });
+
+     $('#discard-draft').click(function(e) {
+         e.preventDefault();
+
+         $.ajax({
+             url: "{{ url_for('project.discard_draft', vid=vid) }}",
+             type: 'POST',
+             contentType: false,
+             processData: false,
+             success: function(response) {
+                 alert('Draft discarded successfully!');
+                 window.location.href = "{{ url_for('project.edit', vid=vid) }}";
              },
              error: function(error) {
                  alert('Error submitting the form. Please try again.');
