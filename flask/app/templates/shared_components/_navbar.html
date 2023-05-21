@@ -13,7 +13,7 @@
             {% if current_user.is_anonymous %}
             </ul>
             <a class="btn btn-primary shadow" role="button" href="{{ url_for('auth.login') }}">Login</a>
-            <div class="dropdown ms-2">
+            <div class="dropdown ms-0">
                 <button class="btn btn-danger dropdown-toggle" type="button" id="dropdownMenuButton1"
                     data-bs-toggle="dropdown" aria-expanded="false">
                     Register
@@ -27,14 +27,14 @@
 
             {% if current_user.type == "researcher" %}
             <div class="dropdown">
-                <a class="btn dropdown-toggle" type="button" id="dropdownMenuButtonProjects"
-                   data-bs-toggle="dropdown" aria-expanded="false">
-                    Projects
-                </a>
-                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButtonProjects">
-                    <li><a class="dropdown-item" href="{{ url_for('project.projects') }}">Your Projects</a></li>
-                    <li><a class="dropdown-item" href="{{ url_for('project.create') }}">Add new Project</a></li>
-                </ul>
+                    <a class="btn dropdown-toggle" type="button" id="dropdownMenuButtonProjects" data-bs-toggle="dropdown"
+                        aria-expanded="false">
+                        Projects
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButtonProjects">
+                        <li><a class="dropdown-item" href="{{ url_for('project.projects') }}">Your Projects</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('project.create') }}">Add new Project</a></li>
+                    </ul>
             </div>
             {% else %}
             <div class="dropdown">

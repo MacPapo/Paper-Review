@@ -6,7 +6,7 @@ from werkzeug.utils import secure_filename
 from app import db
 from app.models import PDF
 from .crypt import Crypt
-
+from extensions import firebase
 
 def upload_pdf(pdfs):
     # Description of the lambda function:

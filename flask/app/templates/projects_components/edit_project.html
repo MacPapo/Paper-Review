@@ -27,27 +27,51 @@
                     </div>
 
                     <!-- Add pdfs -->
-                    <div id="file-fields">
-                        {% for link, name in pdfs.items() %}
-                        <div class="form-group file-group">
-                            <label for="file-{{ loop.index }}">PDF File {{ loop.index }}:</label>
 
-                            {% if name %}
-                            <input class="existing-name" type="text" id="name-{{ loop.index }}" name="names" value="{{ name }}">
-                            {% else %}
-                            <input type="file" id="file-{{ loop.index }}" name="files">
-                            {% endif %}
+                    <table id="file-fields" class="table table-sm">
+                        <tbody>
+                            {% for link, name in pdfs.items() %}
 
-                            <button class="remove-file-btn" type="button">-</button>
-                        </div>
-                        {% endfor %}
+                                <tr class="text-center">
+
+                                    <th scope="row">
+                                        <label for="file-{{ loop.index }}"><b>{{ loop.index }} </b></label>
+                                    </th>
+                                    <td scope="row">
+                                        {% if name %}
+                                        <input style="border: none; width: 100%;text-align:center;" class="existing-name" type="text" id="name-{{ loop.index }}" name="names"
+                                            value="{{ name }}" readonly>
+                                        {% else %}
+                                        <input style="border: none; width: 100%;text-align:center;" type="file" id="file-{{ loop.index }}" name="files" readonly>
+                                        {% endif %}
+                                    </td>
+                                    <td scope="row">
+                                        <div class="d-flex justify-content-end">
+                                        <button class="btn btn-danger" id="remove-file-btn" type="button">-</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+
+                    <div class="d-flex justify-content-center align-items-centerd-flex justify-content-center align-items-center mt-3">
+                    <button  class="btn btn-primary" id="add-file-btn" type="button">+</button>
                     </div>
-
-                    <button id="add-file-btn" type="button">+</button>
                     <br><br>
-                    <button id="submit-draft" type="button">Submit Draft</button>
-                    <button id="submit-project" type="button">Apply Draft to Project</button>
-                    <button id="discard-draft" type="button">Discard Draft</button>
+                    <div class="row">
+                        <div class="col-sm">
+                        <button class="btn btn-danger btn-block " id="discard-draft" type="button">Discard Draft</button>
+                        </div>
+                        <div class="col-sm">
+                            <div class="d-flex justify-content-end">
+                        <button class="btn btn-light btn-block " id="submit-draft" type="button">Submit Draft</button>
+                            </div>
+                        </div>
+                        <div class="col-sm">
+                        <button class="btn btn-primary btn-block" id="submit-project" type="button">Apply Draft To Project</button>
+                        </div>
+                    </div>
             </div>
         </div>
     </div>
@@ -65,20 +89,21 @@
      $('#add-file-btn').click(function(e) {
          e.preventDefault();
 
-         var fileField = $('<div class="form-group file-group">' +
-                           '<label for="file-' + fileCount + '">PDF File ' + fileCount + ':</label>' +
-                           '<input type="file" id="file-' + fileCount + '" name="files">' +
-                           '<button class="remove-file-btn" type="button">-</button>' +
-                           '</div>');
+         var fileField = $('<tr class="text-center">' +
+                           '<th scopre="row"><label for="file-' + (fileCount+1) + '"></th><td scope="row">PDF File ' + (fileCount+1) + ':   </label>' +
+                           '<input  type="file" id="file-' + (fileCount+1) + '" name="files"></td><td scope="row"><div class="d-flex justify-content-end">' +
+                           '<button class="btn btn-danger" id="remove-file-btn" type="button">-</button></div></td>' +
+                           '</tr>');
 
          $('#file-fields').append(fileField);
                 ++fileCount;
      });
 
-     $('#file-fields').on('click', '.remove-file-btn', function(e) {
+     $('#file-fields').on('click', '#remove-file-btn', function(e) {
          e.preventDefault();
 
-         $(this).closest('.file-group').remove();
+         $(this).closest('tr').remove();
+
      });
 
      $('#submit-draft').click(function(e) {
