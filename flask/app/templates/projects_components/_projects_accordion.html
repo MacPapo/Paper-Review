@@ -83,10 +83,10 @@
 {% endmacro %}
 
 
-{% macro render_accordion_no_button(name,pdf) %}
+{% macro render_accordion_no_button(name,pdf,vis) %}
   <!-- Button trigger modal -->
         <button type="button" class="btn btn-primary"
-            onclick="window.location.href='{{ url_for('project.pdf', pdf_name = name) }}'">
+            onclick="window.location.href='{{ url_for('project.pdf', pdf_name = name,vis=vis) }}'">
             {{ name }}
         </button>
 {% endmacro %}

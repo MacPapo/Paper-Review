@@ -22,7 +22,7 @@
             </div>
         </div>
         {% for pdf, name in pdfs %}
-            {{ render_accordion_no_button(name,pdf) }}
+            {{ render_accordion_no_button(name,pdf,version.vid) }}
         {% endfor %}
         <form method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
             {{ form.hidden_tag() }}

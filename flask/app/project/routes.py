@@ -1,9 +1,8 @@
 import os
-import fitz
 from urllib.parse import unquote
 from datetime import datetime
 from pathlib import Path
-from flask import render_template, flash, redirect, url_for
+from flask import render_template, flash, redirect, url_for,request
 from flask_login import current_user, login_required
 from werkzeug.utils import secure_filename
 from app import db, firebase
@@ -165,9 +164,9 @@ def note(vid):
                 names.append(retrive_file_name(pdf))
         return render_template("note.html",title="Add Note",form=form,version=version,pdfs=zip(pdfs,names))
 
-@bp.route("/project/pdf/<pdf_name>")
+@bp.route("/project/pdf/<pdf_name>/<vis>")
 @login_required
-def pdf(pdf_name):
+def pdf(pdf_name,vis):
     clean_url = lambda url: url.replace("files/", "")
     pdf_link=""
     retrive_file_name = lambda n: os.path.basename(unquote(Path(n).stem))[:-20]
@@ -186,4 +185,19 @@ def pdf(pdf_name):
     firebase.download(path,path)
     os.rename(path,"app/static/download/"+path.replace("uploads/",""))
     new_path = "/static/download/"+path.replace("uploads/","")
-    return render_template("pdf.html",title="PDF VIEW",path = new_path)
+    return render_template("pdf.html",title="PDF VIEW",path = new_path,vis=vis)
+
+
+@bp.route("/project/pdf/download/<pdf_path>/<vis>",methods=['POST'])
+@login_required
+def download(pdf_path,vis):
+    correct_file_name = lambda n: os.path.join(
+            "app/static/download",
+            Path(secure_filename(n)).stem
+            + datetime.now().strftime("-%Y-%m-%d-%H:%M:%S")
+            + ".pdf",
+        )
+    pdf_file = request.files['pdfFile']
+    pdfname = correct_file_name(pdf_file.filename)
+    pdf_file.save(pdfname)
+    return  pdfname.replace("app/static/download","/static/download")
