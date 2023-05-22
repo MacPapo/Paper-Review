@@ -3,12 +3,12 @@ from urllib.parse import unquote
 from datetime import datetime
 from pathlib import Path
 from werkzeug.utils import secure_filename
-from app import db
+from app import db, firebase
 from app.models import PDF
 from .crypt import Crypt
 
 
-def upload_pdf(pdfs):
+def upload_pdf(dir, pdfs):
     # Description of the lambda function:
     # 1. secure_filename(n) returns a string of the filename with all the special characters removed.
     #    For example, if n = "hello world.pdf", then secure_filename(n) = "hello world.pdf"
@@ -25,7 +25,7 @@ def upload_pdf(pdfs):
     # 5. os.path.join("uploads", Path(secure_filename(n)).stem + datetime.now().strftime("-%Y-%m-%d-%H:%M:%S") + ".pdf") returns the filename with the path.
     #    For example, if n = "hello world.pdf", then os.path.join("uploads", Path(secure_filename(n)).stem + datetime.now().strftime("-%Y-%m-%d-%H:%M:%S") + ".pdf") = "uploads/hello world-2020-07-01-12:00:00.pdf"
     correct_file_name = lambda n: os.path.join(
-        "uploads",
+        dir + "/",
         Path(secure_filename(n)).stem
         + datetime.now().strftime("-%Y-%m-%d-%H:%M:%S")
         + ".pdf",
@@ -64,11 +64,10 @@ def upload_pdf(pdfs):
     return out
 
 
-def get_pdf(pdfs):
-    crypt = Crypt()
+def get_all_pdfs(pdfs):
     links = []
     for pdf in pdfs:
-        links.append(crypt.decrypt(pdf.key, pdf.id))
+        links.append(get_link(pdf.key, pdf.id))
 
     retrive_file_name = lambda n: os.path.basename(unquote(Path(n).stem))
     names = []
@@ -78,8 +77,17 @@ def get_pdf(pdfs):
     return create_dictionary(links, names)
 
 
+def get_link(key, id):
+    crypt = Crypt()
+    return crypt.decrypt(key, id)
+
+
 def create_dictionary(links, names):
     dictionary = {}
     for link, name in zip(links, names):
         dictionary[link] = name
     return dictionary
+
+
+def download_pdf(name):
+    return firebase.download(name)

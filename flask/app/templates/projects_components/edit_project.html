@@ -34,6 +34,10 @@
 
                             {% if name %}
                             <input class="existing-name" type="text" id="name-{{ loop.index }}" name="names" value="{{ name }}">
+                            <button type="button" class="btn btn-primary"
+                                onclick="window.location.href='{{ url_for('project.edit_pdf', vid = vid, filename=name) }}'">
+                                {{ name }}
+                            </button>
                             {% else %}
                             <input type="file" id="file-{{ loop.index }}" name="files">
                             {% endif %}
