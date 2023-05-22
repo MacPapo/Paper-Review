@@ -5,7 +5,7 @@ from app import db
 from app.blueprints.project import bp
 from app.blueprints.project.forms import UploadForm
 from app.models import Project, Version, Draft
-from app.modules.pdf_helper import *
+from app.modules.pdf_helper import upload_pdf, get_pdf
 
 
 @bp.route("/projects")
@@ -32,7 +32,7 @@ def projects():
 def create():
     form = UploadForm()
     if form.validate_on_submit():
-        pdfs = upload_pdf("uploads", form.pdfs.data)
+        pdfs = upload_pdf(form.pdfs.data)
 
         new_project = Project(researcher=current_user)
         db.session.add(new_project)
@@ -80,7 +80,7 @@ def view(pid, version_number):
     if version_number > len(project.versions):
         return render_template("errors/404.html"), 404
 
-    get_pdf_lambda = lambda x: get_all_pdfs(x)
+    get_pdf_lambda = lambda x: get_pdf(x)
 
     return render_template(
         "view.html",
@@ -102,7 +102,7 @@ def edit(vid):
     form.title.data = draft.title
     form.description.data = draft.description
 
-    pdfs = get_all_pdfs(draft.contains)
+    pdfs = get_pdf(draft.contains)
 
     return render_template(
         "projects_components/edit_project.html",
@@ -125,7 +125,7 @@ def edit_draft(vid):
         draft.description = request.form.get("description")
         names = request.form.getlist("names")
 
-        pdfs = upload_pdf("uploads", request.files.getlist("files"))
+        pdfs = upload_pdf(request.files.getlist("files"))
         draft.contains = [pdf for pdf in draft.contains if pdf.filename in names] + pdfs
 
         db.session.commit()
@@ -182,32 +182,3 @@ def discard_draft(vid):
 
         db.session.commit()
         return ("", 204)
-
-
-#############################################################################
-
-
-@bp.route("/project/edit/<int:vid>/edit_pdf/<filename>", methods=["POST", "GET"])
-@login_required
-def edit_pdf(vid, filename):
-    draft = Version.query.filter_by(vid=vid).first_or_404().draft
-    name = filename + ".pdf"
-    if request.method == "POST":
-        name = request.form.get("pdfName")
-        pdf = request.form.get("pdfFile")
-        print("POST")
-        print(name)
-        print(pdf)
-        draft.contains.append(upload_pdf("static/assets/tmp/", [ pdf ]) )
-        return ("", 204)
-
-
-    if request.method == "GET":
-        link = download_pdf(name)
-        return render_template(
-            "edit_pdf.html",
-            title="PDF VIEW",
-            vid=vid,
-            link=link,
-            filename=filename,
-        )
