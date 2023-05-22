@@ -1,65 +1,103 @@
 {% from "projects_components/_projects_accordion.html" import render_status_bedge %}
 
 {% macro render_user(user) %}
-
-<div class="col">
-    <img src="{{ user.gravatar(size=50, default="robohash") }}" alt="Profile Pic"
-             class="rounded-circle shadow" width="50">
+<div class="row">
+    <div class="col-md-1">
+        <img src="{{ user.gravatar(size=60, default="robohash") }}" alt="Profile Pic" class="rounded-circle shadow"
+            width="60">
+    </div>
+    <div class="col-md-2  mt-3 text-left">
+        <p class="fw-bold text-danger">{{ user.fullname() }}</p>
+    </div>
 </div>
-<div class="col">
-    <p>{{ user.fullname() }}</p>
-</div>
-
 {% endmacro %}
 
 
 
 {% macro render_versions(versions, current_version) %}
 <div class="dropdown">
-    <a class="btn dropdown-toggle" type="button" id="dropdownMenuButtonProjects"
-       data-bs-toggle="dropdown" aria-expanded="false">
+    <a class="btn dropdown-toggle" type="button" id="dropdownMenuButtonProjects" data-bs-toggle="dropdown"
+        aria-expanded="false">
         Version #{{ current_version }}
     </a>
     <ul class="dropdown-menu" aria-labelledby="dropdownMenuButtonProjects">
         {% for version in versions %}
-        <li><a class="dropdown-item" href="{{ url_for('project.view', pid=version.pid, version_number=version.version_number) }}">{{ version.version_number }}</a></li>
+        <li><a class="dropdown-item"
+                href="{{ url_for('project.view', pid=version.pid, version_number=version.version_number) }}">{{
+                version.version_number }}</a></li>
         {% endfor %}
     </ul>
 </div>
 {% endmacro %}
 
+{% macro render_reports() %}
+<a class="btn dropdown-toggle" data-bs-toggle="offcanvas" href="#offcanvasExample" role="button" aria-controls="offcanvasExample">
+  Reports
+</a>
 
+
+<div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasExample" aria-labelledby="offcanvasExampleLabel">
+  <div class="offcanvas-header">
+    <h5 class="offcanvas-title" id="offcanvasExampleLabel">Offcanvas</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+  </div>
+  <div class="offcanvas-body">
+    <div>
+      Some text as placeholder. In real life you can have the elements you have chosen. Like, text, images, lists, etc.
+    </div>
+    <div class="dropdown mt-3">
+      <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+        Dropdown button
+      </button>
+      <ul class="dropdown-menu">
+        <li><a class="dropdown-item" href="#">Action</a></li>
+        <li><a class="dropdown-item" href="#">Another action</a></li>
+        <li><a class="dropdown-item" href="#">Something else here</a></li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+{% endmacro%}
 
 {% macro render_info(version) %}
 
 <div class="row">
-    <div class="col">
-        <h2>{{ version.project_title }}</h2>
-    </div>
-</div>
-<div class="row">
     {{ render_user(version.project.researcher) }}
 </div>
-<div class="row">
+
+<div class="col mt-5" style="text-align: left;">
+    <p class="text-primary fw-bold">Title</p>
+    <h2>{{ version.project_title }}</h2>
+</div>
+<div class="row text-center pt-2">
     <div class="col">
-        <p>Created {{ version.time_since_creation() }}</p>
+        {{ render_reports() }}
+    </div>
+
+    <div class="col">
+        <p>Created :{{ version.time_since_creation() }}</p>
     </div>
     <div class="col">
-        <p>Updated {{ version.time_since_update() }}</p>
+        <p>Updated :{{ version.time_since_update() }}</p>
     </div>
     <div class="col">
-        Status {{ render_status_bedge(version.project_status) }}
+        <p>Status :{{ render_status_bedge(version.project_status) }}</p>
     </div>
     <div class="col">
         {{ render_versions(version.project.versions, version.version_number) }}
     </div>
 </div>
 <hr class="hr" />
-        <div class="row">
-            <div class="col">
-                <p>{{ version.project_description }}</p>
-            </div>
-        </div>
+<div class="row">
+    <div>
+        <p class="text-primary fw-bold">Description</p>
+    </div>
+
+    <div class="col">
+        <p>{{ version.project_description }}</p>
+    </div>
+</div>
 
 
 {% endmacro %}
@@ -68,15 +106,22 @@
 
 {% macro render_pdfs(pdfs) %}
 
-{% for link, name in pdfs.items() %}
+{% for pair in pdfs.items()|batch(2)%}
 
+<div class="row ">
+{% for link, name in pair  %}
+
+    <div class="col-6 mt-2">
         <!-- Button trigger modal -->
-        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal-{{ loop.index }}">
+        <button type="button" class="btn btn-primary h-100 w-100" data-bs-toggle="modal"
+            data-bs-target="#exampleModal-{{ loop.index }}">
             {{ name }}
         </button>
 
+
         <!-- Modal -->
-        <div class="modal fade" id="exampleModal-{{ loop.index }}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal fade" id="exampleModal-{{ loop.index }}" tabindex="-1" aria-labelledby="exampleModalLabel"
+            aria-hidden="true">
             <div class="modal-dialog modal-xl">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -91,6 +136,9 @@
                 </div>
             </div>
         </div>
+    </div>
+    {% endfor %}
+</div>
 {% endfor %}
 
 {% endmacro %}
