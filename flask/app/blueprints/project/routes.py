@@ -187,20 +187,19 @@ def discard_draft(vid):
 #############################################################################
 
 
+
 @bp.route("/project/edit/<int:vid>/edit_pdf/<filename>", methods=["POST", "GET"])
 @login_required
 def edit_pdf(vid, filename):
     draft = Version.query.filter_by(vid=vid).first_or_404().draft
     name = filename + ".pdf"
-    if request.method == "POST":
-        name = request.form.get("pdfName")
-        pdf = request.form.get("pdfFile")
-        print("POST")
-        print(name)
-        print(pdf)
-        draft.contains.append(upload_pdf("static/assets/tmp/", [ pdf ]) )
-        return ("", 204)
 
+    if request.method == "POST":
+        pdf = request.files["pdf"]
+        pdf_obj = upload_pdf("static/assets/tmp/", [pdf])
+        draft.contains = [pdf for pdf in draft.contains if pdf.filename != name] + pdf_obj
+        db.session.commit()
+        return ("", 204)
 
     if request.method == "GET":
         link = download_pdf(name)

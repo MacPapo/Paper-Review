@@ -24,7 +24,7 @@ class Firebase:
         dest = (
             self.download_directory
             + remove_extension(name)
-            + datetime.datetime.now().strftime("-%Y-%m-%d-%H:%M:%S")
+            + datetime.datetime.now().strftime("-%Y-%m-%d-%H-%M-%S")
             + ".pdf"
         )
         self.storage.child(
