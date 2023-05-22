@@ -6,9 +6,9 @@ from flask import render_template, flash, redirect, url_for, request, current_ap
 from flask_login import current_user, login_user, logout_user, login_required
 from werkzeug.urls import url_parse  # this is used to parse the url
 from app import db, firebase
-from app.auth import bp, crypt, logger
+from app.blueprints.auth import bp
 from app.models import Researcher, Reviewer, PDF
-from app.auth.forms import (
+from .forms import (
     LoginUserForm,
     RegistrationResearcherForm,
     RegistrationReviewerForm,

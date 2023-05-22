@@ -1,0 +1,96 @@
+{% from "projects_components/_projects_accordion.html" import render_status_bedge %}
+
+{% macro render_user(user) %}
+
+<div class="col">
+    <img src="{{ user.gravatar(size=50, default="robohash") }}" alt="Profile Pic"
+             class="rounded-circle shadow" width="50">
+</div>
+<div class="col">
+    <p>{{ user.fullname() }}</p>
+</div>
+
+{% endmacro %}
+
+
+
+{% macro render_versions(versions, current_version) %}
+<div class="dropdown">
+    <a class="btn dropdown-toggle" type="button" id="dropdownMenuButtonProjects"
+       data-bs-toggle="dropdown" aria-expanded="false">
+        Version #{{ current_version }}
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButtonProjects">
+        {% for version in versions %}
+        <li><a class="dropdown-item" href="{{ url_for('project.view', pid=version.pid, version_number=version.version_number) }}">{{ version.version_number }}</a></li>
+        {% endfor %}
+    </ul>
+</div>
+{% endmacro %}
+
+
+
+{% macro render_info(version) %}
+
+<div class="row">
+    <div class="col">
+        <h2>{{ version.project_title }}</h2>
+    </div>
+</div>
+<div class="row">
+    {{ render_user(version.project.researcher) }}
+</div>
+<div class="row">
+    <div class="col">
+        <p>Created {{ version.time_since_creation() }}</p>
+    </div>
+    <div class="col">
+        <p>Updated {{ version.time_since_update() }}</p>
+    </div>
+    <div class="col">
+        Status {{ render_status_bedge(version.project_status) }}
+    </div>
+    <div class="col">
+        {{ render_versions(version.project.versions, version.version_number) }}
+    </div>
+</div>
+<hr class="hr" />
+        <div class="row">
+            <div class="col">
+                <p>{{ version.project_description }}</p>
+            </div>
+        </div>
+
+
+{% endmacro %}
+
+
+
+{% macro render_pdfs(pdfs) %}
+
+{% for link, name in pdfs.items() %}
+
+        <!-- Button trigger modal -->
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal-{{ loop.index }}">
+            {{ name }}
+        </button>
+
+        <!-- Modal -->
+        <div class="modal fade" id="exampleModal-{{ loop.index }}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-xl">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="exampleModalLabel">{{ name }}</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="ratio ratio-4x3">
+                            <embed class="embed-responsive-item" src="{{ link }}"></embed>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+{% endfor %}
+
+{% endmacro %}

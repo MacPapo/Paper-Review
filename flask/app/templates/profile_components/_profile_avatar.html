@@ -8,9 +8,11 @@
           <p class="text-secondary mb-1">{{ user.type }}</p>
           <p class="text-muted font-size-sm">{{ user.uid }}</p>
           <button class="btn btn-primary">Follow</button>
-          <button class="btn btn-outline-primary" onclick="location.href='{{ url_for('auth.edit_profile', username=current_user.username ) }}'">
-            Edit
-          </button>
+          {% if current_user.uid == user.uid %}
+            <button class="btn btn-outline-primary" onclick="location.href='{{ url_for('auth.edit_profile', username=current_user.username ) }}'">
+              Edit
+            </button>
+          {% endif %}
         </div>
       </div>
     </div>
