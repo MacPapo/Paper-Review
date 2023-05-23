@@ -3,34 +3,10 @@ from urllib.parse import unquote
 from datetime import datetime
 from pathlib import Path
 from werkzeug.utils import secure_filename
-from app import db
+from app import db, firebase
 from app.models import PDF
 from .crypt import Crypt
-from extensions import firebase
 
-<<<<<<< HEAD
-def upload_pdf(pdfs):
-    # Description of the lambda function:
-    # 1. secure_filename(n) returns a string of the filename with all the special characters removed.
-    #    For example, if n = "hello world.pdf", then secure_filename(n) = "hello world.pdf"
-    #
-    # 2. Path(secure_filename(n)).stem returns the filename without the extension.
-    #    For example, if n = "hello world.pdf", then Path(secure_filename(n)).stem = "hello world"
-    #
-    # 3. datetime.now().strftime("-%Y-%m-%d-%H:%M:%S") returns the current date and time in the format of "-YYYY-MM-DD-HH:MM:SS"
-    #    For example, if the current date and time is 2020-07-01 12:00:00, then datetime.now().strftime("-%Y-%m-%d-%H:%M:%S") = "-2020-07-01-12:00:00"
-    #
-    # 4. Putting it all together, if n = "hello world.pdf", then correct_file_name(n) = "uploads/hello world-2020-07-01-12:00:00.pdf"
-    #    If n = "hello world!.pdf", then correct_file_name(n) = "uploads/hello world!-2020-07-01-12:00:00.pdf"
-    #
-    # 5. os.path.join("uploads", Path(secure_filename(n)).stem + datetime.now().strftime("-%Y-%m-%d-%H:%M:%S") + ".pdf") returns the filename with the path.
-    #    For example, if n = "hello world.pdf", then os.path.join("uploads", Path(secure_filename(n)).stem + datetime.now().strftime("-%Y-%m-%d-%H:%M:%S") + ".pdf") = "uploads/hello world-2020-07-01-12:00:00.pdf"
-    correct_file_name = lambda n: os.path.join(
-        "uploads",
-        Path(secure_filename(n)).stem
-        + datetime.now().strftime("-%Y-%m-%d-%H:%M:%S")
-        + ".pdf",
-=======
 import re
 
 
@@ -39,7 +15,6 @@ def upload_pdf(dir, pdfs):
     correct_file_name = lambda n: os.path.join(
         dir,
         f"{Path(re_filename(n)).stem}-{datetime.now().strftime('%Y-%m-%d-%H-%M-%S')}.pdf",
->>>>>>> f2c6ff9fe98284cdc62dc40c20ab547a71a495d5
     )
 
     files = [correct_file_name(f.filename) for f in pdfs]
@@ -61,11 +36,10 @@ def upload_pdf(dir, pdfs):
     return out
 
 
-def get_pdf(pdfs):
-    crypt = Crypt()
+def get_all_pdfs(pdfs):
     links = []
     for pdf in pdfs:
-        links.append(crypt.decrypt(pdf.key, pdf.id))
+        links.append(get_link(pdf.key, pdf.id))
 
     retrive_file_name = lambda n: os.path.basename(unquote(Path(n).stem))
     names = []
@@ -75,8 +49,26 @@ def get_pdf(pdfs):
     return create_dictionary(links, names)
 
 
+def get_link(key, id):
+    crypt = Crypt()
+    return crypt.decrypt(key, id)
+
+
 def create_dictionary(links, names):
     dictionary = {}
     for link, name in zip(links, names):
         dictionary[link] = name
     return dictionary
+
+def download_pdf(name):
+    return firebase.download(name)
+
+def delete_pdf(pdfs):
+    folder_path = "static/assets/tmp/"
+    for filename in os.listdir(folder_path):
+        if filename.endswith('.pdf'):  # Verifica se l'estensione del file è .pdf
+            for pdf in pdfs:
+                if filename == pdf.filename:
+                    os.remove(folder_path + filename)
+
+    return

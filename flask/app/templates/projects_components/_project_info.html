@@ -20,7 +20,7 @@
         aria-expanded="false">
         Version #{{ current_version }}
     </a>
-    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButtonProjects">
+    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButtonProjects" style="max-height: 200px; overflow-y: auto;">
         {% for version in versions %}
         <li><a class="dropdown-item"
                 href="{{ url_for('project.view', pid=version.pid, version_number=version.version_number) }}">{{
@@ -105,7 +105,7 @@
 
 
 {% macro render_pdfs(pdfs) %}
-
+{% set count = namespace(value = 0) %}
 {% for pair in pdfs.items()|batch(2)%}
 
 <div class="row ">
@@ -114,13 +114,13 @@
     <div class="col-6 mt-2">
         <!-- Button trigger modal -->
         <button type="button" class="btn btn-primary h-100 w-100" data-bs-toggle="modal"
-            data-bs-target="#exampleModal-{{ loop.index }}">
+            data-bs-target="#exampleModal-{{ count.value }}">
             {{ name }}
         </button>
 
 
         <!-- Modal -->
-        <div class="modal fade" id="exampleModal-{{ loop.index }}" tabindex="-1" aria-labelledby="exampleModalLabel"
+        <div class="modal fade" id="exampleModal-{{ count.value }}" tabindex="-1" aria-labelledby="exampleModalLabel"
             aria-hidden="true">
             <div class="modal-dialog modal-xl">
                 <div class="modal-content">
@@ -137,6 +137,7 @@
             </div>
         </div>
     </div>
+    {% set count.value = count.value + 1 %}
     {% endfor %}
 </div>
 {% endfor %}

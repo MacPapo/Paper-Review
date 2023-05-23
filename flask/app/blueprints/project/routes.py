@@ -5,7 +5,7 @@ from app import db
 from app.blueprints.project import bp
 from app.blueprints.project.forms import UploadForm
 from app.models import Project, Version, Draft
-from app.modules.pdf_helper import upload_pdf, get_pdf
+from app.modules.pdf_helper import *
 
 
 @bp.route("/projects")
@@ -32,7 +32,7 @@ def projects():
 def create():
     form = UploadForm()
     if form.validate_on_submit():
-        pdfs = upload_pdf(form.pdfs.data)
+        pdfs = upload_pdf("uploads", form.pdfs.data)
 
         new_project = Project(researcher=current_user)
         db.session.add(new_project)
@@ -80,7 +80,7 @@ def view(pid, version_number):
     if version_number > len(project.versions):
         return render_template("errors/404.html"), 404
 
-    get_pdf_lambda = lambda x: get_pdf(x)
+    get_pdf_lambda = lambda x: get_all_pdfs(x)
 
     return render_template(
         "view.html",
@@ -102,7 +102,7 @@ def edit(vid):
     form.title.data = draft.title
     form.description.data = draft.description
 
-    pdfs = get_pdf(draft.contains)
+    pdfs = get_all_pdfs(draft.contains)
 
     return render_template(
         "projects_components/edit_project.html",
@@ -125,10 +125,12 @@ def edit_draft(vid):
         draft.description = request.form.get("description")
         names = request.form.getlist("names")
 
-        pdfs = upload_pdf(request.files.getlist("files"))
+        pdfs = upload_pdf("uploads", request.files.getlist("files"))
         draft.contains = [pdf for pdf in draft.contains if pdf.filename in names] + pdfs
 
         db.session.commit()
+        pdfs = draft.contains
+        delete_pdf(pdfs)
         return ("", 204)
 
 
@@ -182,8 +184,6 @@ def discard_draft(vid):
 
         db.session.commit()
         return ("", 204)
-<<<<<<< HEAD
-=======
 
 
 #############################################################################
@@ -197,8 +197,10 @@ def edit_pdf(vid, filename):
     name = filename + ".pdf"
 
     if request.method == "POST":
+        pdfs = draft.contains
+        delete_pdf(pdfs)
         pdf = request.files["pdf"]
-        pdf_obj = upload_pdf("static/assets/tmp/", [pdf])
+        pdf_obj = upload_pdf("uploads", [pdf])
         draft.contains = [pdf for pdf in draft.contains if pdf.filename != name] + pdf_obj
         db.session.commit()
         return ("", 204)
@@ -212,4 +214,3 @@ def edit_pdf(vid, filename):
             link=link,
             filename=filename,
         )
->>>>>>> f2c6ff9fe98284cdc62dc40c20ab547a71a495d5

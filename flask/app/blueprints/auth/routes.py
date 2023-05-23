@@ -6,7 +6,8 @@ from flask import render_template, flash, redirect, url_for, request, current_ap
 from flask_login import current_user, login_user, logout_user, login_required
 from werkzeug.urls import url_parse  # this is used to parse the url
 from app import db, firebase
-from app.blueprints.auth import bp
+from app.blueprints.auth import   bp
+from app.modules.crypt import Crypt
 from app.models import Researcher, Reviewer, PDF
 from .forms import (
     LoginUserForm,
@@ -126,9 +127,9 @@ def register_reviewer():
         filename = correct_file_name(form.pdf.data.filename)
         form.pdf.data.save(filename)
 
-        cr = crypt.Crypt()
+        cr = Crypt()
         pdf_cr = cr.encrypt_url(firebase.upload(filename))
-        pdf = PDF(id=pdf_cr[0], key=pdf_cr[1])
+        pdf = PDF(id=pdf_cr[0],filename=form.pdf.data.filename, key=pdf_cr[1])
         os.remove(filename)
 
         reviewer = Reviewer(
