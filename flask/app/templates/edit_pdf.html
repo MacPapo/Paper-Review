@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="description" content="App" />
+    <meta name="keywords" content="App" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+</head>
+
+<body>
+    <div id="embeddedView"></div>
+    <div id="getFile">
+        <div id="getFileText"></div>
+    </div>
+
+    <script src="https://documentcloud.adobe.com/view-sdk/main.js"></script>
+    <script type="text/javascript">
+        const urlToPDF = "{{ link }}";
+        const pdfFilename = urlToPDF.split("/").slice(-1)[0];
+
+        const clientId = "7b3fa4b76de4458ea63535ac28f82dde";
+        const viewerOptions = {
+            embedMode: "FULL_WINDOW",
+            defaultViewMode: "FIT_PAGE",
+            showDownloadPDF: false,
+            showPrintPDF: false,
+            showLeftHandPanel: false,
+            showAnnotationTools: true
+        };
+
+        const saveOptions = {
+            autoSaveFrequency: 0,
+            enableFocusPolling: false,
+            showSaveButton: true
+        };
+
+        const fetchPDF = async (urlToPDF) => {
+            const response = await fetch(urlToPDF);
+            const blob = await response.blob();
+            return await blob.arrayBuffer();
+        };
+
+        const hideLink = () => {
+            document.getElementById("getFile").style.display = "none";
+        };
+
+        const updateSaveUI = (fileName) => {
+            const getFileText = document.getElementById("getFileText");
+            const originalFilename = pdfFilename.split("-").slice(0, -1).join("-"); // Extract the original filename
+            const timestamp = new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d{3}Z/, ""); // Generate the timestamp
+            const newFilename = `${originalFilename}-${timestamp}.pdf`; // Combine the original filename and timestamp
+            getFileText.innerHTML = `You can retrieve your saved file (${newFilename}) from: <a onclick="hideLink(); return true;" href="${fileName}">here.</a>`;
+            document.getElementById("getFile").style.display = "flex";
+        };
+
+        document.addEventListener("adobe_dc_view_sdk.ready", async () => {
+            const adobeDCView = new AdobeDC.View({
+                clientId: clientId,
+                divId: "embeddedView"
+            });
+
+            adobeDCView.registerCallback(
+                AdobeDC.View.Enum.CallbackType.SAVE_API,
+                async (metaData, content, options) => {
+                    const originalFilename = pdfFilename.slice(0, -24);
+
+                    const file = new File([content], originalFilename, { type: 'application/pdf' }); // Create a File object with the original filename
+                    console.log(originalFilename);
+                    const formData = new FormData();
+                    formData.append('pdf', file); // Append the file to the FormData
+
+                    const response = await fetch("{{ url_for('project.edit_pdf', vid=vid, filename=filename) }}", {
+                        method: 'POST',
+                        body: formData,
+                    });
+
+                    if (response.status === 204) {
+                        const text = await response.text();
+                        updateSaveUI(text);
+                    }
+
+                    return Promise.resolve({
+                        code: AdobeDC.View.Enum.ApiResponseCode.SUCCESS,
+                        data: {
+                            metaData: { fileName: pdfFilename } // Use the original fileName as the metadata
+                        }
+                    });
+                },
+                saveOptions
+            );
+
+            const previewFilePromise = adobeDCView.previewFile({
+                content: { promise: fetchPDF(urlToPDF) },
+                metaData: { fileName: pdfFilename }
+            }, viewerOptions);
+        });
+
+        (function () {
+            if (Blob.prototype.arrayBuffer !== "function") {
+                Blob.prototype.arrayBuffer = function () {
+                    return new Promise((resolve) => {
+                        const fileReader = new FileReader();
+                        fileReader.onload = () => {
+                            resolve(fileReader.result);
+                        };
+                        fileReader.readAsArrayBuffer(this);
+                    });
+                };
+            }
+        })();
+    </script>
+</body>
+
+</html>

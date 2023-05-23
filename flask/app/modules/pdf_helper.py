@@ -8,6 +8,7 @@ from app.models import PDF
 from .crypt import Crypt
 from extensions import firebase
 
+<<<<<<< HEAD
 def upload_pdf(pdfs):
     # Description of the lambda function:
     # 1. secure_filename(n) returns a string of the filename with all the special characters removed.
@@ -29,35 +30,31 @@ def upload_pdf(pdfs):
         Path(secure_filename(n)).stem
         + datetime.now().strftime("-%Y-%m-%d-%H:%M:%S")
         + ".pdf",
+=======
+import re
+
+
+def upload_pdf(dir, pdfs):
+    re_filename = lambda n: secure_filename(re.sub(r"[^\w\s.-]", "", n))
+    correct_file_name = lambda n: os.path.join(
+        dir,
+        f"{Path(re_filename(n)).stem}-{datetime.now().strftime('%Y-%m-%d-%H-%M-%S')}.pdf",
+>>>>>>> f2c6ff9fe98284cdc62dc40c20ab547a71a495d5
     )
 
-    # Description of the following code:
-    # 1. The user uploads some files.
-    # 2. The files are saved to the server.
-    files = []
-    for f in pdfs:
-        filename = correct_file_name(f.filename)
-        f.save(filename)
-        files.append(filename)
+    files = [correct_file_name(f.filename) for f in pdfs]
+    [f.save(filename) for f, filename in zip(pdfs, files)]
 
-    # 3. The files are uploaded to Firebase.
-    # 4. The Links that Firebase returns will be encrypted.
     crypt = Crypt()
-    pdf_urls = []
-    for filename in files:
-        pdf_urls.append(crypt.encrypt_url(firebase.upload(filename)))
+    pdf_urls = [crypt.encrypt_url(firebase.upload(filename)) for filename in files]
 
-    # 5. The encrypted files's url is saved to the database.
     name_no_folder = lambda n: os.path.basename(n)
-    out = []
-    for index, pdf_url in enumerate(pdf_urls):
-        out.append(
-            PDF(id=pdf_url[0], filename=name_no_folder(files[index]), key=pdf_url[1])
-        )
+    out = [
+        PDF(id=pdf_url[0], filename=name_no_folder(files[index]), key=pdf_url[1])
+        for index, pdf_url in enumerate(pdf_urls)
+    ]
 
-    # 6. The files are deleted from the server.
-    for filename in files:
-        os.remove(filename)
+    [os.remove(filename) for filename in files]
 
     db.session.add_all(out)
     db.session.commit()
