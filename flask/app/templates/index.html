@@ -34,7 +34,7 @@
                         <div class="mx-auto" style="height: 25px;"></div>
                         {% else %}
 
-                        {{ render_accordions(projects) }}
+                        {{ render_accordions(projects,current_user.type) }}
 
 
                         <!-- For Spacing -->

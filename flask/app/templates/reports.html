@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% from "projects_components/_projects_accordion.html" import render_accordions %}
+
+
+{% block content %}
+
+<section class="py-4 py-md-5 my-5">
+    <div class="container py-md-5">
+        <div class="row">
+            {% if not reports %}
+                <div class="col-12">
+                    <div class="alert alert-info" role="alert">
+                        <h4 class="alert-heading">No Reports yet!</h4>
+                        <p>You don't have any reports yet. Go to review one by clicking this button below .</p>
+                        <hr>
+                        <a href="{{ url_for('project.projects') }}" class="btn btn-primary">Check Projects</a>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+{% endblock %}

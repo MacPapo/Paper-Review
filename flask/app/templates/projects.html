@@ -9,7 +9,7 @@
             {% if current_user.type == "researcher" %}
                 {% if projects %}
                     <h2 class="text-center mb-4">Your projects</h2>
-                    {{ render_accordions(projects) }}
+                    {{ render_accordions(projects,current_user.type) }}
                 {% else %}
                 <div class="col-12">
                     <div class="alert alert-info" role="alert">
@@ -23,7 +23,7 @@
             {% else %}
                 {% if projects %}
                     <h2 class="text-center mb-4">Projects</h2>
-                    {{ render_accordions(projects) }}
+                    {{ render_accordions(projects,current_user.type) }}
                 {% else %}
                 <div class="col-12">
                     <div class="alert alert-info" role="alert">

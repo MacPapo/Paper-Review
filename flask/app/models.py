@@ -16,11 +16,27 @@ pdf_version = db.Table(
     db.Column("version_id", db.Integer, db.ForeignKey("version.vid")),
 )
 
-
 draft_pdf = db.Table(
     "draft_pdf",
     db.Column("pdf_id", BYTEA, db.ForeignKey("pdf.id")),
     db.Column("draft_id", db.Integer, db.ForeignKey("draft.did")),
+)
+
+rdraft_pdf = db.Table(
+    "report_draft_pdf",
+    db.Column("pdf_id", BYTEA, db.ForeignKey("pdf.id")),
+    db.Column("draft_id", db.Integer, db.ForeignKey("reportdraft.rdid")),
+)
+pdf_report = db.Table(
+    "pdf_report",
+    db.Column("pdf_id", BYTEA, db.ForeignKey("pdf.id")),
+    db.Column("report_id", db.Integer, db.ForeignKey("report.rid")),
+)
+
+report_version = db.Table(
+    "report_version",
+    db.Column("report_id", db.Integer, db.ForeignKey("report.rid")),
+    db.Column("version_id", db.Integer, db.ForeignKey("version.vid")),
 )
 
 
@@ -182,6 +198,8 @@ class Version(db.Model):
         "PDF", secondary=pdf_version, backref="version", lazy=True
     )
 
+
+
     # Project versione Status
     created_at = db.Column(db.DateTime, default=datetime.utcnow())
     updated_at = db.Column(db.DateTime, default=datetime.utcnow())
@@ -206,6 +224,52 @@ class Draft(db.Model):
 
     # Draft relation to Version
     version = db.relationship("Version", back_populates="draft", uselist=False)
+
+class Report(db.Model):
+    __tablename__ = "report"
+    rid = db.Column(db.Integer,primary_key=True)
+    title = db.Column(db.String(256), nullable=False)
+    body = db.Column(db.Text, nullable=False)
+    pid = db.Column(db.Integer, db.ForeignKey("project.pid"))
+    rvid = db.Column(db.String(16), db.ForeignKey("reviewer.rvid"))
+    # Report relation to report_version
+    version=db.relationship("Version",secondary=report_version,backref="report",lazy=True)
+    # Report relation to reportdraft
+    rdraft_id = db.Column(db.Integer, db.ForeignKey("reportdraft.rdid"), unique=True, nullable=True)
+    draft = db.relationship("ReportDraft", back_populates="report", uselist=False)
+
+    # Report relation to PDF
+    contains = db.relationship("PDF", secondary=pdf_report, backref="report", lazy=True)
+    # references to other reports
+    reference = db.Column(db.Integer, db.ForeignKey('report.rid'))# Project versione Status
+    created_at = db.Column(db.DateTime, default=datetime.utcnow())
+
+
+    def time_since_creation(self):
+        return naturaldate(self.created_at)
+    def truncate_desc(self):
+        return truncate_string(text=self.project_description, length=200)
+
+
+
+class ReportDraft(db.Model):
+    __tablename__ = "reportdraft"
+    rdid = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(256), nullable=False)
+    body = db.Column(db.Text, nullable=False)
+    rvid = db.Column(db.String(16), db.ForeignKey("reviewer.rvid"))
+    pid = db.Column(db.Integer, db.ForeignKey("project.pid"))
+    status = db.Column(db.String(256), nullable=False)
+    reference = db.Column(db.Integer)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow())
+    # Draft relation to PDF
+    contains = db.relationship("PDF", secondary=rdraft_pdf, backref="reportdraft", lazy=True)
+    #draft relation to report
+    report = db.relationship("Report", back_populates="draft", uselist=False)
+    def time_since_creation(self):
+        return naturaldate(self.created_at)
+    def truncate_desc(self):
+        return truncate_string(text=self.project_description, length=200)
 
 
 @login.user_loader

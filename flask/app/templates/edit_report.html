@@ -1,0 +1,243 @@
+{% extends 'base.html' %}
+{% from "projects_components/_projects_accordion.html" import render_status_bedge %}
+{% from "projects_components/_project_info.html" import render_info, render_pdfs %}
+
+{% block content %}
+<section class="py-4 py-md-5 my-5">
+    <div class="container py-md-5">
+        <div class="row">
+            <div class="mb-3">
+                <h2 class="display-8 fw-bold mb-4">Edit Report <span class="badge bg-warning text-dark">Draft</span>
+                </h2>
+                <p class="display-8 mb-5">Please provide a Title, your evaluation and add comments on the PDF.</p>
+
+                <form method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
+                    <div class="form-group mb-4">
+                        {{ form.hidden_tag() }}
+                        {{ form.title(class="form-control", placeholder="Title", id="title", required=True) }}
+                        <div class="invalid-feedback">
+                            Please provide a valid title.
+                        </div>
+                    </div>
+                    <div class="form-group mb-4">
+                        {{ form.body(class="form-control", placeholder="Body", id="body", rows="7",
+                        required=True) }}
+                        <div class="invalid-feedback">
+                            Please provide a comment.
+                        </div>
+                    </div>
+                    <div class="form-group mb-4">
+                        {{ form.report(class="form-control", placeholder="Report", id="report", required=True) }}
+                    </div>
+                    <!-- Add pdfs -->
+                    <div id="file-fields">
+                        {% for link, name in pdfs.items() %}
+                        <div class="form-group file-group">
+                            <label for="file-{{ loop.index }}">PDF File {{ loop.index }}:</label>
+
+                            {% if name %}
+                            <input class="existing-name" type="text" id="name-{{ loop.index }}" name="names"
+                                value="{{ name }}">
+                            <button type="button" class="btn btn-primary"
+                                onclick="window.location.href='{{ url_for('project.edit_pdf', vid = vid, filename=name) }}'">
+                                {{ name }}
+                            </button>
+                            {% else %}
+                            <input type="file" id="file-{{ loop.index }}" name="files">
+                            {% endif %}
+
+                            <button class="remove-file-btn" type="button">-</button>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <div class="form-group mb-4 mt-2">
+                        <div class="form-check form-check-inline">
+                            {{ form.status(class="form-control",default="Need Changes",id = "status",required=True) }}
+                        </div>
+                    </div>
+
+                    <button id="add-file-btn" type="button">+</button>
+                    <br><br>
+                    <button id="submit-draft" type="button">Save as Draft</button>
+                    <button id="submit-project" type="button">Submit</button>
+                    <button id="discard-draft" type="button">Discard Draft</button>
+
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        // Retrieve project data from the server-side template variable
+        var fileCount = {{ counter }}
+
+
+
+                $('#add-file-btn').click(function (e) {
+        e.preventDefault();
+
+        var fileField = $('<div class="form-group file-group">' +
+            '<label for="file-' + (fileCount + 1) + '">PDF File ' + (fileCount + 1) + ':</label>' +
+            '<input type="file" id="file-' + (fileCount + 1) + '" name="files" accept="application/pdf">' +
+            '<button class="remove-file-btn" type="button">-</button>' +
+            '</div>');
+
+        $('#file-fields').append(fileField);
+        ++fileCount;
+    });
+
+    $('#file-fields').on('click', '.remove-file-btn', function (e) {
+        e.preventDefault();
+
+        $(this).closest('.file-group').remove();
+    });
+
+    $('#submit-draft').click(function (e) {
+        e.preventDefault();
+
+        var title = $('#title').val();
+        var body = $('#body').val();
+        var report = $('#report').val();
+        var status = $('input[name="status"]:checked').val();
+        var names = $('#input[name="names"]');
+        var files = $('input[name="files"]');
+
+        // Todo
+        // Check if at least one file is selected
+        // if (names.length === 0 && files.length === 0) {
+        //     alert('Please upload at least one file.');
+        //     return;
+        // }
+        //
+
+        var formData = new FormData();
+        formData.append('title', title);
+        formData.append('body', body);
+        formData.append('report', report);
+        formData.append('status', status);
+
+        $('.existing-name').each(function () {
+            var name = $(this).val() + '.pdf';
+            console.log(name)
+            formData.append('names', name);
+        });
+
+        for (var i = 0; i < files.length; i++) {
+            formData.append('files', files[i].files[0]);
+        }
+
+        $.ajax({
+            url: "{{ url_for('project.edit_report_draft', pid=pid,vid=vid) }}",
+            type: 'POST',
+            data: formData,
+            contentType: false,
+            processData: false,
+            success: function (response) {
+                alert('Form submitted successfully!');
+                window.location.href = "{{ url_for('project.add_report',pid=pid, vid=vid) }}";
+            },
+            error: function (error) {
+                alert('Error submitting the form. Please try again.');
+                console.log(error);
+            }
+        });
+    });
+
+
+    $('#submit-project').click(function (e) {
+        e.preventDefault();
+
+        var title = $('#title').val();
+        var body = $('#body').val();
+        var report = $('#report').val();
+        var status = $('input[name="status"]:checked').val();
+        var names = $('#input[name="names"]');
+        var files = $('input[name="files"]');
+
+        // Todo
+        // Check if at least one file is selected
+        // if (names.length === 0 && files.length === 0) {
+        //     alert('Please upload at least one file.');
+        //     return;
+        // }
+        //
+
+        var formData = new FormData();
+        formData.append('title', title);
+        formData.append('body', body);
+        formData.append('report', report);
+        formData.append('status', status);
+        $('.existing-name').each(function () {
+            var name = $(this).val() + '.pdf';
+            formData.append('names', name);
+        });
+
+        for (var i = 0; i < files.length; i++) {
+            formData.append('files', files[i].files[0]);
+        }
+
+        $.ajax({
+            url: "{{ url_for('project.edit_report_draft', vid=vid,pid=pid) }}",
+            type: 'POST',
+            data: formData,
+            contentType: false,
+            processData: false,
+            success: function (response) {
+                // Perform the second POST request
+                $.ajax({
+                    url: "{{ url_for('project.update_report', pid=pid,vid=vid) }}",
+                    type: 'POST',
+                    success: function (response) {
+                        // Handle the success of the second POST request
+                        alert('Request submitted successfully!');
+                        window.location.href = "{{ url_for('project.projects') }}";
+                    },
+                    error: function (error) {
+                        // Handle the error of the second POST request
+                        alert('Error submitting the second request. Please try again.');
+                        console.log(error);
+                    }
+                });
+            },
+            error: function (error) {
+                alert('Error submitting the form. Please try again.');
+                console.log(error);
+            }
+        });
+    });
+
+    $('#discard-draft').click(function (e) {
+        e.preventDefault();
+
+        $.ajax({
+            url: "{{ url_for('project.discard_report_draft', pid=pid,vid=vid) }}",
+            type: 'POST',
+            contentType: false,
+            processData: false,
+            success: function (response) {
+                alert('Draft discarded successfully!');
+                window.location.href = "{{ url_for('project.add_report', pid=pid,vid=vid) }}";
+            },
+            error: function (error) {
+                alert('Error submitting the form. Please try again.');
+                console.log(error);
+            }
+        });
+    });
+ });
+</script>
+<script>
+    // Reload the page when it is shown or re-shown
+    window.addEventListener('pageshow', function (event) {
+        if (event.persisted) {
+            location.reload();
+        }
+    });
+</script>
+{% endblock %}

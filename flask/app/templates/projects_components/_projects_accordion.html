@@ -1,19 +1,20 @@
 {% macro render_status_bedge(status) %}
 
-    {% if status == 'Approved' %}
-        <span class="badge text-bg-success">{{ status }}</span>
-    {% elif status == 'Submitted' %}
-        <span class="badge text-bg-primary">{{ status }}</span>
-    {% elif status == 'Requires changes' %}
-        <span class="badge text-bg-warning">{{ status }}</span>
-    {% elif status == 'Not Approved' %}
-        <span class="badge text-bg-danger">{{ status }}</span>
-    {% endif %}
+{% if status == 'Approved' %}
+<span class="badge text-bg-success">{{ status }}</span>
+{% elif status == 'Submitted' %}
+<span class="badge text-bg-primary">{{ status }}</span>
+{% elif status == 'Requires changes' %}
+<span class="badge text-bg-warning">{{ status }}</span>
+{% elif status == 'Not Approved' %}
+<span class="badge text-bg-danger">{{ status }}</span>
+{% endif %}
 
 {% endmacro %}
 
 {% macro render_popover(desc, x) %}
-<button type="button" class="btn btn-light border" data-bs-container="body" data-bs-toggle="popover" data-bs-trigger="hover focus" data-bs-placement="top" data-bs-content="{{ desc }}">
+<button type="button" class="btn btn-light border" data-bs-container="body" data-bs-toggle="popover"
+    data-bs-trigger="hover focus" data-bs-placement="top" data-bs-content="{{ desc }}">
     {{ x }}
 </button>
 {% endmacro %}
@@ -30,11 +31,12 @@
 
 {% endmacro %}
 
-{% macro render_accordion(x) %}
-
+{% macro render_accordion(x,usertype) %}
+{% if usertype == 'researcher'%}
 <div class="accordion-item border">
     <h2 class="accordion-header">
-        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapse{{ x.pid }}" aria-expanded="false" aria-controls="flush-collapse{{ x.pid }}">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+            data-bs-target="#flush-collapse{{ x.pid }}" aria-expanded="false" aria-controls="flush-collapse{{ x.pid }}">
             {{ x.project_title }}
 
             <!-- For Spacing -->
@@ -47,31 +49,68 @@
         </button>
     </h2>
     <div id="flush-collapse{{ x.pid }}" class="accordion-collapse collapse" data-bs-parent="#accordionFlushProject">
-       
+
         <div class="accordion-body" style="overflow-wrap: break-word;">
             {{ render_accordion_body(x) }}
         </div>
 
         <div class="row">
             <div class="btn-group" role="group" aria-label="Actions">
-            <button onclick="window.location.href='{{ url_for('project.view', pid=x.pid, version_number=x.version_number) }}'" type="button" class="btn btn-primary">View</button>
-            <button onclick="window.location.href='{{ url_for('project.edit', vid=x.vid) }}'" type="button" class="btn btn-warning">Edit</button>
-            <button type="button" class="btn btn-danger">Delete</button>
+                <button
+                    onclick="window.location.href='{{ url_for('project.view', pid=x.pid, version_number=x.version_number) }}'"
+                    type="button" class="btn btn-primary">View</button>
+                <button onclick="window.location.href='{{ url_for('project.edit', vid=x.vid) }}'" type="button"
+                    class="btn btn-warning">Edit</button>
+                <button type="button" class="btn btn-danger">Delete</button>
+            </div>
         </div>
+    </div>
+</div>
+{% else %}
+
+<div class="accordion-item border">
+    <h2 class="accordion-header">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+            data-bs-target="#flush-collapse{{ x.pid }}" aria-expanded="false" aria-controls="flush-collapse{{ x.pid }}">
+            {{ x.project_title }}
+
+            <!-- For Spacing -->
+            <div class="flex-grow-1"></div>
+
+            {{ render_status_bedge(x.project_status) }}
+
+            <!-- For Spacing -->
+            <div class="mx-auto" style="width: 30px;"></div>
+        </button>
+    </h2>
+    <div id="flush-collapse{{ x.pid }}" class="accordion-collapse collapse" data-bs-parent="#accordionFlushProject">
+
+        <div class="accordion-body" style="overflow-wrap: break-word;">
+            {{ render_accordion_body(x) }}
         </div>
 
-        
+        <div class="row">
+            <div class="btn-group" role="group" aria-label="Actions">
+                <button
+                    onclick="window.location.href='{{ url_for('project.view', pid=x.pid, version_number=x.version_number) }}'"
+                    type="button" class="btn btn-primary">View</button>
+                <button onclick="window.location.href='{{ url_for('project.add_report', vid=x.vid, pid = x.pid) }}'" type="button"
+                    class="btn btn-warning">Add Report</button>
+                <button type="button" class="btn btn-danger">Delete</button>
+            </div>
+        </div>
     </div>
 </div>
 
+{% endif %}
 {% endmacro %}
 
 
-{% macro render_accordions(field) %}
+{% macro render_accordions(field,usertype) %}
 
 <div class="accordion accordion-flush" id="accordionFlushProject">
     {% for x in field %}
-        {{ render_accordion(x) }}
+    {{ render_accordion(x,usertype) }}
     {% endfor %}
 </div>
 
