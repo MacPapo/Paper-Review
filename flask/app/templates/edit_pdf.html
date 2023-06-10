@@ -69,8 +69,11 @@
                     console.log(originalFilename);
                     const formData = new FormData();
                     formData.append('pdf', file); // Append the file to the FormData
-
-                    const response = await fetch("{{ url_for('project.edit_pdf', vid=vid, filename=filename) }}", {
+                    {% if pid == -1 %}
+                        const response = await fetch("{{ url_for('project.edit_pdf', vid=vid, filename=filename) }}", {
+                    {% else %}
+                        const response = await fetch("{{ url_for('project.edit_report_pdf', vid=vid,filename=filename,pid=pid) }}", {
+                    {% endif %}
                         method: 'POST',
                         body: formData,
                     });

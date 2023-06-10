@@ -1,0 +1,50 @@
+{% macro render_report_info(report,reviewer) %}
+
+<div class="row">
+    <div class="row">
+    <div class="col-md-1">
+        <img src="{{ reviewer.gravatar(size=60, default="robohash") }}" alt="Profile Pic" class="rounded-circle shadow"
+            width="60">
+    </div>
+    <div class="col-md-2  mt-3 text-left">
+        <p><a  class="fw-bold text-danger" href="{{ url_for('auth.profile', username=reviewer.username) }}">{{ reviewer.fullname() }}</a></p>
+    </div>
+    </div>
+</div>
+
+<div class="col mt-5" style="text-align: left;">
+    <p class="text-primary fw-bold">Title</p>
+    <h2>{{ report.pid.project_title }}</h2>
+</div>
+<div class="row text-center pt-2">
+
+    <div class="col">
+        <p>Created :{{ report.time_since_creation() }}</p>
+    </div>
+    <div class="col">
+        <p>Version ID :{{ report.version.vid }}</p>
+    </div>
+    <div class="col">
+        <p>Project ID :{{ report.pid }}</p>
+    </div>
+    <div class="col">
+       {% if  report.reference %}}
+        <p>Report Reference :{{ report.reference }}</p>
+        {% else %}
+        <p>Report Reference :0</p>
+        {% endif %}
+    </div>
+</div>
+<hr class="hr" />
+<div class="row">
+    <div>
+        <p class="text-primary fw-bold">Body</p>
+    </div>
+
+    <div class="col">
+        <p>{{ report.body }}</p>
+    </div>
+</div>
+
+
+{% endmacro %}

@@ -248,7 +248,7 @@ class Report(db.Model):
     def time_since_creation(self):
         return naturaldate(self.created_at)
     def truncate_desc(self):
-        return truncate_string(text=self.project_description, length=200)
+        return truncate_string(text=self.body, length=200)
 
 
 
@@ -269,7 +269,7 @@ class ReportDraft(db.Model):
     def time_since_creation(self):
         return naturaldate(self.created_at)
     def truncate_desc(self):
-        return truncate_string(text=self.project_description, length=200)
+        return truncate_string(text=self.body, length=200)
 
 
 @login.user_loader

@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% from "projects_components/_projects_accordion.html" import render_accordions %}
+{% from "projects_components/_report_accordion.html" import render_accordions_report %}
 
 
 {% block content %}
@@ -16,6 +16,10 @@
                         <a href="{{ url_for('project.projects') }}" class="btn btn-primary">Check Projects</a>
                     </div>
                 </div>
+                {% else %}
+                <div class="col-12">
+                    <h2 class="mb-4">Reports</h2>
+                    {{ render_accordions_report(reports) }}
             {% endif %}
         </div>
     </div>

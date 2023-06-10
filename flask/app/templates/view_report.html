@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% from "projects_components/_report_info.html" import render_report_info %}
+{% from "projects_components/_project_info.html" import render_pdfs %}
+
+{% block content %}
+<section class="py-4 py-md-5 my-5">
+    <div class="container py-md-5">
+        {{ render_report_info(report,reviewer) }}
+
+        <hr class="hr" />
+        <br>
+
+        {{ render_pdfs(get_pdf_lambda(pdfs)) }}
+
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script type="text/javascript">
+const myModal = document.getElementById('myModal')
+const myInput = document.getElementById('myInput')
+
+myModal.addEventListener('shown.bs.modal', () => {
+  myInput.focus()
+})
+</script>
+{% endblock %}

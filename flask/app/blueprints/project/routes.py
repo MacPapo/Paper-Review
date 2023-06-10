@@ -5,7 +5,7 @@ from sqlalchemy.util.langhelpers import portable_instancemethod
 from app import db
 from app.blueprints.project import bp
 from app.blueprints.project.forms import UploadForm, ReportForm
-from app.models import Project, Version, Draft, Report, ReportDraft
+from app.models import Project, Version, Draft, Report, ReportDraft, Reviewer
 from app.modules.pdf_helper import *
 from sqlalchemy import desc
 
@@ -262,7 +262,8 @@ def edit_pdf(vid, filename):
             title="PDF VIEW",
             vid=vid,
             link=link,
-            filename=name
+            filename=name,
+            pid = -1
         )
 
 @bp.route("/project/<int:pid>/edit_report_draft/<int:vid>", methods=["POST"])
@@ -273,7 +274,7 @@ def edit_report_draft(pid,vid):                                                 
         draft.title = request.form.get("title")
         draft.body = request.form.get("body")
         draft.status = request.form.get("status")
-        if request.form.get("report") != None:
+        if request.form.get("rport") != None:
             draft.reference = request.form.get("report")
         else:
             draft.reference = 0
@@ -345,3 +346,48 @@ def discard_report_draft(vid,pid):
             draft.contains = []
         db.session.commit()
         return ("", 204)
+
+
+@bp.route("/project/<int:pid>/edit/<int:vid>/edit_report_pdf/<filename>", methods=["POST", "GET"])
+@login_required
+def edit_report_pdf(pid,vid, filename):
+    draft = ReportDraft.query.filter_by(pid=pid,rvid=current_user.uid).first_or_404()
+    name = filename + ".pdf"
+    if request.method == "POST":
+        pdfs = draft.contains
+        delete_pdf(pdfs)
+        pdf = request.files["pdf"]
+        pdf_obj = upload_pdf("uploads", [pdf])
+        draft.contains = [
+            pdf for pdf in draft.contains if pdf.filename != name
+        ] + pdf_obj
+        db.session.commit()
+        return ("", 204)
+
+    if request.method == "GET":
+        link = download_pdf(name)
+        return render_template(
+            "edit_pdf.html",
+            title="PDF VIEW",
+            vid=vid,
+            link=link,
+            filename=name,
+            pid=pid,
+        )
+
+@bp.route("/project/<int:pid>/report/<int:rid>/<string:reviewer>", methods=["POST", "GET"])
+@login_required
+def report(pid,rid,reviewer):
+    report = Report.query.filter_by(rid=rid).first_or_404()
+    pdfs = [pdf for pdf in report.contains]
+    reviewer = Reviewer.query.filter_by(uid=reviewer).first_or_404()
+    get_pdf_lambda = lambda x: get_all_pdfs(x)
+
+    return render_template(
+        "view_report.html",
+        title="View Report",
+        get_pdf_lambda=get_pdf_lambda,
+        report = report,
+        pdfs = pdfs,
+        reviewer = reviewer,
+    )
