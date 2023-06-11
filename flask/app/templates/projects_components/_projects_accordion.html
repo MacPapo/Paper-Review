@@ -62,7 +62,7 @@
                     type="button" class="btn btn-primary">View</button>
                 <button onclick="window.location.href='{{ url_for('project.edit', vid=x.vid) }}'" type="button"
                     class="btn btn-warning">Edit</button>
-                <button type="button" class="btn btn-danger">Delete</button>
+                <button type="button" onclick="window.location.href='{{ url_for('project.delete_project',pid=x.pid) }}'" class="btn btn-danger">Delete</button>
             </div>
         </div>
         {% else %}
@@ -108,7 +108,6 @@
                         type="button" class="btn btn-primary">View</button>
                     <button onclick="window.location.href='{{ url_for('project.add_report', vid=x.vid, pid = x.pid) }}'"
                         type="button" class="btn btn-warning">Add Report</button>
-                    <button type="button" class="btn btn-danger">Delete</button>
                 </div>
             </div>
             {% else %}
@@ -119,8 +118,9 @@
                         type="button" class="btn btn-primary">View</button>
                 </div>
             </div>
+            {% endif %}
         </div>
-        {% endif %}
+    </div>
         {% endif %}
         {% endmacro %}
 

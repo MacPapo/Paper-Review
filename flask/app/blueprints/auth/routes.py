@@ -95,6 +95,7 @@ def register_researcher():
             sex=form.sex.data,
             nationality=form.nationality.data,
             phone=form.phone.data,
+            department=form.department.data,
             created_at=datetime.now(),
             updated_at=datetime.now(),
         )
@@ -141,6 +142,7 @@ def register_reviewer():
             email=form.email.data,
             sex=form.sex.data,
             nationality=form.nationality.data,
+            department=form.department.data,
             phone=form.phone.data,
             created_at=datetime.now(),
             updated_at=datetime.now(),

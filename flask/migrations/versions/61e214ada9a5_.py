@@ -1,8 +1,8 @@
-"""report
+"""empty message
 
-Revision ID: b83068d8d07a
+Revision ID: 61e214ada9a5
 Revises: 
-Create Date: 2023-06-09 23:56:22.657097
+Create Date: 2023-06-11 18:47:40.018517
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision = 'b83068d8d07a'
+revision = '61e214ada9a5'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -56,8 +56,8 @@ def upgrade():
     op.create_table('draft_pdf',
     sa.Column('pdf_id', postgresql.BYTEA(), nullable=True),
     sa.Column('draft_id', sa.Integer(), nullable=True),
-    sa.ForeignKeyConstraint(['draft_id'], ['draft.did'], ),
-    sa.ForeignKeyConstraint(['pdf_id'], ['pdf.id'], )
+    sa.ForeignKeyConstraint(['draft_id'], ['draft.did'], ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['pdf_id'], ['pdf.id'], ondelete='CASCADE')
     )
     op.create_table('researcher',
     sa.Column('rsid', sa.String(length=16), nullable=False),
@@ -67,7 +67,7 @@ def upgrade():
     op.create_table('reviewer',
     sa.Column('rvid', sa.String(length=16), nullable=False),
     sa.Column('pdf_id', postgresql.BYTEA(), nullable=False),
-    sa.ForeignKeyConstraint(['pdf_id'], ['pdf.id'], ),
+    sa.ForeignKeyConstraint(['pdf_id'], ['pdf.id'], ondelete='CASCADE'),
     sa.ForeignKeyConstraint(['rvid'], ['user.uid'], ),
     sa.PrimaryKeyConstraint('rvid'),
     sa.UniqueConstraint('pdf_id')
@@ -87,7 +87,7 @@ def upgrade():
     sa.Column('status', sa.String(length=256), nullable=False),
     sa.Column('reference', sa.Integer(), nullable=True),
     sa.Column('created_at', sa.DateTime(), nullable=True),
-    sa.ForeignKeyConstraint(['pid'], ['project.pid'], ),
+    sa.ForeignKeyConstraint(['pid'], ['project.pid'], ondelete='CASCADE'),
     sa.ForeignKeyConstraint(['rvid'], ['reviewer.rvid'], ),
     sa.PrimaryKeyConstraint('rdid')
     )
@@ -102,15 +102,15 @@ def upgrade():
     sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.Column('updated_at', sa.DateTime(), nullable=True),
     sa.ForeignKeyConstraint(['draft_id'], ['draft.did'], ),
-    sa.ForeignKeyConstraint(['pid'], ['project.pid'], ),
+    sa.ForeignKeyConstraint(['pid'], ['project.pid'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('vid'),
     sa.UniqueConstraint('draft_id')
     )
     op.create_table('pdf_version',
     sa.Column('pdf_id', postgresql.BYTEA(), nullable=True),
     sa.Column('version_id', sa.Integer(), nullable=True),
-    sa.ForeignKeyConstraint(['pdf_id'], ['pdf.id'], ),
-    sa.ForeignKeyConstraint(['version_id'], ['version.vid'], )
+    sa.ForeignKeyConstraint(['pdf_id'], ['pdf.id'], ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['version_id'], ['version.vid'], ondelete='CASCADE')
     )
     op.create_table('report',
     sa.Column('rid', sa.Integer(), nullable=False),
@@ -121,9 +121,9 @@ def upgrade():
     sa.Column('rdraft_id', sa.Integer(), nullable=True),
     sa.Column('reference', sa.Integer(), nullable=True),
     sa.Column('created_at', sa.DateTime(), nullable=True),
-    sa.ForeignKeyConstraint(['pid'], ['project.pid'], ),
-    sa.ForeignKeyConstraint(['rdraft_id'], ['reportdraft.rdid'], ),
-    sa.ForeignKeyConstraint(['reference'], ['report.rid'], ),
+    sa.ForeignKeyConstraint(['pid'], ['project.pid'], ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['rdraft_id'], ['reportdraft.rdid'], ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['reference'], ['report.rid'], ondelete='SET NULL'),
     sa.ForeignKeyConstraint(['rvid'], ['reviewer.rvid'], ),
     sa.PrimaryKeyConstraint('rid'),
     sa.UniqueConstraint('rdraft_id')
@@ -131,20 +131,20 @@ def upgrade():
     op.create_table('report_draft_pdf',
     sa.Column('pdf_id', postgresql.BYTEA(), nullable=True),
     sa.Column('draft_id', sa.Integer(), nullable=True),
-    sa.ForeignKeyConstraint(['draft_id'], ['reportdraft.rdid'], ),
-    sa.ForeignKeyConstraint(['pdf_id'], ['pdf.id'], )
+    sa.ForeignKeyConstraint(['draft_id'], ['reportdraft.rdid'], ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['pdf_id'], ['pdf.id'], ondelete='CASCADE')
     )
     op.create_table('pdf_report',
     sa.Column('pdf_id', postgresql.BYTEA(), nullable=True),
     sa.Column('report_id', sa.Integer(), nullable=True),
-    sa.ForeignKeyConstraint(['pdf_id'], ['pdf.id'], ),
-    sa.ForeignKeyConstraint(['report_id'], ['report.rid'], )
+    sa.ForeignKeyConstraint(['pdf_id'], ['pdf.id'], ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['report_id'], ['report.rid'], ondelete='CASCADE')
     )
     op.create_table('report_version',
     sa.Column('report_id', sa.Integer(), nullable=True),
     sa.Column('version_id', sa.Integer(), nullable=True),
-    sa.ForeignKeyConstraint(['report_id'], ['report.rid'], ),
-    sa.ForeignKeyConstraint(['version_id'], ['version.vid'], )
+    sa.ForeignKeyConstraint(['report_id'], ['report.rid'], ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['version_id'], ['version.vid'], ondelete='CASCADE')
     )
     # ### end Alembic commands ###
 

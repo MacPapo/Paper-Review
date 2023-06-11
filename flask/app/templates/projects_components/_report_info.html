@@ -13,8 +13,8 @@
 </div>
 
 <div class="col mt-5" style="text-align: left;">
-    <p class="text-primary fw-bold">Title</p>
-    <h2>{{ report.pid.project_title }}</h2>
+    <p class="text-primary fw-bold">Report Title</p>
+    <h2>{{ report.title }}</h2>
 </div>
 <div class="row text-center pt-2">
 
@@ -22,7 +22,7 @@
         <p>Created :{{ report.time_since_creation() }}</p>
     </div>
     <div class="col">
-        <p>Version ID :{{ report.version.vid }}</p>
+        <p>Project Version  :{{ report.version[-1].version_number }}</p>
     </div>
     <div class="col">
         <p>Project ID :{{ report.pid }}</p>

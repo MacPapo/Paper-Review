@@ -1,26 +1,28 @@
 from datetime import datetime
 from flask import render_template, flash, redirect, url_for, request, jsonify
 from flask_login import current_user, login_required
+from sqlalchemy.orm import UserDefinedOption
 from sqlalchemy.util.langhelpers import portable_instancemethod
 from app import db
 from app.blueprints.project import bp
 from app.blueprints.project.forms import UploadForm, ReportForm
-from app.models import Project, Version, Draft, Report, ReportDraft, Reviewer
+from app.models import Project, Version, Draft, Report, ReportDraft, Reviewer, User
 from app.modules.pdf_helper import *
-from sqlalchemy import desc
+from sqlalchemy import desc,asc
 
 @bp.route("/projects")
 @login_required
 def projects():
     if current_user.is_authenticated:
+
         if current_user.type == "reviewer":
             projects = Project.query.all()
-            versions = [p.versions[-1] for p in projects]
+            versions = [p.versions[-1] for p in projects if p.researcher.department == current_user.department]
             return render_template(
                 "projects.html", title="All Projects", projects=versions
             )
         else:
-            versions = [p.versions[-1] for p in current_user.projects]
+            versions = [p.versions[-1] for p in current_user.projects ]
             return render_template(
                 "projects.html", title="Your Projects", projects=versions
             )
@@ -39,7 +41,7 @@ def reports():
 @login_required
 def add_report(pid, vid):
     form = ReportForm()
-    draft = ReportDraft.query.filter_by(pid=pid,rvid= current_user.uid).order_by(desc(ReportDraft.created_at)).first()
+    draft = ReportDraft.query.filter_by(pid=pid,rvid= current_user.uid).order_by(desc(ReportDraft.rdid)).first()
     reports = Report.query.filter_by(pid=pid).all()
     if draft and draft.reference != 0:
         report = Report.query.filter_by(rid=draft.reference).first()
@@ -88,6 +90,7 @@ def create():
         pdfs = upload_pdf("uploads", form.pdfs.data)
         new_project = Project(researcher=current_user)
         db.session.add(new_project)
+        new_project.researcher = current_user
         db.session.commit()
 
         new_draft = Draft(
@@ -270,7 +273,7 @@ def edit_pdf(vid, filename):
 @login_required                                                                                                               #
 def edit_report_draft(pid,vid):                                                                                               #
     if request.method == "POST":                                                                                              #
-        draft = ReportDraft.query.filter_by(pid=pid,rvid=current_user.uid).order_by(desc(ReportDraft.created_at)).first_or_404()                                                                                                                     #
+        draft = ReportDraft.query.filter_by(pid=pid,rvid=current_user.uid).order_by(desc(ReportDraft.rdid)).first_or_404()                                                                                                                     #
         draft.title = request.form.get("title")
         draft.body = request.form.get("body")
         draft.status = request.form.get("status")
@@ -291,7 +294,7 @@ def edit_report_draft(pid,vid):                                                 
 @login_required
 def update_report(vid,pid):
     if request.method == "POST":
-        draft = ReportDraft.query.filter_by(pid=pid,rvid=current_user.uid).first()
+        draft = ReportDraft.query.filter_by(pid=pid,rvid=current_user.uid).order_by(desc(ReportDraft.rdid)).first()
         version = Version.query.filter_by(vid=vid).order_by(desc(Version.version_number)).first()
         if draft.reference != 0:
             reference = draft.reference
@@ -334,7 +337,7 @@ def update_report(vid,pid):
 @login_required
 def discard_report_draft(vid,pid):
     if request.method == "POST":
-        draft = ReportDraft.query.filter_by(pid=pid,rvid=current_user.uid).first_or_404()
+        draft = ReportDraft.query.filter_by(pid=pid,rvid=current_user.uid).order_by(desc(ReportDraft.rdid)).first_or_404()
         version = Version.query.filter_by(vid=vid).order_by(desc(Version.version_number)).first()
         draft.title = 'Title'
         draft.body = 'Body'
@@ -391,3 +394,24 @@ def report(pid,rid,reviewer):
         pdfs = pdfs,
         reviewer = reviewer,
     )
+
+@bp.route("/project/delete_project/<int:pid>", methods=["POST", "GET"])
+@login_required
+def delete_project(pid):
+    project = Project.query.filter_by(pid=pid).first_or_404()
+    db.session.delete(project)
+    db.session.commit()
+    return redirect(url_for("main.index"))
+
+@bp.route("/project/<int:pid>/report_list/<int:n>", methods=["GET"])
+@login_required
+def report_list(pid,n):
+    if n==1:
+       reports = Report.query.filter_by(pid=pid).order_by(asc(Report.created_at)).all()
+    elif n==2:
+       reports = Report.query.filter_by(pid=pid).order_by(desc(Report.created_at)).all()
+    elif n==3:
+        report = Report.query.filter_by(pid=pid).order_by(asc(Report.title)).all()
+    else:
+        reports = Report.query.filter_by(pid=pid).order_by(desc(Report.title)).all()
+    return (reports,200)
