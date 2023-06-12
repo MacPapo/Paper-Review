@@ -354,7 +354,7 @@ def discard_report_draft(vid,pid):
 @bp.route("/project/<int:pid>/edit/<int:vid>/edit_report_pdf/<filename>", methods=["POST", "GET"])
 @login_required
 def edit_report_pdf(pid,vid, filename):
-    draft = ReportDraft.query.filter_by(pid=pid,rvid=current_user.uid).first_or_404()
+    draft = ReportDraft.query.filter_by(pid=pid,rvid=current_user.uid).order_by(desc(ReportDraft.rdid)).first_or_404()
     name = filename + ".pdf"
     if request.method == "POST":
         pdfs = draft.contains
@@ -411,7 +411,16 @@ def report_list(pid,n):
     elif n==2:
        reports = Report.query.filter_by(pid=pid).order_by(desc(Report.created_at)).all()
     elif n==3:
-        report = Report.query.filter_by(pid=pid).order_by(asc(Report.title)).all()
+        reports = Report.query.filter_by(pid=pid).order_by(asc(Report.title)).all()
     else:
         reports = Report.query.filter_by(pid=pid).order_by(desc(Report.title)).all()
-    return (reports,200)
+    reports_data = [
+        {
+            'rid':report.rid,
+            'pid':report.pid,
+            'rvid':report.rvid,
+            'title':report.title,
+        }
+        for report in reports
+    ]
+    return (reports_data,200)
