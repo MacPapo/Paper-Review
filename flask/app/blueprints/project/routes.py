@@ -5,8 +5,8 @@ from sqlalchemy.orm import UserDefinedOption
 from sqlalchemy.util.langhelpers import portable_instancemethod
 from app import db
 from app.blueprints.project import bp
-from app.blueprints.project.forms import UploadForm, ReportForm
-from app.models import Project, Version, Draft, Report, ReportDraft, Reviewer, User
+from app.blueprints.project.forms import UploadForm, ReportForm, AddCommentForm
+from app.models import Project, Version, Draft, Report, ReportDraft, Reviewer, User, Comment
 from app.modules.pdf_helper import *
 from sqlalchemy import desc,asc
 
@@ -126,15 +126,31 @@ def create():
     )
 
 
-@bp.route("/project/view/<int:pid>/<int:version_number>")
+@bp.route("/project/view/<int:pid>/<int:version_number>", methods=["GET", "POST"])
 @login_required
 def view(pid, version_number):
+    form = AddCommentForm()
     project = Project.query.filter_by(pid=pid).first_or_404()
+    comments = Comment.query.filter_by(pid=pid)
 
     if version_number > len(project.versions):
         return render_template("errors/404.html"), 404
 
     get_pdf_lambda = lambda x: get_all_pdfs(x)
+
+    if form.validate_on_submit():
+        new_comment = Comment(
+            body=form.body.data,
+            created_at=datetime.now(),
+            uid = current_user.uid,
+            pid = pid,
+            version_ref = version_number
+        )
+
+        db.session.add(new_comment)
+
+        db.session.commit()
+        return redirect(url_for("project.view", pid=pid, version_number=version_number))
 
     return render_template(
         "view.html",
@@ -142,6 +158,8 @@ def view(pid, version_number):
         project=project,
         version_number=version_number,
         get_pdf_lambda=get_pdf_lambda,
+        form = form, 
+        comments = comments
     )
 
 
