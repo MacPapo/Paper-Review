@@ -74,7 +74,9 @@ class User(UserMixin, db.Model):
         ENUM("researcher", "reviewer", name="user_type", create_type=False),
         nullable=False,
     )
-    projects = db.relationship("Comment", backref="user", lazy=True)
+
+    comments = db.relationship("Comment", backref="user", lazy=True)
+    report_comments = db.relationship("ReportComment", backref="user", lazy=True)
 
     created_at = db.Column(db.DateTime, default=datetime.utcnow())
     updated_at = db.Column(db.DateTime, default=datetime.utcnow())
@@ -275,3 +277,22 @@ class Comment(db.Model):
 
     #Comment relation to Project
     pid = db.Column(db.Integer, db.ForeignKey("project.pid"))
+
+    def time_since_creation(self):
+        return naturaldate(self.created_at)
+
+class ReportComment(db.Model):
+    cid = db.Column(db.Integer, primary_key=True)
+    body = db.Column(db.Text, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow())
+    version_ref = db.Column(db.Integer, nullable=False)
+
+    #Comment relation to User
+    uid = db.Column(db.String(16), db.ForeignKey("user.uid"))
+
+    #Comment relation to Project
+    rid = db.Column(db.Integer, db.ForeignKey("report.rid"))
+
+
+    def time_since_creation(self):
+        return naturaldate(self.created_at)

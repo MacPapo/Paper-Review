@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% from "projects_components/_report_info.html" import render_report_info %}
+{% from "projects_components/_report_info.html" import render_report_info, render_user_for_report_comments %}
 {% from "projects_components/_project_info.html" import render_pdfs %}
 
 {% block content %}
@@ -11,6 +11,37 @@
         <br>
 
         {{ render_pdfs(get_pdf_lambda(pdfs)) }}
+
+         <!-- For Spacing -->
+         <div class="mx-auto" style="height: 75px;"></div>
+
+         <h1 class="modal-title fs-5" id="exampleModalLabel">Comments</h1>
+        <br>
+
+    {% for comment in report_comments %}
+        <div>
+            {{ render_user_for_report_comments(comment.user, comment) }}
+
+            {{ comment.body }}
+
+            {% if not loop.last %}
+                <hr>
+            {% endif %}
+        </div>
+    {% endfor %}
+
+     <!-- For Spacing -->
+     <div class="mx-auto" style="height: 75px;"></div>
+
+
+     <form method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
+       {{ form.hidden_tag() }}
+
+       <div class="form-group mb-4">
+           {{ form.body(class="form-control", placeholder="Write a comment", rows="7", required=True) }}
+       </div>
+       {{ form.submit(class="btn btn-primary") }}
+   </form>
 
     </div>
 </section>

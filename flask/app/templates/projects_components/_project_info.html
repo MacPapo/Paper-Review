@@ -1,4 +1,4 @@
-{% from "projects_components/_projects_accordion.html" import render_status_bedge %}
+{% from "projects_components/_projects_accordion.html" import render_status_bedge,render_project %}
 
 {% macro render_user(user) %}
 <div class="row">
@@ -7,7 +7,8 @@
             width="60">
     </div>
     <div class="col-md-2  mt-3 text-left">
-        <p><a  class="fw-bold text-danger" href="{{ url_for('auth.profile', username=user.username) }}">{{ user.fullname() }}</a></p>
+        <p><a class="fw-bold text-danger" href="{{ url_for('auth.profile', username=user.username) }}">{{
+                user.fullname() }}</a></p>
     </div>
 </div>
 {% endmacro %}
@@ -16,26 +17,25 @@
 {% macro render_user_for_comments(user, comment_info, version_number, comment_version) %}
 <div class="row">
     <div class="col-md-1">
-        <img src="{{ user.gravatar(size=60, default="robohash") }}" alt="Profile Pic" class="rounded-circle shadow"
+        <img src="{{ user.gravatar(size=60, default=" robohash") }}" alt="Profile Pic" class="rounded-circle shadow"
             width="60">
     </div>
     <div class="col-md-2 mt-3">
-    <p class="fw-bold text-primary mb-0">
-        <a href="{{ url_for('auth.profile', username=user.username) }}">{{ user.fullname() }}</a>
-    </p>
-   
-</div>
-<div class="col-md-2 mt-3">
-    <p>{{ comment_info.created_at }}</p>
-</div>
+        <p class="fw-bold text-primary mb-0">
+            <a href="{{ url_for('auth.profile', username=user.username) }}">{{ user.fullname() }}</a>
+        </p>
+
+    </div>
+    <div class="col-md-2 mt-3">
+        <p>{{ comment_info.time_since_creation() }}</p>
+    </div>
     <div>
         {% if version_number > comment_version %}
         <span class="badge text-bg-danger">Outdated</span>
         {% endif %}
 
-        {% if version_number < comment_version %}
-        <span class="badge text-bg-primary">Ahead of time</span>
-        {% endif %}
+        {% if version_number < comment_version %} <span class="badge text-bg-primary">Ahead of time</span>
+            {% endif %}
     </div>
 </div>
 {% endmacro %}
@@ -57,45 +57,53 @@
 </div>
 {% endmacro %}
 
+{% macro render_project() %}
+<div class="dropdown">
+    <a class="btn dropdown-toggle" type="button" id="dropdownMenuButtonProjects" data-bs-toggle="dropdown"
+        aria-expanded="false">
+        Project
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButtonProjects" style="max-height: 200px; overflow-y: auto;">
+    </ul>
+</div>
+
+{% endmacro %}
+
 {% macro render_reports() %}
-<a class="btn dropdown-toggle" data-bs-toggle="offcanvas" href="#offcanvasExample" role="button" aria-controls="offcanvasExample">
-  Reports
+<a class="btn dropdown-toggle" data-bs-toggle="offcanvas" href="#offcanvasExample" role="button"
+    aria-controls="offcanvasExample">
+    Reports
 </a>
 
 
-<div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasExample" aria-labelledby="offcanvasExampleLabel">
-  <div class="offcanvas-header">
-    <h5 class="offcanvas-title" id="offcanvasExampleLabel">View Reports</h5>
-    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-  </div>
-  <div class="offcanvas-body">
-    <div>
-        Order Report by:
-    </div>
-    <div class="dropdown mt-3">
-      <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-        order by
-      </button>
-      <ul class="dropdown-menu">
-        <li><a class="dropdown-item" id="b1">Date up</a></li>
-        <li><a class="dropdown-item" id="b2">Date down</a></li>
-        <li><a class="dropdown-item" id="b3">Alphabetic up</a></li>
-        <li><a class="dropdown-item" id="b4">Alphabetic down</a></li>
-      </ul>
-    </div>
-    <div id="report-list" class="mt-2 align-left">
-  <!-- The list of reports will be populated here -->
-    </div>
-
-  </div>
-</div>
 
 {% endmacro%}
 
 {% macro render_info(version) %}
-
 <div class="row">
     {{ render_user(version.project.researcher) }}
+</div>
+
+<div class="row text-center pt-2">
+    <ul class="nav nav-tabs">
+        <li class="nav-item">
+            <div class="col">
+                {{ render_reports() }}
+            </div>
+        </li>
+        <li class="nav-item">
+            <div class="col">
+                <div class="nav-link active">
+                {{ render_versions(version.project.versions, version.version_number) }}
+                </div>
+            </div>
+        </li>
+        <li class="nav-item">
+            <div class="col">
+                {{ render_project() }}
+            </div>
+        </li>
+    </ul>
 </div>
 
 <div class="col mt-5" style="text-align: left;">
@@ -103,23 +111,18 @@
     <h2>{{ version.project_title }}</h2>
 </div>
 <div class="row text-center pt-2">
-    <div class="col">
-        {{ render_reports() }}
-    </div>
 
-    <div class="col">
-        <p>Created :{{ version.time_since_creation() }}</p>
+   <div class="col">
+        <p class="nav-link active">Created :{{ version.time_since_creation() }}</p>
     </div>
     <div class="col">
-        <p>Updated :{{ version.time_since_update() }}</p>
+        <p class="nav-link">Updated :{{ version.time_since_update() }}</p>
     </div>
     <div class="col">
-        <p>Status :{{ render_status_bedge(version.project_status) }}</p>
-    </div>
-    <div class="col">
-        {{ render_versions(version.project.versions, version.version_number) }}
+        <p class="nav-link">Status :{{ render_status_bedge(version.project_status) }}</p>
     </div>
 </div>
+
 <hr class="hr" />
 <div class="row">
     <div>
@@ -141,7 +144,7 @@
 {% for pair in pdfs.items()|batch(2)%}
 
 <div class="row ">
-{% for link, name in pair  %}
+    {% for link, name in pair %}
 
     <div class="col-6 mt-2">
         <!-- Button trigger modal -->
