@@ -13,6 +13,34 @@
 {% endmacro %}
 
 
+{% macro render_user_for_comments(user, comment_info, version_number, comment_version) %}
+<div class="row">
+    <div class="col-md-1">
+        <img src="{{ user.gravatar(size=60, default="robohash") }}" alt="Profile Pic" class="rounded-circle shadow"
+            width="60">
+    </div>
+    <div class="col-md-2 mt-3">
+    <p class="fw-bold text-primary mb-0">
+        <a href="{{ url_for('auth.profile', username=user.username) }}">{{ user.fullname() }}</a>
+    </p>
+   
+</div>
+<div class="col-md-2 mt-3">
+    <p>{{ comment_info.created_at }}</p>
+</div>
+    <div>
+        {% if version_number > comment_version %}
+        <span class="badge text-bg-danger">Outdated</span>
+        {% endif %}
+
+        {% if version_number < comment_version %}
+        <span class="badge text-bg-primary">Ahead of time</span>
+        {% endif %}
+    </div>
+</div>
+{% endmacro %}
+
+
 {% macro render_versions(versions, current_version) %}
 <div class="dropdown">
     <a class="btn dropdown-toggle" type="button" id="dropdownMenuButtonProjects" data-bs-toggle="dropdown"

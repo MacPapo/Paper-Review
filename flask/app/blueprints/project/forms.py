@@ -27,3 +27,8 @@ class ReportForm(FlaskForm):
         for data in field.data:
             if not data.filename.endswith(".pdf"):
                 raise ValidationError("Only PDFs are  allowed.")
+            
+
+class AddCommentForm(FlaskForm):
+    body = StringField("Title", validators=[DataRequired(), Length(min=1, max=256)])
+    submit = SubmitField("Confirm", render_kw={"class": "btn btn-primary"})
