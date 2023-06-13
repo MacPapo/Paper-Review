@@ -28,6 +28,20 @@
 
 {% endmacro %}
 
+{% macro render_select_field(field) %}
+<div class="form-floating mb-3">
+    <div class="input-group">
+        {{ field(class="form-select", id=field.id) }}
+    </div>
+    {% if field.errors %}
+        <ul class="errors">
+            {% for error in field.errors %}
+                <li>{{ error }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+</div>
+{% endmacro %}
 
 {% macro render_submit_button(field) %}
 

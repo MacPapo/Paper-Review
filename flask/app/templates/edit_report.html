@@ -2,6 +2,7 @@
 {% from "projects_components/_projects_accordion.html" import render_status_bedge %}
 {% from "projects_components/_project_info.html" import render_info, render_pdfs %}
 
+{% from "form_components/_render_field.html" import render_field, render_submit_button, render_radio_field, render_file_field,render_select_field %}
 {% block content %}
 <section class="py-4 py-md-5 my-5">
     <div class="container py-md-5">
@@ -52,7 +53,7 @@
                     </div>
                     <div class="form-group mb-4 mt-2">
                         <div class="form-check form-check-inline">
-                            {{ form.status(class="form-control",default="Requires changes",id = "status",required=True) }}
+                            {{ render_radio_field(form.status) }}
                         </div>
                     </div>
 

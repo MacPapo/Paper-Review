@@ -14,6 +14,7 @@ from wtforms import (
     SubmitField,
     DateField,
     RadioField,
+    SelectField,
 )
 
 
@@ -124,6 +125,19 @@ class RegistrationResearcherForm(FlaskForm):
             "placeholder": "Password",
             "size": 32,
         },
+    )
+    department = SelectField(
+        "Department",
+        choices=[("Dip Economia","Dip Economia"),
+                 ("Dip Filosofia e Beni Culturali","Dip Filosofia e Beni Culturali"),
+                 ("Dip Management","Dip Management"),
+                 ("Dip Scienze Ambientali,Informatica e Statistica","Dip Scienze Ambientali,Informatica e Statistica"),
+                 ("Dip Scienze molecolari e Nanosistemi","Dip Scienze molecolari e Nanosistemi"),
+                 ("Dip Studi linguistici e culturali comparati","Dip Studi linguistici e culturali comparati"),
+                 ("Dip Studi umanistici","Dip Studi umanistici"),
+                 ("Dip Studi dell'Asia e dell'Africa Mediterranea","Dip Studi dell'Asia e dell'Africa Mediterranea"),
+                 ],
+        validators=[DataRequired()],
     )
     password2 = PasswordField(
         "Repeat Password",
@@ -256,6 +270,19 @@ class RegistrationReviewerForm(FlaskForm):
             "size": 32,
             "class": "shadow-sm form-control",
         },
+    )
+    department = SelectField(
+        "Department",
+        choices=[("Dip Economia","Dip Economia"),
+                 ("Dip Filosofia e Beni Culturali","Dip Filosofia e Beni Culturali"),
+                 ("Dip Management","Dip Management"),
+                 ("Dip Scienze Ambientali,Informatica e Statistica","Dip Scienze Ambientali,Informatica e Statistica"),
+                 ("Dip Scienze molecolari e Nanosistemi","Dip Scienze molecolari e Nanosistemi"),
+                 ("Dip Studi linguistici e culturali comparati","Dip Studi linguistici e culturali comparati"),
+                 ("Dip Studi umanistici","Dip Studi umanistici"),
+                 ("Dip Studi dell'Asia e dell'Africa Mediterranea","Dip Studi dell'Asia e dell'Africa Mediterranea"),
+                 ],
+        validators=[DataRequired()],
     )
 
     pdf = FileField(

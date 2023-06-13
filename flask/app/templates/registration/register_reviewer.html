@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% from "form_components/_render_field.html" import render_field, render_submit_button, render_radio_field, render_file_field %}
+{% from "form_components/_render_field.html" import render_field, render_submit_button, render_radio_field, render_file_field,render_select_field %}
 
 {% block styles %}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/16.0.4/css/intlTelInput.css">
@@ -24,6 +24,7 @@
                     {{ render_field(form.lastname) }}
                     {{ render_field(form.birthdate) }}
                     {{ render_field(form.nationality) }}
+                    {{ render_select_field(form.department) }}
                     {{ render_field(form.phone) }}
                     {{ render_field(form.email) }}
 
