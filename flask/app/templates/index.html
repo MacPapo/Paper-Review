@@ -9,8 +9,9 @@
                 <div class="text-center">
                     {% if current_user.is_authenticated %}
                     
-                    <h1 class="display-4 fw-bold mb-5">Welcome &nbsp;<span class="underline">{{ current_user.researcher_fullname() }}</span>.</h1>
+                    <h1 class="display-4 fw-bold mb-5">Welcome &nbsp;<span class="underline">{{ current_user.fullname() }}</span>.</h1>
 
+                    {% if current_user.type == "researcher" %}
                     <!-- For Spacing -->
                     <div class="mx-auto" style="height: 25px;"></div>
 
@@ -33,15 +34,14 @@
                         <div class="mx-auto" style="height: 25px;"></div>
                         {% else %}
 
-                        {{ render_accordions(projects) }}
+                        {{ render_accordions(projects,current_user.type) }}
 
-
-                        <!-- For Spacing -->
-                        <div class="mx-auto" style="height: 100px;"></div>
 
                         {% endif %}
 
                       </div>
+                      {% else %}
+                      {% endif %}
                     {% else %}
                     <div class="col-12 col-lg-10 mx-auto">
                         <div class="text-center position-relative"><img class="img-fluid" src="{{ url_for('static', filename='assets/img/illustrations/meeting.svg') }}" style="width: 800px;"></div>

@@ -1,25 +1,30 @@
+import datetime
 import pyrebase
+from config import FIREBASE_CONFIG
 
 
 class Firebase:
     def __init__(self):
-        # Firebase configuration
-        config = {
-            "apiKey": "AIzaSyDvsdPFUgyr67aaXCtvignz0m8aM2ZdnTU",
-            "authDomain": "paperreview-f9016.firebaseapp.com",
-            "databaseURL": "",
-            "projectId": "paperreview-f9016",
-            "storageBucket": "paperreview-f9016.appspot.com",
-            "messagingSenderId": "620720763534",
-            "appId": "1:620720763534:web:d8aba558e4838cbdd84fdf",
-            "measurementId": "G-1234567890",
-        }
-        self.firebase = pyrebase.initialize_app(config)
+        self.firebase = None
+        self.storage = None
+        self.firebase_directory = "files/"
+        self.upload_directory = "uploads/"
+        self.download_directory = "static/assets/tmp/"
+
+    def init_app(self, app):
+        self.firebase = pyrebase.initialize_app(FIREBASE_CONFIG)
         self.storage = self.firebase.storage()
 
     def upload(self, file):
-        self.storage.child("files/" + file).put(file)
-        return self.storage.child("files/" + file).get_url(None)
+        self.storage.child(self.firebase_directory + file).put(file)
+        return self.storage.child(self.firebase_directory + file).get_url(None)
 
-    def download(self, url, file):
-        self.storage.child("files/" + url).download(file)
+    def download(self, name):
+
+        dest = (
+            self.download_directory + name
+                   )
+        self.storage.child(
+            self.firebase_directory + self.upload_directory + name
+        ).download(path=self.download_directory, filename=dest)
+        return "/" + dest

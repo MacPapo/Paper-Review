@@ -1,0 +1,149 @@
+{% from "projects_components/_projects_accordion.html" import render_status_bedge %}
+
+{% macro render_user(user) %}
+<div class="row">
+    <div class="col-md-1">
+        <img src="{{ user.gravatar(size=60, default="robohash") }}" alt="Profile Pic" class="rounded-circle shadow"
+            width="60">
+    </div>
+    <div class="col-md-2  mt-3 text-left">
+        <p><a  class="fw-bold text-danger" href="{{ url_for('auth.profile', username=user.username) }}">{{ user.fullname() }}</a></p>
+    </div>
+</div>
+{% endmacro %}
+
+
+{% macro render_versions(versions, current_version) %}
+<div class="dropdown">
+    <a class="btn dropdown-toggle" type="button" id="dropdownMenuButtonProjects" data-bs-toggle="dropdown"
+        aria-expanded="false">
+        Version #{{ current_version }}
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButtonProjects" style="max-height: 200px; overflow-y: auto;">
+        {% for version in versions %}
+        <li><a class="dropdown-item"
+                href="{{ url_for('project.view', pid=version.pid, version_number=version.version_number) }}">{{
+                version.version_number }}</a></li>
+        {% endfor %}
+    </ul>
+</div>
+{% endmacro %}
+
+{% macro render_reports() %}
+<a class="btn dropdown-toggle" data-bs-toggle="offcanvas" href="#offcanvasExample" role="button" aria-controls="offcanvasExample">
+  Reports
+</a>
+
+
+<div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasExample" aria-labelledby="offcanvasExampleLabel">
+  <div class="offcanvas-header">
+    <h5 class="offcanvas-title" id="offcanvasExampleLabel">View Reports</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+  </div>
+  <div class="offcanvas-body">
+    <div>
+        Order Report by:
+    </div>
+    <div class="dropdown mt-3">
+      <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+        order by
+      </button>
+      <ul class="dropdown-menu">
+        <li><a class="dropdown-item" id="b1">Date up</a></li>
+        <li><a class="dropdown-item" id="b2">Date down</a></li>
+        <li><a class="dropdown-item" id="b3">Alphabetic up</a></li>
+        <li><a class="dropdown-item" id="b4">Alphabetic down</a></li>
+      </ul>
+    </div>
+    <div id="report-list" class="mt-2 align-left">
+  <!-- The list of reports will be populated here -->
+    </div>
+
+  </div>
+</div>
+
+{% endmacro%}
+
+{% macro render_info(version) %}
+
+<div class="row">
+    {{ render_user(version.project.researcher) }}
+</div>
+
+<div class="col mt-5" style="text-align: left;">
+    <p class="text-primary fw-bold">Title</p>
+    <h2>{{ version.project_title }}</h2>
+</div>
+<div class="row text-center pt-2">
+    <div class="col">
+        {{ render_reports() }}
+    </div>
+
+    <div class="col">
+        <p>Created :{{ version.time_since_creation() }}</p>
+    </div>
+    <div class="col">
+        <p>Updated :{{ version.time_since_update() }}</p>
+    </div>
+    <div class="col">
+        <p>Status :{{ render_status_bedge(version.project_status) }}</p>
+    </div>
+    <div class="col">
+        {{ render_versions(version.project.versions, version.version_number) }}
+    </div>
+</div>
+<hr class="hr" />
+<div class="row">
+    <div>
+        <p class="text-primary fw-bold">Description</p>
+    </div>
+
+    <div class="col">
+        <p>{{ version.project_description }}</p>
+    </div>
+</div>
+
+
+{% endmacro %}
+
+
+
+{% macro render_pdfs(pdfs) %}
+{% set count = namespace(value = 0) %}
+{% for pair in pdfs.items()|batch(2)%}
+
+<div class="row ">
+{% for link, name in pair  %}
+
+    <div class="col-6 mt-2">
+        <!-- Button trigger modal -->
+        <button type="button" class="btn btn-primary h-100 w-100" data-bs-toggle="modal"
+            data-bs-target="#exampleModal-{{ count.value }}">
+            {{ name }}
+        </button>
+
+
+        <!-- Modal -->
+        <div class="modal fade" id="exampleModal-{{ count.value }}" tabindex="-1" aria-labelledby="exampleModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog modal-xl">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="exampleModalLabel">{{ name }}</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="ratio ratio-4x3">
+                            <embed class="embed-responsive-item" src="{{ link }}"></embed>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% set count.value = count.value + 1 %}
+    {% endfor %}
+</div>
+{% endfor %}
+
+{% endmacro %}

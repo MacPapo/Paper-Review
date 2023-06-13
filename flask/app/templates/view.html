@@ -1,54 +1,17 @@
 {% extends 'base.html' %}
 {% from "projects_components/_projects_accordion.html" import render_status_bedge %}
+{% from "projects_components/_project_info.html" import render_info, render_pdfs %}
 
 {% block content %}
 <section class="py-4 py-md-5 my-5">
     <div class="container py-md-5">
-        <div class="row">
-            <div class="col">
-                <h2>{{ version.project_title }}</h2>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col">
-                <p>Created {{ version.time_since_creation() }}</p>
-            </div>
-            <div class="col">
-                <p>Updated {{ version.time_since_update() }}</p>
-            </div>
-            <div class="col">
-                Status {{ render_status_bedge(version.project_status) }}
-            </div>
-        </div>
-        <div class="row">
-            <div class="col">
-                <p>{{ version.project_description }}</p>
-            </div>
-        </div>
-        {% for link, name in pdfs %}
+        {{ render_info(project.versions[version_number - 1]) }}
 
-        <!-- Button trigger modal -->
-        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
-            {{ name }}
-        </button>
-
-        <!-- Modal -->
-        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-xl">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h1 class="modal-title fs-5" id="exampleModalLabel">{{ name }}</h1>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="ratio ratio-4x3">
-                            <embed class="embed-responsive-item" src="{{ link }}"></embed>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        {% endfor %}
+        <hr class="hr" />
+        <br>
+        
+        {{ render_pdfs(get_pdf_lambda(project.versions[version_number - 1].contains)) }}
+        
     </div>
 </section>
 {% endblock %}
@@ -62,5 +25,125 @@ const myInput = document.getElementById('myInput')
 myModal.addEventListener('shown.bs.modal', () => {
   myInput.focus()
 })
+</script>
+<script type="text/javascript">
+ var pid = {{ project.pid }};
+ $('#b1').click(function(e){
+     e.preventDefault();
+     var n = 1;
+  $.ajax({
+    url: `/project/${pid}/report_list/${n}`,
+    type: 'GET',
+    success: function(data) {
+      var reports = data; // Extract the reports from the returned data
+      var reportList = $('#report-list');
+      reportList.empty(); // Clear the existing list
+
+      // Iterate over the reports and create the list of links
+      for (var i = 0; i < reports.length; i++) {
+        var report = reports[i];
+        var url = `/project/${report.pid}/report/${report.rid}/${report.rvid}`;
+        var link = $('<a>').attr('href', url).text(report.title);
+        var listItem = $('<li>').append(link);
+        reportList.append(listItem);
+      }
+      console.log(data); // Log the data to the console for testing
+    },
+    error: function(error) {
+      console.log(error); // Log any errors to the console
+    }
+  });
+});
+
+
+
+
+$('#b2').click(function(e){
+     e.preventDefault();
+     var n = 2;
+  $.ajax({
+    url: `/project/${pid}/report_list/${n}`,
+    type: 'GET',
+    success: function(data) {
+      var reports = data; // Extract the reports from the returned data
+      var reportList = $('#report-list');
+      reportList.empty(); // Clear the existing list
+
+      // Iterate over the reports and create the list of links
+      for (var i = 0; i < reports.length; i++) {
+        var report = reports[i];
+        var url = `/project/${report.pid}/report/${report.rid}/${report.rvid}`;
+        var link = $('<a>').attr('href', url).text(report.title);
+        var listItem = $('<li>').append(link);
+        reportList.append(listItem);
+      }
+      console.log(data); // Log the data to the console for testing
+    },
+    error: function(error) {
+      console.log(error); // Log any errors to the console
+    }
+  });
+});
+
+
+
+
+$('#b3').click(function(e){
+     e.preventDefault();
+     var n = 3;
+  $.ajax({
+    url: `/project/${pid}/report_list/${n}`,
+    type: 'GET',
+    success: function(data) {
+      var reports = data; // Extract the reports from the returned data
+      var reportList = $('#report-list');
+      reportList.empty(); // Clear the existing list
+
+      // Iterate over the reports and create the list of links
+      for (var i = 0; i < reports.length; i++) {
+        var report = reports[i];
+        var url = `/project/${report.pid}/report/${report.rid}/${report.rvid}`;
+        var link = $('<a>').attr('href', url).text(report.title);
+        var listItem = $('<li>').append(link);
+        reportList.append(listItem);
+      }
+      console.log(data); // Log the data to the console for testing
+    },
+    error: function(error) {
+      console.log(error); // Log any errors to the console
+    }
+  });
+});
+
+
+
+
+ $('#b4').click(function(e){
+     e.preventDefault();
+     var n = 4;
+  $.ajax({
+    url: `/project/${pid}/report_list/${n}`,
+    type: 'GET',
+    success: function(data) {
+      var reports = data; // Extract the reports from the returned data
+      var reportList = $('#report-list');
+      reportList.empty(); // Clear the existing list
+
+      // Iterate over the reports and create the list of links
+      for (var i = 0; i < reports.length; i++) {
+        var report = reports[i];
+        var url = `/project/${report.pid}/report/${report.rid}/${report.rvid}`;
+        var link = $('<a>').attr('href', url).text(report.title);
+        var listItem = $('<li>').append(link);
+        reportList.append(listItem);
+      }
+      console.log(data); // Log the data to the console for testing
+    },
+    error: function(error) {
+      console.log(error); // Log any errors to the console
+    }
+  });
+});
+
 </script>
 {% endblock %}
