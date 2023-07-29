@@ -1,6 +1,6 @@
 from werkzeug.security import generate_password_hash, check_password_hash
 from hashlib import md5
-from datetime import datetime
+from datetime import datetime,timedelta
 from flask_login import UserMixin
 from sqlalchemy.dialects.postgresql import BYTEA, ENUM
 from app import db, login
@@ -40,11 +40,24 @@ report_version = db.Table(
     db.Column("version_id", db.Integer, db.ForeignKey("version.vid", ondelete="CASCADE")),
 )
 
+class Project(db.Model):
+    __tablename__ = "project"
+
+    pid = db.Column(db.Integer, primary_key=True)
+    rsid = db.Column(db.String(16), db.ForeignKey("researcher.rsid"))
+
+    researcher = db.relationship("Researcher", backref="project", lazy=True)
+    versions = db.relationship("Version", backref="project", lazy=True, cascade="all, delete")
+
+    def get_id(self):
+        return self.rsid
+
+
 
 class PDF(db.Model):
     __tablename__ = "pdf"
 
-    id = db.Column(BYTEA, primary_key=True)
+    id = db.Column(BYTEA,primary_key=True)
     filename = db.Column(db.String(256), nullable=False)
     key = db.Column(BYTEA, nullable=False)
 
@@ -53,6 +66,7 @@ class PDF(db.Model):
     def __repr__(self):
         return "<PDF {}>".format(self.id)
 
+max_birthdate = (datetime.utcnow() - timedelta(days=365 * 18)).date()
 
 class User(UserMixin, db.Model):
     __tablename__ = "user"
@@ -86,6 +100,16 @@ class User(UserMixin, db.Model):
         "polymorphic_identity": "user",
         "polymorphic_on": type,
     }
+
+    __table_args__ = (
+                     db.CheckConstraint("birthdate <= :max_birthdate", name="ck_user_birthdate"),
+                         #db.CheckConstraint("username NOT IN (SELECT username FROM user WHERE username IS NOT NULL)", name="ck_user_username"),
+                       #db.CheckConstraint("email NOT IN (SELECT email FROM user WHERE email IS NOT NULL)", name="ck_user_email"),
+                       #db.CheckConstraint("first_name NOT IN (SELECT last_name FROM user WHERE last_name IS NOT NULL)", name="ck_user_first_name"),
+                        #db.CheckConstraint("last_name NOT IN (SELECT first_name FROM user WHERE first_name IS NOT NULL)", name="ck_user_last_name"),
+                        db.CheckConstraint("sex IN ('M','F','Other')",name="ck_user_sx_value"),
+                        db.CheckConstraint("type IN ('researcher','reviewer')",name="ck_user_type_value"),
+                      )
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -151,19 +175,6 @@ class Reviewer(User):
         return "<Reviewer {}>".format(self.rvid)
 
 
-class Project(db.Model):
-    __tablename__ = "project"
-
-    pid = db.Column(db.Integer, primary_key=True)
-    rsid = db.Column(db.String(16), db.ForeignKey("researcher.rsid"))
-
-    researcher = db.relationship("Researcher", backref="project", lazy=True)
-    versions = db.relationship("Version", backref="project", lazy=True, cascade="all, delete")
-
-    def get_id(self):
-        return self.rsid
-
-
 class Version(db.Model):
     vid = db.Column(db.Integer, primary_key=True)
     version_number = db.Column(db.Integer, nullable=False)
@@ -192,6 +203,12 @@ class Version(db.Model):
 
     created_at = db.Column(db.DateTime, default=datetime.utcnow())
     updated_at = db.Column(db.DateTime, default=datetime.utcnow())
+    __table_args__ = (
+        db.CheckConstraint("version_number > 0", name="ck_version_number"),
+        db.CheckConstraint("project_status IN ('Approved','Submitted','Requires changes','Not Approved')", name="ck_project_status"),
+        #db.CheckConstraint("project_title NOT IN (SELECT project_title FROM version WHERE project_title IS NOT NULL)", name="ck_project_title"),
+        db.Index("version_index","project_title","version_number"),
+    )
 
     def time_since_creation(self):
         return naturaldate(self.created_at)
@@ -212,6 +229,11 @@ class Draft(db.Model):
 
     version = db.relationship("Version", back_populates="draft", uselist=False, cascade="all, delete")
 
+    __table_args__ = (
+        #db.CheckConstraint("title NOT IN (SELECT project_title FROM version WHERE project_title IS NOT NULL)", name="ck_draft_title"),
+        db.Index("draft_index","title"),
+    )
+
 class Report(db.Model):
     __tablename__ = "report"
     rid = db.Column(db.Integer, primary_key=True)
@@ -229,6 +251,10 @@ class Report(db.Model):
     reference = db.Column(db.Integer, db.ForeignKey('report.rid',ondelete='SET NULL'), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow())
 
+    __table_args__ = (
+        db.Index("report_index","pid","rvid","title"),
+    )
+
     def time_since_creation(self):
         return naturaldate(self.created_at)
 
@@ -244,12 +270,17 @@ class ReportDraft(db.Model):
     rvid = db.Column(db.String(16), db.ForeignKey("reviewer.rvid"))
     pid = db.Column(db.Integer, db.ForeignKey("project.pid",ondelete='CASCADE'))
     status = db.Column(db.String(256), nullable=False)
-    reference = db.Column(db.Integer)
+    reference = db.Column(db.Integer,nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow())
 
     contains = db.relationship("PDF", secondary=rdraft_pdf, backref="reportdraft", lazy=True, cascade="all, delete")
 
     report = db.relationship("Report", back_populates="draft", uselist=False, cascade="all, delete")
+
+    __table_args__ = (
+        db.CheckConstraint("status IN ('Approved','Submitted','Requires changes','Not Approved')", name="ck_report_status"),
+        db.Index("reportdraft_index","pid","rvid","title"),
+    )
 
     def time_since_creation(self):
         return naturaldate(self.created_at)
@@ -278,6 +309,9 @@ class Comment(db.Model):
     #Comment relation to Project
     pid = db.Column(db.Integer, db.ForeignKey("project.pid"))
 
+    __table_args__ = (
+        db.Index("comment_index","pid","version_ref"),
+    )
     def time_since_creation(self):
         return naturaldate(self.created_at)
 
@@ -293,6 +327,15 @@ class ReportComment(db.Model):
     #Comment relation to Project
     rid = db.Column(db.Integer, db.ForeignKey("report.rid"))
 
+    __table_args__ = (
+        db.Index("reportcomment_index","rid","version_ref"),
+    )
 
     def time_since_creation(self):
         return naturaldate(self.created_at)
+#utente non si può iscrivere due volte
+#il reviewer che fa report non può essere researcher del progetto
+#se versione del commento dopo, la data deve esserre maggiore
+#report non fa reference a se stesso
+#se progetto è stato concluso , non possiamo fare altro (trigger)
+#projetto se uguale allora titolo è uguale
