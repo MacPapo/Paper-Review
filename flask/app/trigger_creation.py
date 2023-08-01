@@ -1,6 +1,6 @@
 from sqlalchemy import  event , DDL
 from app import db
-
+from app.models import ReportComment
 # Trigger to check if the reviewer is a researcher of the same project
 reviewer_not_project_researcher= DDL("""
 CREATE OR REPLACE FUNCTION reviewer_not_project_researcher()
@@ -28,13 +28,13 @@ EXECUTE FUNCTION reviewer_not_project_researcher();
 """)
 
 
-
 comment_date_check = DDL("""
 CREATE OR REPLACE FUNCTION comment_date_check()
 RETURNS TRIGGER AS $$
 BEGIN
     IF EXISTS(SELECT * FROM public.comment cm
-              WHERE NEW.version_ref < cm.version_ref)
+              WHERE NEW.version_ref < cm.version_ref
+              AND NEW.pid = cm.pid)
     THEN RAISE EXCEPTION 'New comment cannot be of an older version of the project';
     END IF;
     RETURN NEW;
@@ -51,7 +51,8 @@ CREATE OR REPLACE FUNCTION report_comment_date_check()
 RETURNS TRIGGER AS $$
 BEGIN
     IF EXISTS(SELECT * FROM reportcomment rc
-              WHERE NEW.version_ref < rc.version_ref)
+              WHERE NEW.version_ref < rc.version_ref
+              AND NEW.rid = rc.rid)
     THEN RAISE EXCEPTION 'New reportcomment cannot be of an older version of the project';
     END IF;
     RETURN NEW;
@@ -93,7 +94,7 @@ CREATE OR REPLACE FUNCTION project_status_check()
 RETURNS TRIGGER AS $$
 BEGIN
     IF EXISTS(SELECT * FROM public.version vs
-                WHERE vs.pid = NEW.pid AND (vs.project_status='Approved' OR vs.project_status='Rejected'))
+                WHERE vs.pid = NEW.pid AND (vs.project_status='Approved' OR vs.project_status='Not Approved'))
     THEN RAISE EXCEPTION 'Project cannot be updated after it is approved or rejected';
     END IF;
     RETURN NEW;
@@ -122,3 +123,5 @@ def create_triggers():
 
         # Commit the changes to the database
         con.commit()
+
+event.listen(ReportComment.__table__, 'after_create', create_triggers)

@@ -2,9 +2,9 @@ import logging
 from logging.config import fileConfig
 
 from flask import current_app
-
+from app.trigger_creation import create_triggers
 from alembic import context
-
+from flask import current_app
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
@@ -70,6 +70,8 @@ def run_migrations_offline():
 
     with context.begin_transaction():
         context.run_migrations()
+    with current_app.app_context():
+        create_triggers()
 
 
 def run_migrations_online():
@@ -102,6 +104,8 @@ def run_migrations_online():
 
         with context.begin_transaction():
             context.run_migrations()
+        with current_app.app_context():
+            create_triggers()
 
 
 if context.is_offline_mode():
