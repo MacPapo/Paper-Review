@@ -58,7 +58,7 @@ class PDF(db.Model):
     __tablename__ = "pdf"
 
     id = db.Column(BYTEA,primary_key=True)
-    filename = db.Column(db.String(256), nullable=False)
+    filename = db.Column(db.String(256),index=True, nullable=False)
     key = db.Column(BYTEA, nullable=False)
 
     reviewer = db.relationship("Reviewer", back_populates="pdf", uselist=False)
@@ -66,7 +66,8 @@ class PDF(db.Model):
     def __repr__(self):
         return "<PDF {}>".format(self.id)
 
-max_birthdate = (datetime.utcnow() - timedelta(days=365 * 18)).date()
+max_birthdate = (datetime.utcnow() - timedelta(days=365 * 18))
+
 
 class User(UserMixin, db.Model):
     __tablename__ = "user"
@@ -75,7 +76,7 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(32), index=True, unique=True, nullable=False)
     first_name = db.Column(db.String(32))
     last_name = db.Column(db.String(64))
-    birthdate = db.Column(db.Date)
+    birthdate = db.Column(db.Date, info={'check': f'birthdate < {max_birthdate}'})
     email = db.Column(db.String(120), index=True, unique=True)
     password_hash = db.Column(db.String(128))
     sex = db.Column(
@@ -102,11 +103,7 @@ class User(UserMixin, db.Model):
     }
 
     __table_args__ = (
-                     db.CheckConstraint("birthdate <= :max_birthdate", name="ck_user_birthdate"),
-                         #db.CheckConstraint("username NOT IN (SELECT username FROM user WHERE username IS NOT NULL)", name="ck_user_username"),
-                       #db.CheckConstraint("email NOT IN (SELECT email FROM user WHERE email IS NOT NULL)", name="ck_user_email"),
-                       #db.CheckConstraint("first_name NOT IN (SELECT last_name FROM user WHERE last_name IS NOT NULL)", name="ck_user_first_name"),
-                        #db.CheckConstraint("last_name NOT IN (SELECT first_name FROM user WHERE first_name IS NOT NULL)", name="ck_user_last_name"),
+                     db.CheckConstraint(birthdate <= max_birthdate, name="ck_user_birthdate"),
                         db.CheckConstraint("sex IN ('M','F','Other')",name="ck_user_sx_value"),
                         db.CheckConstraint("type IN ('researcher','reviewer')",name="ck_user_type_value"),
                       )
@@ -206,7 +203,6 @@ class Version(db.Model):
     __table_args__ = (
         db.CheckConstraint("version_number > 0", name="ck_version_number"),
         db.CheckConstraint("project_status IN ('Approved','Submitted','Requires changes','Not Approved')", name="ck_project_status"),
-        #db.CheckConstraint("project_title NOT IN (SELECT project_title FROM version WHERE project_title IS NOT NULL)", name="ck_project_title"),
         db.Index("version_index","project_title","version_number"),
     )
 
@@ -230,7 +226,6 @@ class Draft(db.Model):
     version = db.relationship("Version", back_populates="draft", uselist=False, cascade="all, delete")
 
     __table_args__ = (
-        #db.CheckConstraint("title NOT IN (SELECT project_title FROM version WHERE project_title IS NOT NULL)", name="ck_draft_title"),
         db.Index("draft_index","title"),
     )
 
@@ -298,10 +293,11 @@ def load_researcher(id):
 
 
 class Comment(db.Model):
+    __tablename__ = "comment"
     cid = db.Column(db.Integer, primary_key=True)
     body = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow())
-    version_ref = db.Column(db.Integer, nullable=False)
+    version_ref = db.Column(db.Integer, db.ForeignKey("version.vid"))
 
     #Comment relation to User
     uid = db.Column(db.String(16), db.ForeignKey("user.uid"))
@@ -315,11 +311,13 @@ class Comment(db.Model):
     def time_since_creation(self):
         return naturaldate(self.created_at)
 
+
 class ReportComment(db.Model):
+    __tablename__ = "reportcomment"
     cid = db.Column(db.Integer, primary_key=True)
     body = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow())
-    version_ref = db.Column(db.Integer, nullable=False)
+    version_ref = db.Column(db.Integer, db.ForeignKey("version.vid"))
 
     #Comment relation to User
     uid = db.Column(db.String(16), db.ForeignKey("user.uid"))
@@ -333,9 +331,3 @@ class ReportComment(db.Model):
 
     def time_since_creation(self):
         return naturaldate(self.created_at)
-#utente non si può iscrivere due volte
-#il reviewer che fa report non può essere researcher del progetto
-#se versione del commento dopo, la data deve esserre maggiore
-#report non fa reference a se stesso
-#se progetto è stato concluso , non possiamo fare altro (trigger)
-#projetto se uguale allora titolo è uguale

@@ -1,8 +1,8 @@
-"""added check-index
+"""fix trigger scheme
 
-Revision ID: ecf55f384469
+Revision ID: d000d96cfa82
 Revises: 
-Create Date: 2023-07-29 21:05:19.752935
+Create Date: 2023-07-30 19:49:15.593337
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision = 'ecf55f384469'
+revision = 'd000d96cfa82'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -49,9 +49,9 @@ def upgrade():
     sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.Column('updated_at', sa.DateTime(), nullable=True),
     sa.Column('last_seen', sa.DateTime(), nullable=True),
+    sa.CheckConstraint("birthdate <= '2005-08-03 19:49:15.259500'", name='ck_user_birthdate'),
     sa.CheckConstraint("sex IN ('M','F','Other')", name='ck_user_sx_value'),
     sa.CheckConstraint("type IN ('researcher','reviewer')", name='ck_user_type_value'),
-    sa.CheckConstraint('birthdate <= NULL', name='ck_user_birthdate'),
     sa.PrimaryKeyConstraint('uid')
     )
     with op.batch_alter_table('user', schema=None) as batch_op:
@@ -59,6 +59,12 @@ def upgrade():
         batch_op.create_index(batch_op.f('ix_user_uid'), ['uid'], unique=False)
         batch_op.create_index(batch_op.f('ix_user_username'), ['username'], unique=True)
 
+    op.create_table('draft_pdf',
+    sa.Column('pdf_id', postgresql.BYTEA(), nullable=True),
+    sa.Column('draft_id', sa.Integer(), nullable=True),
+    sa.ForeignKeyConstraint(['draft_id'], ['draft.did'], ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['pdf_id'], ['pdf.id'], ondelete='CASCADE')
+    )
     op.create_table('researcher',
     sa.Column('rsid', sa.String(length=16), nullable=False),
     sa.ForeignKeyConstraint(['rsid'], ['user.uid'], ),
@@ -72,18 +78,11 @@ def upgrade():
     sa.PrimaryKeyConstraint('rvid'),
     sa.UniqueConstraint('pdf_id')
     )
-
     op.create_table('project',
     sa.Column('pid', sa.Integer(), nullable=False),
     sa.Column('rsid', sa.String(length=16), nullable=True),
     sa.ForeignKeyConstraint(['rsid'], ['researcher.rsid'], ),
     sa.PrimaryKeyConstraint('pid')
-    )
-    op.create_table('draft_pdf',
-    sa.Column('pdf_id', postgresql.BYTEA(), nullable=True),
-    sa.Column('draft_id', sa.Integer(), nullable=True),
-    sa.ForeignKeyConstraint(['draft_id'], ['draft.did'], ondelete='CASCADE'),
-    sa.ForeignKeyConstraint(['pdf_id'], ['pdf.id'], ondelete='CASCADE')
     )
     op.create_table('reportdraft',
     sa.Column('rdid', sa.Integer(), nullable=False),
@@ -101,65 +100,6 @@ def upgrade():
     )
     with op.batch_alter_table('reportdraft', schema=None) as batch_op:
         batch_op.create_index('reportdraft_index', ['pid', 'rvid', 'title'], unique=False)
-
-    op.create_table('report',
-    sa.Column('rid', sa.Integer(), nullable=False),
-    sa.Column('title', sa.String(length=256), nullable=False),
-    sa.Column('body', sa.Text(), nullable=False),
-    sa.Column('pid', sa.Integer(), nullable=True),
-    sa.Column('rvid', sa.String(length=16), nullable=True),
-    sa.Column('rdraft_id', sa.Integer(), nullable=True),
-    sa.Column('reference', sa.Integer(), nullable=True),
-    sa.Column('created_at', sa.DateTime(), nullable=True),
-    sa.ForeignKeyConstraint(['pid'], ['project.pid'], ondelete='CASCADE'),
-    sa.ForeignKeyConstraint(['rdraft_id'], ['reportdraft.rdid'], ondelete='CASCADE'),
-    sa.ForeignKeyConstraint(['reference'], ['report.rid'], ondelete='SET NULL'),
-    sa.ForeignKeyConstraint(['rvid'], ['reviewer.rvid'], ),
-    sa.PrimaryKeyConstraint('rid'),
-    sa.UniqueConstraint('rdraft_id')
-    )
-    with op.batch_alter_table('report', schema=None) as batch_op:
-        batch_op.create_index('report_index', ['pid', 'rvid', 'title'], unique=False)
-
-    op.create_table('pdf_report',
-    sa.Column('pdf_id', postgresql.BYTEA(), nullable=True),
-    sa.Column('report_id', sa.Integer(), nullable=True),
-    sa.ForeignKeyConstraint(['pdf_id'], ['pdf.id'], ondelete='CASCADE'),
-    sa.ForeignKeyConstraint(['report_id'], ['report.rid'], ondelete='CASCADE')
-    )
-    op.create_table('report_comment',
-    sa.Column('cid', sa.Integer(), nullable=False),
-    sa.Column('body', sa.Text(), nullable=False),
-    sa.Column('created_at', sa.DateTime(), nullable=True),
-    sa.Column('version_ref', sa.Integer(), nullable=False),
-    sa.Column('uid', sa.String(length=16), nullable=True),
-    sa.Column('rid', sa.Integer(), nullable=True),
-    sa.ForeignKeyConstraint(['rid'], ['report.rid'], ),
-    sa.ForeignKeyConstraint(['uid'], ['user.uid'], ),
-    sa.PrimaryKeyConstraint('cid')
-    )
-    with op.batch_alter_table('report_comment', schema=None) as batch_op:
-        batch_op.create_index('reportcomment_index', ['rid', 'version_ref'], unique=False)
-
-    op.create_table('report_draft_pdf',
-    sa.Column('pdf_id', postgresql.BYTEA(), nullable=True),
-    sa.Column('draft_id', sa.Integer(), nullable=True),
-    sa.ForeignKeyConstraint(['draft_id'], ['reportdraft.rdid'], ondelete='CASCADE'),
-    sa.ForeignKeyConstraint(['pdf_id'], ['pdf.id'], ondelete='CASCADE')
-    )
-    op.create_table('comment',
-    sa.Column('cid', sa.Integer(), nullable=False),
-    sa.Column('body', sa.Text(), nullable=False),
-    sa.Column('created_at', sa.DateTime(), nullable=True),
-    sa.Column('version_ref', sa.Integer(), nullable=False),
-    sa.Column('uid', sa.String(length=16), nullable=True),
-    sa.Column('pid', sa.Integer(), nullable=True),
-    sa.ForeignKeyConstraint(['pid'], ['project.pid'], ),
-    sa.ForeignKeyConstraint(['uid'], ['user.uid'], ),
-    sa.PrimaryKeyConstraint('cid')
-    )
-    with op.batch_alter_table('comment', schema=None) as batch_op:
-        batch_op.create_index('comment_index', ['pid', 'version_ref'], unique=False)
 
     op.create_table('version',
     sa.Column('vid', sa.Integer(), nullable=False),
@@ -181,11 +121,57 @@ def upgrade():
     with op.batch_alter_table('version', schema=None) as batch_op:
         batch_op.create_index('version_index', ['project_title', 'version_number'], unique=False)
 
+    op.create_table('comment',
+    sa.Column('cid', sa.Integer(), nullable=False),
+    sa.Column('body', sa.Text(), nullable=False),
+    sa.Column('created_at', sa.DateTime(), nullable=True),
+    sa.Column('version_ref', sa.Integer(), nullable=True),
+    sa.Column('uid', sa.String(length=16), nullable=True),
+    sa.Column('pid', sa.Integer(), nullable=True),
+    sa.ForeignKeyConstraint(['pid'], ['project.pid'], ),
+    sa.ForeignKeyConstraint(['uid'], ['user.uid'], ),
+    sa.ForeignKeyConstraint(['version_ref'], ['version.vid'], ),
+    sa.PrimaryKeyConstraint('cid')
+    )
+    with op.batch_alter_table('comment', schema=None) as batch_op:
+        batch_op.create_index('comment_index', ['pid', 'version_ref'], unique=False)
+
     op.create_table('pdf_version',
     sa.Column('pdf_id', postgresql.BYTEA(), nullable=True),
     sa.Column('version_id', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['pdf_id'], ['pdf.id'], ondelete='CASCADE'),
     sa.ForeignKeyConstraint(['version_id'], ['version.vid'], ondelete='CASCADE')
+    )
+    op.create_table('report',
+    sa.Column('rid', sa.Integer(), nullable=False),
+    sa.Column('title', sa.String(length=256), nullable=False),
+    sa.Column('body', sa.Text(), nullable=False),
+    sa.Column('pid', sa.Integer(), nullable=True),
+    sa.Column('rvid', sa.String(length=16), nullable=True),
+    sa.Column('rdraft_id', sa.Integer(), nullable=True),
+    sa.Column('reference', sa.Integer(), nullable=True),
+    sa.Column('created_at', sa.DateTime(), nullable=True),
+    sa.ForeignKeyConstraint(['pid'], ['project.pid'], ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['rdraft_id'], ['reportdraft.rdid'], ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['reference'], ['report.rid'], ondelete='SET NULL'),
+    sa.ForeignKeyConstraint(['rvid'], ['reviewer.rvid'], ),
+    sa.PrimaryKeyConstraint('rid'),
+    sa.UniqueConstraint('rdraft_id')
+    )
+    with op.batch_alter_table('report', schema=None) as batch_op:
+        batch_op.create_index('report_index', ['pid', 'rvid', 'title'], unique=False)
+
+    op.create_table('report_draft_pdf',
+    sa.Column('pdf_id', postgresql.BYTEA(), nullable=True),
+    sa.Column('draft_id', sa.Integer(), nullable=True),
+    sa.ForeignKeyConstraint(['draft_id'], ['reportdraft.rdid'], ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['pdf_id'], ['pdf.id'], ondelete='CASCADE')
+    )
+    op.create_table('pdf_report',
+    sa.Column('pdf_id', postgresql.BYTEA(), nullable=True),
+    sa.Column('report_id', sa.Integer(), nullable=True),
+    sa.ForeignKeyConstraint(['pdf_id'], ['pdf.id'], ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['report_id'], ['report.rid'], ondelete='CASCADE')
     )
     op.create_table('report_version',
     sa.Column('report_id', sa.Integer(), nullable=True),
@@ -193,30 +179,53 @@ def upgrade():
     sa.ForeignKeyConstraint(['report_id'], ['report.rid'], ondelete='CASCADE'),
     sa.ForeignKeyConstraint(['version_id'], ['version.vid'], ondelete='CASCADE')
     )
+    op.create_table('reportcomment',
+    sa.Column('cid', sa.Integer(), nullable=False),
+    sa.Column('body', sa.Text(), nullable=False),
+    sa.Column('created_at', sa.DateTime(), nullable=True),
+    sa.Column('version_ref', sa.Integer(), nullable=True),
+    sa.Column('uid', sa.String(length=16), nullable=True),
+    sa.Column('rid', sa.Integer(), nullable=True),
+    sa.ForeignKeyConstraint(['rid'], ['report.rid'], ),
+    sa.ForeignKeyConstraint(['uid'], ['user.uid'], ),
+    sa.ForeignKeyConstraint(['version_ref'], ['version.vid'], ),
+    sa.PrimaryKeyConstraint('cid')
+    )
+    with op.batch_alter_table('reportcomment', schema=None) as batch_op:
+        batch_op.create_index('reportcomment_index', ['rid', 'version_ref'], unique=False)
+
     # ### end Alembic commands ###
 
 
 def downgrade():
     # ### commands auto generated by Alembic - please adjust! ###
-    op.drop_table('report_version')
-    op.drop_table('pdf_version')
-    with op.batch_alter_table('version', schema=None) as batch_op:
-        batch_op.drop_index('version_index')
+    with op.batch_alter_table('reportcomment', schema=None) as batch_op:
+        batch_op.drop_index('reportcomment_index')
 
-    op.drop_table('version')
+    op.drop_table('reportcomment')
+    op.drop_table('report_version')
+    op.drop_table('pdf_report')
+    op.drop_table('report_draft_pdf')
+    with op.batch_alter_table('report', schema=None) as batch_op:
+        batch_op.drop_index('report_index')
+
+    op.drop_table('report')
+    op.drop_table('pdf_version')
     with op.batch_alter_table('comment', schema=None) as batch_op:
         batch_op.drop_index('comment_index')
 
     op.drop_table('comment')
+    with op.batch_alter_table('version', schema=None) as batch_op:
+        batch_op.drop_index('version_index')
+
+    op.drop_table('version')
+    with op.batch_alter_table('reportdraft', schema=None) as batch_op:
+        batch_op.drop_index('reportdraft_index')
+
+    op.drop_table('reportdraft')
     op.drop_table('project')
     op.drop_table('reviewer')
     op.drop_table('researcher')
-    op.drop_table('report_draft_pdf')
-    with op.batch_alter_table('report_comment', schema=None) as batch_op:
-        batch_op.drop_index('reportcomment_index')
-
-    op.drop_table('report_comment')
-    op.drop_table('pdf_report')
     op.drop_table('draft_pdf')
     with op.batch_alter_table('user', schema=None) as batch_op:
         batch_op.drop_index(batch_op.f('ix_user_username'))
@@ -224,14 +233,6 @@ def downgrade():
         batch_op.drop_index(batch_op.f('ix_user_email'))
 
     op.drop_table('user')
-    with op.batch_alter_table('reportdraft', schema=None) as batch_op:
-        batch_op.drop_index('reportdraft_index')
-
-    op.drop_table('reportdraft')
-    with op.batch_alter_table('report', schema=None) as batch_op:
-        batch_op.drop_index('report_index')
-
-    op.drop_table('report')
     op.drop_table('pdf')
     with op.batch_alter_table('draft', schema=None) as batch_op:
         batch_op.drop_index('draft_index')
