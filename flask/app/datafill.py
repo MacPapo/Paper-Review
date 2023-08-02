@@ -4,10 +4,7 @@ from werkzeug.security import generate_password_hash
 from app.models import User
 from datetime import datetime, timedelta
 
-def random_data():
-    fake = Faker()
-    fake.locale = 'it_IT'
-    Faker.seed(0)
+def random_user(fake):
     end_date = datetime.now()
     start_date = end_date - timedelta(days=365 * 18)
     #generate 10 rows for tablee users
@@ -33,3 +30,16 @@ def random_data():
             updated_at=datetime.now(),
         )
         db.session.add(user)
+    db.session.commit()
+
+
+#def random_pdf(fake):
+
+
+def fake_data():
+    faker = Faker()
+    faker.locale = 'it_IT'
+    Faker.seed(0)
+
+    random_user(faker)
+    random_pdf(faker)

@@ -132,8 +132,8 @@ def view(pid, version_number):
     form = AddCommentForm()
     project = Project.query.filter_by(pid=pid).first_or_404()
     comments = Comment.query.filter_by(pid=pid)
-
-    if version_number > len(project.versions):
+    version  = Version.query.filter_by(pid=pid,version_number=version_number).first_or_404()
+    if version.version_number > len(project.versions):
         return render_template("errors/404.html"), 404
 
     get_pdf_lambda = lambda x: get_all_pdfs(x)
@@ -144,19 +144,19 @@ def view(pid, version_number):
             created_at=datetime.now(),
             uid = current_user.uid,
             pid = pid,
-            version_ref = version_number
+            version_ref = version.version_number,
         )
 
         db.session.add(new_comment)
 
         db.session.commit()
-        return redirect(url_for("project.view", pid=pid, version_number=version_number))
+        return redirect(url_for("project.view", pid=pid, version_number=version.version_number))
 
     return render_template(
         "view.html",
         title="View Project",
         project=project,
-        version_number=version_number,
+        version_number=version.version_number,
         get_pdf_lambda=get_pdf_lambda,
         form = form, 
         comments = comments
@@ -325,6 +325,7 @@ def update_report(vid,pid):
             pid=pid,
             rdraft_id=draft.rdid,
             reference=reference,
+            vid=vid,
             contains=[pdf for pdf in draft.contains],
             draft=draft,
         )
@@ -413,7 +414,7 @@ def report(pid,rid,reviewer):
             created_at=datetime.now(),
             uid = current_user.uid,
             rid = rid,
-            version_ref = 0
+            version_ref = report.vid,
         )
 
         db.session.add(new_comment)

@@ -34,11 +34,6 @@ pdf_report = db.Table(
     db.Column("report_id", db.Integer, db.ForeignKey("report.rid", ondelete="CASCADE")),
 )
 
-report_version = db.Table(
-    "report_version",
-    db.Column("report_id", db.Integer, db.ForeignKey("report.rid", ondelete="CASCADE")),
-    db.Column("version_id", db.Integer, db.ForeignKey("version.vid", ondelete="CASCADE")),
-)
 
 class Project(db.Model):
     __tablename__ = "project"
@@ -236,8 +231,7 @@ class Report(db.Model):
     body = db.Column(db.Text, nullable=False)
     pid = db.Column(db.Integer, db.ForeignKey("project.pid",ondelete='CASCADE'))
     rvid = db.Column(db.String(16), db.ForeignKey("reviewer.rvid"))
-
-    version = db.relationship("Version", secondary=report_version, backref="report", lazy=True, cascade="all, delete")
+    vid = db.Column(db.Integer, db.ForeignKey("version.vid",ondelete='CASCADE'))
 
     rdraft_id = db.Column(db.Integer, db.ForeignKey("reportdraft.rdid",ondelete='CASCADE'), unique=True, nullable=True)
     draft = db.relationship("ReportDraft", back_populates="report", uselist=False, cascade="all, delete")
@@ -298,7 +292,7 @@ class Comment(db.Model):
     body = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow())
     version_ref = db.Column(db.Integer, db.ForeignKey("version.vid"))
-
+    anonymous = db.Column(db.Boolean, default=False)
     #Comment relation to User
     uid = db.Column(db.String(16), db.ForeignKey("user.uid"))
 
@@ -318,7 +312,7 @@ class ReportComment(db.Model):
     body = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow())
     version_ref = db.Column(db.Integer, db.ForeignKey("version.vid"))
-
+    anonymous = db.Column(db.Boolean, default=False)
     #Comment relation to User
     uid = db.Column(db.String(16), db.ForeignKey("user.uid"))
 

@@ -5,7 +5,6 @@ from app.blueprints.project import bp as project_bp
 from app.blueprints.main import bp as main_bp
 from app.blueprints.auth import bp as auth_bp
 from config import Config
-from app.datafill import random_data
 
 def create_app():
     app = Flask(__name__, static_folder="../static")
@@ -26,3 +25,10 @@ def create_app():
     app.register_blueprint(auth_bp, url_prefix="/auth")
 
     return app
+#FATTO!  relazione tra report -version 1 a 1
+#finire script inserire tabelle
+#ruolii e politiche di autorizzazione
+#finire documentazione
+#FATTO!  aggiustare commentii anonimi nel modello
+#video 10 min
+#aggiustare codice

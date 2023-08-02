@@ -1,6 +1,4 @@
-from sqlalchemy import  event , DDL
-from app import db
-from app.models import ReportComment
+from sqlalchemy import DDL
 # Trigger to check if the reviewer is a researcher of the same project
 reviewer_not_project_researcher= DDL("""
 CREATE OR REPLACE FUNCTION reviewer_not_project_researcher()
@@ -77,13 +75,8 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE TRIGGER check_report_not_reference_itself_trigger
+CREATE OR REPLACE TRIGGER check_report_not_reference_itself
 BEFORE INSERT ON report
-FOR EACH ROW
-EXECUTE FUNCTION check_report_not_reference_itself();
-
-CREATE OR REPLACE TRIGGER check_reportdraft_not_reference_itself_trigger
-BEFORE INSERT ON reportdraft
 FOR EACH ROW
 EXECUTE FUNCTION check_report_not_reference_itself();
 
@@ -113,8 +106,8 @@ FOR EACH ROW
 EXECUTE FUNCTION project_status_check();
 """)
 
-def create_triggers():
-    with db.engine.connect() as con:
+def create_triggers(op):
+        con = op.get_bind()
         # Execute the DDL statements directly to create triggers
         con.execute(reviewer_not_project_researcher)
         con.execute(comment_date_check)
@@ -124,4 +117,3 @@ def create_triggers():
         # Commit the changes to the database
         con.commit()
 
-event.listen(ReportComment.__table__, 'after_create', create_triggers)

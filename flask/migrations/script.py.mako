@@ -6,6 +6,7 @@ Create Date: ${create_date}
 
 """
 from alembic import op
+from app.trigger_creation import create_triggers
 import sqlalchemy as sa
 ${imports if imports else ""}
 
@@ -18,6 +19,7 @@ depends_on = ${repr(depends_on)}
 
 def upgrade():
     ${upgrades if upgrades else "pass"}
+    create_triggers(op)
 
 
 def downgrade():
