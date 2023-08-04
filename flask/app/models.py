@@ -291,13 +291,13 @@ class Comment(db.Model):
     cid = db.Column(db.Integer, primary_key=True)
     body = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow())
-    version_ref = db.Column(db.Integer, db.ForeignKey("version.vid"))
+    version_ref = db.Column(db.Integer, db.ForeignKey("version.vid",ondelete='CASCADE'))
     anonymous = db.Column(db.Boolean, default=False)
     #Comment relation to User
-    uid = db.Column(db.String(16), db.ForeignKey("user.uid"))
+    uid = db.Column(db.String(16), db.ForeignKey("user.uid",ondelete='CASCADE'))
 
     #Comment relation to Project
-    pid = db.Column(db.Integer, db.ForeignKey("project.pid"))
+    pid = db.Column(db.Integer, db.ForeignKey("project.pid",ondelete='CASCADE'))
 
     __table_args__ = (
         db.Index("comment_index","pid","version_ref"),
@@ -311,13 +311,13 @@ class ReportComment(db.Model):
     cid = db.Column(db.Integer, primary_key=True)
     body = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow())
-    version_ref = db.Column(db.Integer, db.ForeignKey("version.vid"))
+    version_ref = db.Column(db.Integer, db.ForeignKey("version.vid",ondelete='CASCADE'))
     anonymous = db.Column(db.Boolean, default=False)
     #Comment relation to User
-    uid = db.Column(db.String(16), db.ForeignKey("user.uid"))
+    uid = db.Column(db.String(16), db.ForeignKey("user.uid",ondelete='CASCADE'))
 
-    #Comment relation to Project
-    rid = db.Column(db.Integer, db.ForeignKey("report.rid"))
+    #Comment relation to Report
+    rid = db.Column(db.Integer, db.ForeignKey("report.rid",ondelete='CASCADE'))
 
     __table_args__ = (
         db.Index("reportcomment_index","rid","version_ref"),

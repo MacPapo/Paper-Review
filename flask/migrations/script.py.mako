@@ -21,6 +21,5 @@ def upgrade():
     ${upgrades if upgrades else "pass"}
     create_triggers(op)
 
-
 def downgrade():
     ${downgrades if downgrades else "pass"}
