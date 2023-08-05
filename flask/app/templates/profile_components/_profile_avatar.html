@@ -1,19 +1,18 @@
-  <div class="card shadow">
-    <div class="card-body">
-      <div class="d-flex flex-column align-items-center text-center">
-        <img src="{{ user.gravatar(size=150, default="robohash") }}" alt="Profile Pic"
-             class="rounded-circle shadow" width="150">
-        <div class="mt-3">
-          <h4>{{ user.fullname() }}</h4>
-          <p class="text-secondary mb-1">{{ user.type }}</p>
-          <p class="text-muted font-size-sm">{{ user.uid }}</p>
-          <button class="btn btn-primary">Follow</button>
-          {% if current_user.uid == user.uid %}
-            <button class="btn btn-outline-primary" onclick="location.href='{{ url_for('auth.edit_profile', username=current_user.username ) }}'">
-              Edit
-            </button>
-          {% endif %}
-        </div>
+<div class="card shadow">
+  <div class="card-body">
+    <div class="d-flex flex-column align-items-center text-center">
+      <img src="{{ user.gravatar(size=150, default="robohash") }}" alt="Profile Pic"
+           class="rounded-circle shadow" width="150">
+      <div class="mt-3">
+        <h4>{{ user.fullname() }}</h4>
+        <p class="text-secondary mb-1">{{ user.type }}</p>
+        <p class="text-muted font-size-sm">{{ user.uid }}</p>
+        {% if current_user.uid == user.uid %}
+        <button class="btn btn-outline-primary" onclick="location.href='{{ url_for('auth.edit_profile', username=current_user.username ) }}'">
+          Edit
+        </button>
+        {% endif %}
       </div>
     </div>
   </div>
+</div>
