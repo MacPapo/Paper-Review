@@ -1,34 +1,35 @@
-<div class="row gutters-sm">
-  <div class="col-sm-6 mb-3">
-    <div class="card h-100 shadow">
-      <div class="card-body">
-        <h6 class="d-flex align-items-center mb-3">
-          <i class="material-icons text-info mr-2">Projects status</i>
-        </h6>
-        <small>Submitted</small>
-        <div class="progress mb-3" style="height: 5px;">
-          <div class="progress-bar bg-primary" role="progressbar"
-               style="width: {{ submitted }}%;" aria-valuenow="80" aria-valuemin="0"
-               aria-valuemax="100"></div>
-        </div>
-        <small>Requires changes</small>
-        <div class="progress mb-3" style="height: 5px;">
-          <div class="progress-bar bg-primary" role="progressbar"
-               style="width: {{ requires_changes }}%;" aria-valuenow="72" aria-valuemin="0"
-               aria-valuemax="100"></div>
-        </div>
-        <small>Approved</small>
-        <div class="progress mb-3" style="height: 5px;">
-          <div class="progress-bar bg-primary" role="progressbar"
-               style="width: {{ approved }}%;" aria-valuenow="89" aria-valuemin="0"
-               aria-valuemax="100"></div>
-        </div>
-        <small>Rejected</small>
-        <div class="progress mb-3" style="height: 5px;">
-          <div class="progress-bar bg-primary" role="progressbar"
-               style="width: {{ rejected }}%;" aria-valuenow="55" aria-valuemin="0"
-               aria-valuemax="100"></div>
-        </div>
-      </div>
+<div class="card mb-3 shadow">
+  <div class="card-body">
+    <h6 class="d-flex align-items-center mb-3">
+      <i class="material-icons text-info mr-2">Projects status</i>
+    </h6>
+
+    <small>Submitted</small>
+    <div class="progress mb-3" style="height: 5px;">
+      <div class="progress-bar bg-primary" role="progressbar"
+           style="width: {{ submitted }}%;" aria-valuenow="{{ submitted }}" aria-valuemin="0"
+           aria-valuemax="100"></div>
+    </div>
+
+    <small>Requires changes</small>
+    <div class="progress mb-3" style="height: 5px;">
+      <div class="progress-bar bg-primary" role="progressbar"
+           style="width: {{ requires_changes }}%;" aria-valuenow="{{ submitted }}" aria-valuemin="0"
+           aria-valuemax="100"></div>
+    </div>
+
+    <small>Approved</small>
+    <div class="progress mb-3" style="height: 5px;">
+      <div class="progress-bar bg-primary" role="progressbar"
+           style="width: {{ approved }}%;" aria-valuenow="{{ submitted }}" aria-valuemin="0"
+           aria-valuemax="100"></div>
+    </div>
+
+    <small>Rejected</small>
+    <div class="progress mb-3" style="height: 5px;">
+      <div class="progress-bar bg-primary" role="progressbar"
+           style="width: {{ rejected }}%;" aria-valuenow="{{ submitted }}" aria-valuemin="0"
+           aria-valuemax="100"></div>
     </div>
   </div>
+</div>

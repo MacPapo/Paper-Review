@@ -32,6 +32,9 @@ def index():
             return render_template("index.html", title="Home", projects=projects)
     return render_template("index.html", title="Home")
 
+@bp.route("/explaination")
+def explaination():
+    return render_template("explaination.html", title="Explaination")
 
 @bp.route("/about")
 def about():

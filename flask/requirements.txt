@@ -13,7 +13,6 @@ dominate==2.7.0
 email-validator==2.0.0.post2
 Flask==2.3.2
 Flask-Bootstrap==3.3.7.1
-Flask-DebugToolbar==0.13.1
 Flask-Login==0.6.2
 Flask-Migrate==4.0.4
 Flask-Script==2.0.6
@@ -62,3 +61,4 @@ WTForms==3.0.1
 WTForms-Components==0.10.5
 zope.interface==6.0
 codicefiscale==0.9
+Faker==4.0.0

@@ -20,7 +20,6 @@ class Firebase:
         return self.storage.child(self.firebase_directory + file).get_url(None)
 
     def download(self, name):
-
         dest = (
             self.download_directory + name
                    )

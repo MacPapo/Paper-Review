@@ -12,10 +12,10 @@ RUN pip install -r requirements.txt
 COPY app app
 COPY migrations migrations
 COPY uploads uploads
-COPY project0.py boot.sh ./
+COPY paper_review.py boot.sh ./
 RUN chmod +x boot.sh
 
-ENV FLASK_APP project0.py
+ENV FLASK_APP paper_review.py
 ENV FLASK_ENV development
 ENV FLASK_DEBUG 1
 ENV FLASK_RUN_HOST 0.0.0.0

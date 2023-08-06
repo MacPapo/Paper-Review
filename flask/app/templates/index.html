@@ -8,46 +8,50 @@
             <div class="col-md-12 text-center text-md-start mx-auto">
                 <div class="text-center">
                     {% if current_user.is_authenticated %}
-                    
-                    <h1 class="display-4 fw-bold mb-5">Welcome &nbsp;<span class="underline">{{ current_user.fullname() }}</span>.</h1>
+                        <h1 class="display-4 fw-bold mb-5">Welcome, <span class="underline">{{ current_user.fullname() }}</span>.</h1>
 
-                    {% if current_user.type == "researcher" %}
-                    <!-- For Spacing -->
-                    <div class="mx-auto" style="height: 25px;"></div>
+                        {% if current_user.type == "researcher" %}
 
-                    <div class="container">
-                        <div class="row justify-content-between">
-                          <div class="col-md-6">
-                            <h2 class="display-8 fw-bold mb-5">Your projects</h2>
-                          </div>
-                          <div class="col-md-6">
-                            <a href="{{ url_for('project.create') }}" class="btn btn-primary">New Project +</a>
-                          </div>
-                        </div>
+                        <!-- TODO: rendere più carine queste sezioni -->
+                            {% if current_user.projects %}
+                                <div class="container my-4">
+                                    <div class="row justify-content-between">
+                                        <div class="col-md-6">
+                                            <h2 class="display-8 fw-bold mb-5">Your projects</h2>
+                                        </div>
+                                        <div class="col-md-6 text-md-end">
+                                            <a href="{{ url_for('project.create') }}" class="btn btn-primary">New Project +</a>
+                                        </div>
+                                    </div>
+                                </div>
+                                {{ render_accordions(projects, current_user.type) }}
+                            {% else %}
+                                <div class="d-flex flex-column justify-content-center align-items-center" style="min-height: 50vh;">
+                                    <p class="display-8 fw-bold mb-5">No projects here! Start by creating one above.</p>
+                                </div>
+                            {% endif %}
 
-                        <!-- For Spacing -->
-                        <div class="mx-auto" style="height: 50px;"></div>
+                        {% elif current_user.type == "reviewer" %}
+                                <!-- TODO: far apparire la lista dei projects che ha fatto la review se ce ne sono altrimenti una sezione che lo porta alla lista dei projecs -->
 
-                        {% if len == 0 %}
-                            <p class="display-8 fw-bold mb-5">No projects here! Create your first one with the button above.</p>
-                            <!-- For Spacing -->
-                        <div class="mx-auto" style="height: 25px;"></div>
-                        {% else %}
-
-                        {{ render_accordions(projects,current_user.type) }}
-
-
+                                {% if true %}
+                                <p>REVIEWER SAS</p>
+                                {% endif %}
                         {% endif %}
 
-                      </div>
-                      {% else %}
-                      {% endif %}
                     {% else %}
-                    <div class="col-12 col-lg-10 mx-auto">
-                        <div class="text-center position-relative"><img class="img-fluid" src="{{ url_for('static', filename='assets/img/illustrations/meeting.svg') }}" style="width: 800px;"></div>
-                    </div>
-                    <h1 class="display-4 fw-bold mb-5">Welcome to Project0</span>.</h1>
-                    <p class="fs-5 text-muted mb-5">Welcome! Take a tour of our site</p>
+                        <div class="col-12 col-lg-10 mx-auto">
+                            <div class="text-center position-relative">
+                                <img class="img-fluid mb-4" src="{{ url_for('static', filename='assets/img/illustrations/meeting.svg') }}" style="width: 800px;">
+                            </div>
+                            <h1 class="display-4 fw-bold mb-3">Welcome to Paper Review.</h1>
+                            <p class="fs-5 text-muted mb-4">Take a tour of our platform.</p>
+                        </div>
+                        <!-- Universal links section for both authenticated and non-authenticated users -->
+                        <div class="mt-4 d-flex justify-content-center">
+                            <a href="{{ url_for('main.explaination') }}" class="btn btn-outline-secondary me-2">Explanation</a>
+                            <a href="{{ url_for('main.about') }}" class="btn btn-outline-secondary">Who We Are</a>
+                        </div>
                     {% endif %}
                 </div>
             </div>

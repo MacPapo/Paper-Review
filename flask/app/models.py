@@ -1,6 +1,6 @@
 from werkzeug.security import generate_password_hash, check_password_hash
 from hashlib import md5
-from datetime import datetime
+from datetime import datetime,timedelta
 from flask_login import UserMixin
 from sqlalchemy.dialects.postgresql import BYTEA, ENUM
 from app import db, login
@@ -34,24 +34,34 @@ pdf_report = db.Table(
     db.Column("report_id", db.Integer, db.ForeignKey("report.rid", ondelete="CASCADE")),
 )
 
-report_version = db.Table(
-    "report_version",
-    db.Column("report_id", db.Integer, db.ForeignKey("report.rid", ondelete="CASCADE")),
-    db.Column("version_id", db.Integer, db.ForeignKey("version.vid", ondelete="CASCADE")),
-)
+
+class Project(db.Model):
+    __tablename__ = "project"
+
+    pid = db.Column(db.Integer, primary_key=True)
+    rsid = db.Column(db.String(16), db.ForeignKey("researcher.rsid"))
+
+    researcher = db.relationship("Researcher", backref="project", lazy=True)
+    versions = db.relationship("Version", backref="project", lazy=True, cascade="all, delete")
+
+    def get_id(self):
+        return self.rsid
+
 
 
 class PDF(db.Model):
     __tablename__ = "pdf"
 
-    id = db.Column(BYTEA, primary_key=True)
-    filename = db.Column(db.String(256), nullable=False)
+    id = db.Column(BYTEA,primary_key=True)
+    filename = db.Column(db.String(256),index=True, nullable=False)
     key = db.Column(BYTEA, nullable=False)
 
     reviewer = db.relationship("Reviewer", back_populates="pdf", uselist=False)
 
     def __repr__(self):
         return "<PDF {}>".format(self.id)
+
+max_birthdate = (datetime.utcnow() - timedelta(days=365 * 18))
 
 
 class User(UserMixin, db.Model):
@@ -61,7 +71,7 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(32), index=True, unique=True, nullable=False)
     first_name = db.Column(db.String(32))
     last_name = db.Column(db.String(64))
-    birthdate = db.Column(db.Date)
+    birthdate = db.Column(db.Date, info={'check': f'birthdate < {max_birthdate}'})
     email = db.Column(db.String(120), index=True, unique=True)
     password_hash = db.Column(db.String(128))
     sex = db.Column(
@@ -74,7 +84,9 @@ class User(UserMixin, db.Model):
         ENUM("researcher", "reviewer", name="user_type", create_type=False),
         nullable=False,
     )
-    projects = db.relationship("Comment", backref="user", lazy=True)
+
+    comments = db.relationship("Comment", backref="user", lazy=True)
+    report_comments = db.relationship("ReportComment", backref="user", lazy=True)
 
     created_at = db.Column(db.DateTime, default=datetime.utcnow())
     updated_at = db.Column(db.DateTime, default=datetime.utcnow())
@@ -84,6 +96,12 @@ class User(UserMixin, db.Model):
         "polymorphic_identity": "user",
         "polymorphic_on": type,
     }
+
+    __table_args__ = (
+                     db.CheckConstraint(birthdate <= max_birthdate, name="ck_user_birthdate"),
+                        db.CheckConstraint("sex IN ('M','F','Other')",name="ck_user_sx_value"),
+                        db.CheckConstraint("type IN ('researcher','reviewer')",name="ck_user_type_value"),
+                      )
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -149,19 +167,6 @@ class Reviewer(User):
         return "<Reviewer {}>".format(self.rvid)
 
 
-class Project(db.Model):
-    __tablename__ = "project"
-
-    pid = db.Column(db.Integer, primary_key=True)
-    rsid = db.Column(db.String(16), db.ForeignKey("researcher.rsid"))
-
-    researcher = db.relationship("Researcher", backref="project", lazy=True)
-    versions = db.relationship("Version", backref="project", lazy=True, cascade="all, delete")
-
-    def get_id(self):
-        return self.rsid
-
-
 class Version(db.Model):
     vid = db.Column(db.Integer, primary_key=True)
     version_number = db.Column(db.Integer, nullable=False)
@@ -190,6 +195,11 @@ class Version(db.Model):
 
     created_at = db.Column(db.DateTime, default=datetime.utcnow())
     updated_at = db.Column(db.DateTime, default=datetime.utcnow())
+    __table_args__ = (
+        db.CheckConstraint("version_number > 0", name="ck_version_number"),
+        db.CheckConstraint("project_status IN ('Approved','Submitted','Requires changes','Not Approved')", name="ck_project_status"),
+        db.Index("version_index","project_title","version_number"),
+    )
 
     def time_since_creation(self):
         return naturaldate(self.created_at)
@@ -210,6 +220,10 @@ class Draft(db.Model):
 
     version = db.relationship("Version", back_populates="draft", uselist=False, cascade="all, delete")
 
+    __table_args__ = (
+        db.Index("draft_index","title"),
+    )
+
 class Report(db.Model):
     __tablename__ = "report"
     rid = db.Column(db.Integer, primary_key=True)
@@ -217,8 +231,7 @@ class Report(db.Model):
     body = db.Column(db.Text, nullable=False)
     pid = db.Column(db.Integer, db.ForeignKey("project.pid",ondelete='CASCADE'))
     rvid = db.Column(db.String(16), db.ForeignKey("reviewer.rvid"))
-
-    version = db.relationship("Version", secondary=report_version, backref="report", lazy=True, cascade="all, delete")
+    vid = db.Column(db.Integer, db.ForeignKey("version.vid",ondelete='CASCADE'))
 
     rdraft_id = db.Column(db.Integer, db.ForeignKey("reportdraft.rdid",ondelete='CASCADE'), unique=True, nullable=True)
     draft = db.relationship("ReportDraft", back_populates="report", uselist=False, cascade="all, delete")
@@ -226,6 +239,10 @@ class Report(db.Model):
     contains = db.relationship("PDF", secondary=pdf_report, backref="report", lazy=True, cascade="all, delete")
     reference = db.Column(db.Integer, db.ForeignKey('report.rid',ondelete='SET NULL'), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow())
+
+    __table_args__ = (
+        db.Index("report_index","pid","rvid","title"),
+    )
 
     def time_since_creation(self):
         return naturaldate(self.created_at)
@@ -242,12 +259,17 @@ class ReportDraft(db.Model):
     rvid = db.Column(db.String(16), db.ForeignKey("reviewer.rvid"))
     pid = db.Column(db.Integer, db.ForeignKey("project.pid",ondelete='CASCADE'))
     status = db.Column(db.String(256), nullable=False)
-    reference = db.Column(db.Integer)
+    reference = db.Column(db.Integer,nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow())
 
     contains = db.relationship("PDF", secondary=rdraft_pdf, backref="reportdraft", lazy=True, cascade="all, delete")
 
     report = db.relationship("Report", back_populates="draft", uselist=False, cascade="all, delete")
+
+    __table_args__ = (
+        db.CheckConstraint("status IN ('Approved','Submitted','Requires changes','Not Approved')", name="ck_report_status"),
+        db.Index("reportdraft_index","pid","rvid","title"),
+    )
 
     def time_since_creation(self):
         return naturaldate(self.created_at)
@@ -265,13 +287,41 @@ def load_researcher(id):
 
 
 class Comment(db.Model):
+    __tablename__ = "comment"
     cid = db.Column(db.Integer, primary_key=True)
     body = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow())
-    version_ref = db.Column(db.Integer, nullable=False)
-
+    version_ref = db.Column(db.Integer, db.ForeignKey("version.vid",ondelete='CASCADE'))
+    anonymous = db.Column(db.Boolean, default=False)
     #Comment relation to User
-    uid = db.Column(db.String(16), db.ForeignKey("user.uid"))
+    uid = db.Column(db.String(16), db.ForeignKey("user.uid",ondelete='CASCADE'))
 
     #Comment relation to Project
-    pid = db.Column(db.Integer, db.ForeignKey("project.pid"))
+    pid = db.Column(db.Integer, db.ForeignKey("project.pid",ondelete='CASCADE'))
+
+    __table_args__ = (
+        db.Index("comment_index","pid","version_ref"),
+    )
+    def time_since_creation(self):
+        return naturaldate(self.created_at)
+
+
+class ReportComment(db.Model):
+    __tablename__ = "reportcomment"
+    cid = db.Column(db.Integer, primary_key=True)
+    body = db.Column(db.Text, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow())
+    version_ref = db.Column(db.Integer, db.ForeignKey("version.vid",ondelete='CASCADE'))
+    anonymous = db.Column(db.Boolean, default=False)
+    #Comment relation to User
+    uid = db.Column(db.String(16), db.ForeignKey("user.uid",ondelete='CASCADE'))
+
+    #Comment relation to Report
+    rid = db.Column(db.Integer, db.ForeignKey("report.rid",ondelete='CASCADE'))
+
+    __table_args__ = (
+        db.Index("reportcomment_index","rid","version_ref"),
+    )
+
+    def time_since_creation(self):
+        return naturaldate(self.created_at)

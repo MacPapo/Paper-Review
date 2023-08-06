@@ -22,7 +22,7 @@
         <p>Created :{{ report.time_since_creation() }}</p>
     </div>
     <div class="col">
-        <p>Project Version  :{{ report.version[-1].version_number }}</p>
+        <p>Project Version  :{{ report.vid }}</p>
     </div>
     <div class="col">
         <p>Project ID :{{ report.pid }}</p>
@@ -45,6 +45,38 @@
         <p>{{ report.body }}</p>
     </div>
 </div>
+{% endmacro %}
 
 
+
+{% macro render_user_for_report_comments(user, comment_info, anonymous) %}
+    <div class="row">
+        <div class="col-md-1">
+            {% if not anonymous %}
+                <img src="{{ user.gravatar(size=60, default="robohash") }}" alt="Profile Pic" class="rounded-circle shadow"
+                    width="60">
+            {% else %}
+                <div class="rounded-circle bg-secondary shadow d-flex align-items-center justify-content-center" style="width: 60px; height: 60px; font-size: 24px;">
+                    <strong>?</strong>
+                </div>
+            {% endif %}
+        </div>
+        <div class="col-md-2 mt-3">
+            {% if not anonymous %}
+        <p class="fw-bold text-primary mb-0">
+            <a href="{{ url_for('auth.profile', username=user.username) }}">{{ user.fullname() }}</a>
+        </p>
+        {% else %}
+        <p class="fw-bold text-primary mb-0">
+            <a>Anonymous</a>
+        </p>
+        {% endif %}
+        
+
+    </div>
+    <div class="col-md-2 mt-3">
+        <p>{{ comment_info.time_since_creation() }}</p>
+    </div>
+        <!-- This div serves alignment purpose -->
+    </div>
 {% endmacro %}

@@ -1,14 +1,12 @@
 from datetime import datetime
-from flask import render_template, flash, redirect, url_for, request, jsonify
+from flask import render_template, flash, redirect, url_for, request
 from flask_login import current_user, login_required
-from sqlalchemy.orm import UserDefinedOption
-from sqlalchemy.util.langhelpers import portable_instancemethod
 from app import db
 from app.blueprints.project import bp
 from app.blueprints.project.forms import UploadForm, ReportForm, AddCommentForm
-from app.models import Project, Version, Draft, Report, ReportDraft, Reviewer, User, Comment
-from app.modules.pdf_helper import *
-from sqlalchemy import desc,asc
+from app.models import Project, Draft, Version, Report, ReportDraft, Reviewer, Comment, ReportComment
+from app.modules.pdf_helper import upload_pdf, get_all_pdfs, delete_pdf, download_pdf
+from sqlalchemy import desc
 
 @bp.route("/projects")
 @login_required
@@ -132,8 +130,8 @@ def view(pid, version_number):
     form = AddCommentForm()
     project = Project.query.filter_by(pid=pid).first_or_404()
     comments = Comment.query.filter_by(pid=pid)
-
-    if version_number > len(project.versions):
+    version  = Version.query.filter_by(pid=pid,version_number=version_number).first_or_404()
+    if version.version_number > len(project.versions):
         return render_template("errors/404.html"), 404
 
     get_pdf_lambda = lambda x: get_all_pdfs(x)
@@ -144,21 +142,22 @@ def view(pid, version_number):
             created_at=datetime.now(),
             uid = current_user.uid,
             pid = pid,
-            version_ref = version_number
+            version_ref = version.version_number,
+            anonymous = form.is_anonymous.data
         )
 
         db.session.add(new_comment)
 
         db.session.commit()
-        return redirect(url_for("project.view", pid=pid, version_number=version_number))
+        return redirect(url_for("project.view", pid=pid, version_number=version.version_number))
 
     return render_template(
         "view.html",
         title="View Project",
         project=project,
-        version_number=version_number,
+        version_number=version.version_number,
         get_pdf_lambda=get_pdf_lambda,
-        form = form, 
+        form = form,
         comments = comments
     )
 
@@ -288,10 +287,10 @@ def edit_pdf(vid, filename):
         )
 
 @bp.route("/project/<int:pid>/edit_report_draft/<int:vid>", methods=["POST"])
-@login_required                                                                                                               #
-def edit_report_draft(pid,vid):                                                                                               #
-    if request.method == "POST":                                                                                              #
-        draft = ReportDraft.query.filter_by(pid=pid,rvid=current_user.uid).order_by(desc(ReportDraft.rdid)).first_or_404()                                                                                                                     #
+@login_required
+def edit_report_draft(pid,vid):
+    if request.method == "POST":
+        draft = ReportDraft.query.filter_by(pid=pid,rvid=current_user.uid).order_by(desc(ReportDraft.rdid)).first_or_404()
         draft.title = request.form.get("title")
         draft.body = request.form.get("body")
         draft.status = request.form.get("status")
@@ -299,14 +298,14 @@ def edit_report_draft(pid,vid):                                                 
             draft.reference = request.form.get("report")
         else:
             draft.reference = 0
-        names = request.form.getlist("names")                                                                                 #
-                                                                                                                              #
-        pdfs = upload_pdf("uploads", request.files.getlist("files"))                                                          #
-        draft.contains = [pdf for pdf in draft.contains if pdf.filename in names] + pdfs                                #
-        db.session.commit()                                                                                                   #
-        pdfs = draft.contains                                                                                                 #
+        names = request.form.getlist("names")
+
+        pdfs = upload_pdf("uploads", request.files.getlist("files"))
+        draft.contains = [pdf for pdf in draft.contains if pdf.filename in names] + pdfs
+        db.session.commit()
+        pdfs = draft.contains
         delete_pdf(pdfs)
-        return ("",204)                                                                                                       #
+        return ("",204)
 
 @bp.route("/project/<int:pid>/update_report/<int:vid>", methods=["POST"])
 @login_required
@@ -325,6 +324,7 @@ def update_report(vid,pid):
             pid=pid,
             rdraft_id=draft.rdid,
             reference=reference,
+            vid=vid,
             contains=[pdf for pdf in draft.contains],
             draft=draft,
         )
@@ -403,6 +403,24 @@ def report(pid,rid,reviewer):
     pdfs = [pdf for pdf in report.contains]
     reviewer = Reviewer.query.filter_by(uid=reviewer).first_or_404()
     get_pdf_lambda = lambda x: get_all_pdfs(x)
+    report_comments = ReportComment.query.filter_by(rid=rid)
+
+    form = AddCommentForm()
+
+    if form.validate_on_submit():
+        new_comment = ReportComment(
+            body=form.body.data,
+            created_at=datetime.now(),
+            uid = current_user.uid,
+            rid = rid,
+            version_ref = report.vid,
+            anonymous = form.is_anonymous.data
+        )
+
+        db.session.add(new_comment)
+
+        db.session.commit()
+        return redirect(url_for("project.report", pid=pid, rid=rid, reviewer=reviewer.rvid))
 
     return render_template(
         "view_report.html",
@@ -411,7 +429,9 @@ def report(pid,rid,reviewer):
         report = report,
         pdfs = pdfs,
         reviewer = reviewer,
-    )
+        form = form,
+        report_comments = report_comments
+)
 
 @bp.route("/project/delete_project/<int:pid>", methods=["POST", "GET"])
 @login_required
@@ -420,25 +440,3 @@ def delete_project(pid):
     db.session.delete(project)
     db.session.commit()
     return redirect(url_for("main.index"))
-
-@bp.route("/project/<int:pid>/report_list/<int:n>", methods=["GET"])
-@login_required
-def report_list(pid,n):
-    if n==1:
-       reports = Report.query.filter_by(pid=pid).order_by(asc(Report.created_at)).all()
-    elif n==2:
-       reports = Report.query.filter_by(pid=pid).order_by(desc(Report.created_at)).all()
-    elif n==3:
-        reports = Report.query.filter_by(pid=pid).order_by(asc(Report.title)).all()
-    else:
-        reports = Report.query.filter_by(pid=pid).order_by(desc(Report.title)).all()
-    reports_data = [
-        {
-            'rid':report.rid,
-            'pid':report.pid,
-            'rvid':report.rvid,
-            'title':report.title,
-        }
-        for report in reports
-    ]
-    return (reports_data,200)

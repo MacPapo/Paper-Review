@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms.validators import ValidationError, DataRequired, Length
-from wtforms import StringField, TextAreaField, SubmitField, MultipleFileField, SelectField, RadioField
+from wtforms import StringField, TextAreaField, SubmitField, MultipleFileField, SelectField, RadioField, BooleanField
 
 
 class UploadForm(FlaskForm):
@@ -32,3 +32,4 @@ class ReportForm(FlaskForm):
 class AddCommentForm(FlaskForm):
     body = StringField("Title", validators=[DataRequired(), Length(min=1, max=256)])
     submit = SubmitField("Confirm", render_kw={"class": "btn btn-primary"})
+    is_anonymous = BooleanField("Anonymous Comment")  
