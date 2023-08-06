@@ -76,7 +76,7 @@
                 {% for version in versions %}
                 <li class="list-group-item">
                     <a href="{{ url_for('project.view', pid=version.pid, version_number=version.version_number) }}">
-                    {{ version.version_number }}
+                    {{ version.version_number }}  -  {{ version.project_title }}
                 </a>
                 </li>
                 {% endfor %}
@@ -122,46 +122,34 @@
 
 {% endmacro %}
 
-{% macro render_reports() %}
 
-<a class="btn dropdown-toggle" data-bs-toggle="offcanvas" href="#offcanvasExample" role="button" aria-controls="offcanvasExample">
-    Reports
-  </a>
-  
-  
-  <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasExample" aria-labelledby="offcanvasExampleLabel">
-    <div class="offcanvas-header">
-      <h5 class="offcanvas-title" id="offcanvasExampleLabel">View Reports</h5>
-      <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-    </div>
-    <div class="offcanvas-body">
-      <div>
-          Order Report by:
-      </div>
-      <div class="dropdown mt-3">
-        <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-          order by
-        </button>
-        <ul class="dropdown-menu">
-          <li><a class="dropdown-item" id="b1">Date up</a></li>
-          <li><a class="dropdown-item" id="b2">Date down</a></li>
-          <li><a class="dropdown-item" id="b3">Alphabetic up</a></li>
-          <li><a class="dropdown-item" id="b4">Alphabetic down</a></li>
-        </ul>
-      </div>
-      <div id="report-list" class="mt-2 align-left">
-    <!-- The list of reports will be populated here -->
-      </div>
-  
-    </div>
-  </div>
+{% macro render_reports(reports,project) %}
 
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-6">
+            <h5>All Reports</h5>
+            <ul class="list-group">
+                {% for report in reports %}
+                <li class="list-group-item">
+                    <a href="{{ url_for('project.report', pid=report.pid,rid=report.rid,reviewer=report.rvid) }}">
+                    {{ report.rid }}  -  {{ report.title }}
+                    </a>
+               </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
 {% endmacro%}
 
-{% macro render_info(version) %}
+{% macro render_info(version,reports) %}
 <div class="row">
     {{ render_user(version.project.researcher) }}
 </div>
+
+<!-- For Spacing -->
+<div class="mx-auto" style="height: 75px;"></div>
 
 <nav>
     <div class="nav nav-tabs" id="nav-tab" role="tablist">
@@ -173,7 +161,7 @@
   <div class="tab-content" id="nav-tabContent">
     <div class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab">{{ render_project(version) }}</div>
     <div class="tab-pane fade" id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab"> {{ render_versions(version.project.versions, version.version_number) }}</div>
-    <div class="tab-pane fade" id="nav-contact" role="tabpanel" aria-labelledby="nav-contact-tab"> {{ render_reports() }}</div>
+    <div class="tab-pane fade" id="nav-contact" role="tabpanel" aria-labelledby="nav-contact-tab"> {{ render_reports(reports) }}</div>
   </div>
 
 {% endmacro %}

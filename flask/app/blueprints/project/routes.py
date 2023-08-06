@@ -131,6 +131,7 @@ def view(pid, version_number):
     project = Project.query.filter_by(pid=pid).first_or_404()
     comments = Comment.query.filter_by(pid=pid)
     version  = Version.query.filter_by(pid=pid,version_number=version_number).first_or_404()
+    reports = Report.query.filter_by(pid=pid).all()
     if version.version_number > len(project.versions):
         return render_template("errors/404.html"), 404
 
@@ -158,7 +159,8 @@ def view(pid, version_number):
         version_number=version.version_number,
         get_pdf_lambda=get_pdf_lambda,
         form = form,
-        comments = comments
+        comments = comments,
+        reports = reports,
     )
 
 
