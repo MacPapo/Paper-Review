@@ -20,7 +20,10 @@
 
     {% for comment in report_comments %}
         <div>
-            {{ render_user_for_report_comments(comment.user, comment) }}
+            {{ render_user_for_report_comments(comment.user, comment, comment.anonymous) }}
+
+             <!-- For Spacing -->
+             <div class="mx-auto" style="height: 20px;"></div>
 
             {{ comment.body }}
 
@@ -35,13 +38,22 @@
 
 
      <form method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
-       {{ form.hidden_tag() }}
+        {{ form.hidden_tag() }}
+       
+        <div class="form-group mb-4">
+            {{ form.body(class="form-control", placeholder="Write a comment", rows="7", required=True) }}
 
-       <div class="form-group mb-4">
-           {{ form.body(class="form-control", placeholder="Write a comment", rows="7", required=True) }}
-       </div>
-       {{ form.submit(class="btn btn-primary") }}
-   </form>
+              <!-- For Spacing -->
+              <div class="mx-auto" style="height: 25px;"></div>
+
+              <div class="form-check mb-4">
+                  
+                  {{ form.is_anonymous(class="form-check-input") }}
+                  <label class="form-check-label" for="{{ form.is_anonymous.id }}">Anonymous comment</label>
+              </div>
+         </div>
+        {{ form.submit(class="btn btn-primary") }}
+    </form>
 
     </div>
 </section>

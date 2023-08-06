@@ -143,6 +143,7 @@ def view(pid, version_number):
             uid = current_user.uid,
             pid = pid,
             version_ref = version.version_number,
+            anonymous = form.is_anonymous.data
         )
 
         db.session.add(new_comment)
@@ -413,6 +414,7 @@ def report(pid,rid,reviewer):
             uid = current_user.uid,
             rid = rid,
             version_ref = report.vid,
+            anonymous = form.is_anonymous.data
         )
 
         db.session.add(new_comment)
@@ -430,6 +432,7 @@ def report(pid,rid,reviewer):
         form = form,
         report_comments = report_comments
 )
+
 @bp.route("/project/delete_project/<int:pid>", methods=["POST", "GET"])
 @login_required
 def delete_project(pid):

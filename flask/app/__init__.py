@@ -5,6 +5,7 @@ from app.blueprints.project import bp as project_bp
 from app.blueprints.main import bp as main_bp
 from app.blueprints.auth import bp as auth_bp
 from config import Config
+from app.datafill import fake_data
 
 def create_app():
     app = Flask(__name__, static_folder="../static")
@@ -21,6 +22,9 @@ def create_app():
     app.register_blueprint(project_bp)
     app.register_blueprint(main_bp)
     app.register_blueprint(auth_bp, url_prefix="/auth")
+
+    with app.app_context():
+        fake_data()
 
     return app
 

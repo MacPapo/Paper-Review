@@ -65,7 +65,7 @@ def random_user(fake):
                     file.write(f"uid:  {user.uid}\nusername:  {user.username}\npassw:  {paword}\nrole:  {user.type}\nphone:  {user.phone}\nemail:  {user.email}\n\n\n\n")
             db.session.commit()
     except Exception as e:
-        print(f"Error: {e}")
+        pass
 
 def random_pdf():
     file_path = "app/links.txt"
@@ -91,7 +91,7 @@ def random_pdf():
     except FileNotFoundError:
             print(f"File '{file_path}' not found.")
     except Exception as e:
-            print(f"Error: {e}")
+            pass
 
 
 def random_project():
@@ -108,7 +108,7 @@ def random_project():
                 db.session.add(project)
             db.session.commit()
     except Exception as e:
-        print(f"Error: {e}")
+        pass
 
 
 def random_draft(faker):
@@ -124,7 +124,7 @@ def random_draft(faker):
                 db.session.add(draft)
             db.session.commit()
     except Exception as e:
-        print(f"Error: {e}")
+        pass
 
 def random_report_draft(faker):
     try:
@@ -149,7 +149,7 @@ def random_report_draft(faker):
                     db.session.add(draft)
                     db.session.commit()
     except Exception as e:
-        print(f"Error: {e}")
+        pass
 
 def random_version():
     try:
@@ -176,7 +176,7 @@ def random_version():
                     db.session.add(version)
                 db.session.commit()
     except Exception as e:
-        print(f"Error: {e}")
+        pass
 
 def random_report():
     try:
@@ -202,7 +202,7 @@ def random_report():
                     db.session.add(report)
                 db.session.commit()
     except Exception as e:
-        print(f"Error: {e}")
+        pass
 
 def random_comment(faker):
     try:
@@ -227,7 +227,7 @@ def random_comment(faker):
                     db.session.add(comment)
                 db.session.commit()
     except Exception as e:
-        print(f"Error: {e}")
+        pass
 
 def random_report_comment(faker):
     try:
@@ -252,7 +252,7 @@ def random_report_comment(faker):
                     db.session.add(report_comment)
                 db.session.commit()
     except Exception as e:
-        print(f"Error: {e}")
+        pass
 
 def fake_data():
     faker = Faker()

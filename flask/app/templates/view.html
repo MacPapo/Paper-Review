@@ -21,7 +21,10 @@
 
         {% for comment in comments %}
         <div>
-            {{ render_user_for_comments(comment.user, comment, version_number, comment.version_ref) }}
+            {{ render_user_for_comments(comment.user, comment, version_number, comment.version_ref, comment.anonymous) }}
+
+             <!-- For Spacing -->
+            <div class="mx-auto" style="height: 20px;"></div>
 
             {{ comment.body }}
             
@@ -40,6 +43,15 @@
          
           <div class="form-group mb-4">
               {{ form.body(class="form-control", placeholder="Write a comment", rows="7", required=True) }}
+
+                <!-- For Spacing -->
+                <div class="mx-auto" style="height: 25px;"></div>
+
+                <div class="form-check mb-4">
+                    
+                    {{ form.is_anonymous(class="form-check-input") }}
+                    <label class="form-check-label" for="{{ form.is_anonymous.id }}">Anonymous comment</label>
+                </div>
            </div>
           {{ form.submit(class="btn btn-primary") }}
       </form>
