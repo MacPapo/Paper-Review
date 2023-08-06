@@ -57,84 +57,55 @@
 
 
 {% macro render_versions(versions, current_version) %}
-<div class="dropdown">
-    <a class="btn dropdown-toggle" type="button" id="dropdownMenuButtonProjects" data-bs-toggle="dropdown"
-        aria-expanded="false">
-        Version #{{ current_version }}
-    </a>
-    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButtonProjects" style="max-height: 200px; overflow-y: auto;">
-        {% for version in versions %}
-        <li><a class="dropdown-item"
-                href="{{ url_for('project.view', pid=version.pid, version_number=version.version_number) }}">{{
-                version.version_number }}</a></li>
-        {% endfor %}
-    </ul>
-</div>
-{% endmacro %}
-
-{% macro render_project() %}
-<div class="dropdown">
-    <a class="btn dropdown-toggle" type="button" id="dropdownMenuButtonProjects" data-bs-toggle="dropdown"
-        aria-expanded="false">
-        Project
-    </a>
-    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButtonProjects" style="max-height: 200px; overflow-y: auto;">
-    </ul>
-</div>
-
-{% endmacro %}
-
-{% macro render_reports() %}
-<a class="btn dropdown-toggle" data-bs-toggle="offcanvas" href="#offcanvasExample" role="button"
-    aria-controls="offcanvasExample">
-    Reports
-</a>
-
-
-
-{% endmacro%}
-
-{% macro render_info(version) %}
-<div class="row">
-    {{ render_user(version.project.researcher) }}
-</div>
-
-<div class="row text-center pt-2">
-    <ul class="nav nav-tabs">
-        <li class="nav-item">
-            <div class="col">
-                {{ render_reports() }}
-            </div>
-        </li>
-        <li class="nav-item">
-            <div class="col">
-                <div class="nav-link active">
-                {{ render_versions(version.project.versions, version.version_number) }}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Current Version</h5>
+                    <p class="card-text">Version #{{ current_version }}</p>
                 </div>
             </div>
-        </li>
-        <li class="nav-item">
-            <div class="col">
-                {{ render_project() }}
-            </div>
-        </li>
-    </ul>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-6">
+            <h5>All Versions</h5>
+            <ul class="list-group">
+                {% for version in versions %}
+                <li class="list-group-item">
+                    <a href="{{ url_for('project.view', pid=version.pid, version_number=version.version_number) }}">
+                    {{ version.version_number }}
+                </a>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
 </div>
 
+
+{% endmacro %}
+
+{% macro render_project(version) %}
 <div class="col mt-5" style="text-align: left;">
     <p class="text-primary fw-bold">Title</p>
     <h2>{{ version.project_title }}</h2>
 </div>
 <div class="row text-center pt-2">
 
+    <div class="col">
+        <p class="nav-link active">Version: {{ version.version_number }}</p>
+    </div>
    <div class="col">
-        <p class="nav-link active">Created :{{ version.time_since_creation() }}</p>
+        <p class="nav-link active">Created:{{ version.time_since_creation() }}</p>
     </div>
     <div class="col">
-        <p class="nav-link">Updated :{{ version.time_since_update() }}</p>
+        <p class="nav-link">Updated: {{ version.time_since_update() }}</p>
     </div>
     <div class="col">
-        <p class="nav-link">Status :{{ render_status_bedge(version.project_status) }}</p>
+        <p class="nav-link">Status: {{ render_status_bedge(version.project_status) }}</p>
     </div>
 </div>
 
@@ -149,6 +120,61 @@
     </div>
 </div>
 
+{% endmacro %}
+
+{% macro render_reports() %}
+
+<a class="btn dropdown-toggle" data-bs-toggle="offcanvas" href="#offcanvasExample" role="button" aria-controls="offcanvasExample">
+    Reports
+  </a>
+  
+  
+  <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasExample" aria-labelledby="offcanvasExampleLabel">
+    <div class="offcanvas-header">
+      <h5 class="offcanvas-title" id="offcanvasExampleLabel">View Reports</h5>
+      <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+      <div>
+          Order Report by:
+      </div>
+      <div class="dropdown mt-3">
+        <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+          order by
+        </button>
+        <ul class="dropdown-menu">
+          <li><a class="dropdown-item" id="b1">Date up</a></li>
+          <li><a class="dropdown-item" id="b2">Date down</a></li>
+          <li><a class="dropdown-item" id="b3">Alphabetic up</a></li>
+          <li><a class="dropdown-item" id="b4">Alphabetic down</a></li>
+        </ul>
+      </div>
+      <div id="report-list" class="mt-2 align-left">
+    <!-- The list of reports will be populated here -->
+      </div>
+  
+    </div>
+  </div>
+
+{% endmacro%}
+
+{% macro render_info(version) %}
+<div class="row">
+    {{ render_user(version.project.researcher) }}
+</div>
+
+<nav>
+    <div class="nav nav-tabs" id="nav-tab" role="tablist">
+      <button class="nav-link active" id="nav-home-tab" data-bs-toggle="tab" data-bs-target="#nav-home" type="button" role="tab" aria-controls="nav-home" aria-selected="true">Project</button>
+      <button class="nav-link" id="nav-profile-tab" data-bs-toggle="tab" data-bs-target="#nav-profile" type="button" role="tab" aria-controls="nav-profile" aria-selected="false">Versions</button>
+      <button class="nav-link" id="nav-contact-tab" data-bs-toggle="tab" data-bs-target="#nav-contact" type="button" role="tab" aria-controls="nav-contact" aria-selected="false">Reports</button>
+    </div>
+</nav>
+  <div class="tab-content" id="nav-tabContent">
+    <div class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab">{{ render_project(version) }}</div>
+    <div class="tab-pane fade" id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab"> {{ render_versions(version.project.versions, version.version_number) }}</div>
+    <div class="tab-pane fade" id="nav-contact" role="tabpanel" aria-labelledby="nav-contact-tab"> {{ render_reports() }}</div>
+  </div>
 
 {% endmacro %}
 

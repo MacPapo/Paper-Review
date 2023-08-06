@@ -8,10 +8,20 @@
     <div class="container py-md-5">
         {{ render_info(project.versions[version_number - 1]) }}
 
+
         <hr class="hr" />
         <br>
-        
+
+     
         {{ render_pdfs(get_pdf_lambda(project.versions[version_number - 1].contains)) }}
+
+        <!-- For Spacing -->
+        <div class="mx-auto" style="height: 75px;"></div>
+
+        {% if current_user.uid == project.rsid %}
+            <button class="btn btn-primary">Edit Project</button>
+        {% endif %}
+    
 
         <!-- For Spacing -->
         <div class="mx-auto" style="height: 125px;"></div>
